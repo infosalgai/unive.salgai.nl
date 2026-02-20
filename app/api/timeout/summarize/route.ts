@@ -1,6 +1,13 @@
 import OpenAI from "openai";
+import { NextResponse } from "next/server";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+export const runtime = "nodejs";
+
+function getClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
+}
 
 const SYSTEM_PROMPT = `Je bent een ervaren, mensgerichte time-out coach en schrijft een persoonlijke terugkoppeling op basis van een Time-out intake.
 Je ontvangt alleen de (gestructureerde) antwoorden van een werknemer die preventief een time-out heeft aangevraagd.
@@ -177,22 +184,29 @@ function buildUserPrompt(fd: Record<string, unknown>): string {
 }
 
 export async function POST(req: Request) {
+  const client = getClient();
+  if (!client) {
+    return NextResponse.json(
+      { error: "OPENAI_API_KEY ontbreekt in environment variables." },
+      { status: 500 }
+    );
+  }
+
   try {
     const body = await req.json();
     const formData = (body?.formData ?? {}) as Record<string, unknown>;
 
     const userPrompt = buildUserPrompt(formData);
 
-const resp = await client.responses.create({
-  model: "gpt-5.2",
-  reasoning: { effort: "high" },
-  max_output_tokens: 1800,
-  input: [
-    { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: userPrompt },
-  ],
-});
-
+    const resp = await client.responses.create({
+      model: "gpt-5.2",
+      reasoning: { effort: "high" },
+      max_output_tokens: 1800,
+      input: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userPrompt },
+      ],
+    });
 
     return Response.json({ summary: resp.output_text ?? "" });
   } catch (err: any) {
