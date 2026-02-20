@@ -1,125 +1,229 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+/* ============================================
+   VITALR GLOBALS.CSS
+   Huisstijl: kleuren, typografie, basis-stijlen
+   ============================================ */
 
-@custom-variant dark (&:is(.dark *));
+/* Google Fonts import */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap');
 
+/* ── CSS Custom Properties (design tokens) ── */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Kleuren */
+  --color-primary:        #2D3182;  /* Donkerblauw */
+  --color-primary-dark:   #222870;  /* Hover donkerblauw */
+  --color-accent:         #F7A521;  /* Oranje */
+  --color-accent-dark:    #E09518;  /* Hover oranje */
+  --color-bg:             #F4F5F0;  /* Lichtgrijs achtergrond */
+  --color-white:          #FFFFFF;
+  --color-text:           #555555;  /* Body tekst */
+  --color-text-subtle:    #888888;  /* Subtiele tekst */
+  --color-heading:        #2D3182;  /* Koppen */
+
+  /* Typografie */
+  --font-family:          'Nunito Sans', sans-serif;
+  --font-size-base:       16px;
+  --font-size-sm:         14px;
+  --font-size-lg:         18px;
+  --font-size-xl:         24px;
+  --font-size-2xl:        32px;
+  --font-size-3xl:        40px;
+  --font-weight-regular:  400;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+  --font-weight-extrabold:800;
+
+  /* Spacing */
+  --spacing-xs:   4px;
+  --spacing-sm:   8px;
+  --spacing-md:   16px;
+  --spacing-lg:   24px;
+  --spacing-xl:   32px;
+  --spacing-2xl:  48px;
+  --spacing-3xl:  64px;
+
+  /* Border radius */
+  --radius-sm:    8px;
+  --radius-md:    12px;
+  --radius-lg:    16px;
+  --radius-pill:  50px;
+
+  /* Shadows */
+  --shadow-card:  0 2px 12px rgba(0, 0, 0, 0.07);
+  --shadow-nav:   0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+/* ── Reset & Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+html {
+  font-size: var(--font-size-base);
+  scroll-behavior: smooth;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+body {
+  font-family:      var(--font-family);
+  font-weight:      var(--font-weight-regular);
+  color:            var(--color-text);
+  background-color: var(--color-bg);
+  line-height:      1.6;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* ── Typografie ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family:  var(--font-family);
+  font-weight:  var(--font-weight-bold);
+  color:        var(--color-heading);
+  line-height:  1.2;
+}
+
+h1 { font-size: var(--font-size-3xl); font-weight: var(--font-weight-extrabold); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); }
+h4 { font-size: var(--font-size-lg); }
+
+p {
+  color:       var(--color-text);
+  line-height: 1.7;
+  margin-bottom: var(--spacing-md);
+}
+
+a {
+  color:           var(--color-primary);
+  text-decoration: none;
+  transition:      color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* ── Navigatiebalk ── */
+.navbar {
+  background:    var(--color-white);
+  box-shadow:    var(--shadow-nav);
+  height:        68px;
+  display:       flex;
+  align-items:   center;
+  padding:       0 var(--spacing-xl);
+  position:      sticky;
+  top:           0;
+  z-index:       100;
+}
+
+.navbar-logo img {
+  height:  38px;
+  width:   auto;
+}
+
+.navbar-links a {
+  color:       var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size:   var(--font-size-sm);
+  padding:     0 var(--spacing-md);
+  transition:  color 0.2s ease;
+}
+
+.navbar-links a:hover {
+  color: var(--color-accent);
+}
+
+/* ── Buttons ── */
+.btn {
+  display:         inline-block;
+  padding:         12px 28px;
+  border-radius:   var(--radius-pill);
+  font-family:     var(--font-family);
+  font-weight:     var(--font-weight-bold);
+  font-size:       var(--font-size-base);
+  cursor:          pointer;
+  border:          none;
+  transition:      background 0.2s ease, transform 0.1s ease;
+  text-decoration: none;
+  line-height:     1;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Primaire button — donkerblauw */
+.btn-primary {
+  background: var(--color-primary);
+  color:      var(--color-white);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  color:      var(--color-white);
+}
+
+/* Accent button — oranje */
+.btn-accent {
+  background: var(--color-accent);
+  color:      var(--color-white);
+}
+
+.btn-accent:hover {
+  background: var(--color-accent-dark);
+  color:      var(--color-white);
+}
+
+/* Outline button */
+.btn-outline {
+  background:    transparent;
+  color:         var(--color-primary);
+  border:        2px solid var(--color-primary);
+}
+
+.btn-outline:hover {
+  background: var(--color-primary);
+  color:      var(--color-white);
+}
+
+/* ── Kaarten ── */
+.card {
+  background:    var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow:    var(--shadow-card);
+  padding:       var(--spacing-xl);
+}
+
+/* ── Secties ── */
+.section {
+  padding: var(--spacing-3xl) var(--spacing-xl);
+}
+
+.section-alt {
+  background: var(--color-white);
+  padding:    var(--spacing-3xl) var(--spacing-xl);
+}
+
+/* ── Badge / nummer (zoals op de homepage) ── */
+.badge {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  width:           36px;
+  height:          36px;
+  border-radius:   50%;
+  background:      var(--color-primary);
+  color:           var(--color-white);
+  font-weight:     var(--font-weight-bold);
+  font-size:       var(--font-size-sm);
+  flex-shrink:     0;
+}
+
+/* ── Utility klassen ── */
+.text-primary   { color: var(--color-primary); }
+.text-accent    { color: var(--color-accent); }
+.text-subtle    { color: var(--color-text-subtle); }
+.bg-primary     { background-color: var(--color-primary); }
+.bg-accent      { background-color: var(--color-accent); }
+.bg-light       { background-color: var(--color-bg); }
+.font-bold      { font-weight: var(--font-weight-bold); }
+.font-semibold  { font-weight: var(--font-weight-semibold); }
