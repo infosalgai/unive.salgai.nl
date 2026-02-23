@@ -1610,7 +1610,7 @@ export default function TimeoutFormPage() {
                   <Card className="mb-4 rounded-2xl">
                     <CardContent className="p-6">
                       <div className="prose prose-sm max-w-none">
-                        {summaryText.split("\n").map((line, i) => {
+                        {(summaryText ?? "").split("\n").map((line, i) => {
                           if (line.startsWith("## ")) return <h3 key={i} className="mb-2 mt-4 text-base font-semibold text-primary first:mt-0">{line.replace("## ", "")}</h3>
                           if (line.startsWith("- ")) return <p key={i} className="mb-1 pl-4 text-sm text-foreground">&#8226; {line.replace("- ", "")}</p>
                           if (line.trim() === "") return <div key={i} className="h-2" />
