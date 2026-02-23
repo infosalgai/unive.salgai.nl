@@ -1379,14 +1379,14 @@ export default function TimeoutFormPage() {
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  disabled={screenIndex === 0}
+                  disabled={currentScreenIndex === 0}
                   className="rounded-xl bg-transparent"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Vorige
                 </Button>
                 <Button onClick={handleNext} className="rounded-xl">
-                  {screenIndex === totalVisible - 1 ? (
+                  {currentScreenIndex === totalVisible - 1 ? (
                     <>
                       <Sparkles className="mr-2 h-4 w-4" />
                       Maak samenvatting
