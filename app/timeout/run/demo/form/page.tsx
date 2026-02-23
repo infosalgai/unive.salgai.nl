@@ -1,19 +1,19 @@
-"use client"
+\"use client\"
 
-import React from "react"
-import { useState, useEffect, useRef, useCallback } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Slider } from "@/components/ui/slider"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { NavHeader } from "@/components/nav-header"
-import { AppFooter } from "@/components/app-footer"
-import { ArrowLeft, ArrowRight, Sparkles, CheckCircle, Send, ChevronDown } from "lucide-react"
+import React from \"react\"
+import { useState, useEffect, useRef, useCallback } from \"react\"
+import { useRouter, useSearchParams } from \"next/navigation\"
+import { Button } from \"@/components/ui/button\"
+import { Card, CardContent } from \"@/components/ui/card\"
+import { Slider } from \"@/components/ui/slider\"
+import { Textarea } from \"@/components/ui/textarea\"
+import { Input } from \"@/components/ui/input\"
+import { RadioGroup, RadioGroupItem } from \"@/components/ui/radio-group\"
+import { Label } from \"@/components/ui/label\"
+import { Checkbox } from \"@/components/ui/checkbox\"
+import { NavHeader } from \"@/components/nav-header\"
+import { AppFooter } from \"@/components/app-footer\"
+import { ArrowLeft, ArrowRight, Sparkles, CheckCircle, Send, Info } from \"lucide-react\"
 import {
   Dialog,
   DialogContent,
@@ -21,8 +21,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { getDemoContext } from "@/lib/demo-data"
+} from \"@/components/ui/dialog\"
+import { Tooltip, TooltipContent, TooltipTrigger } from \"@/components/ui/tooltip\"
+import { getDemoContext } from \"@/lib/demo-data\"
 
 // ── Options ──
 
@@ -184,11 +185,15 @@ interface FormData {
   hoofdoorzaak: string
   andersText: string
   zwaarte: number
+  hoofdoorzaakToelichting: string
   factoren: string[]
+  factorenToelichting: string
   sinds: string
   risico: number
   signalen: string[]
+  signalenToelichting: string
   doelen: string[]
+  doelenToelichting: string
   belangrijkheid: number
   werkdrukDruk: string[]
   werkdrukDuur: string
@@ -217,6 +222,7 @@ interface FormData {
   combinatieVerdeling: number
   combinatieVerandering: string
   closingNodig: string[]
+  closingToelichting: string
   closingBelangrijk: number
   randWelBereiken: string
   randNietBereiken: string
@@ -228,11 +234,15 @@ const initialFormData: FormData = {
   hoofdoorzaak: "",
   andersText: "",
   zwaarte: 4,
+  hoofdoorzaakToelichting: "",
   factoren: [],
+  factorenToelichting: "",
   sinds: "",
   risico: 4,
   signalen: [],
+  signalenToelichting: "",
   doelen: [],
+  doelenToelichting: "",
   belangrijkheid: 4,
   werkdrukDruk: [],
   werkdrukDuur: "",
@@ -261,6 +271,7 @@ const initialFormData: FormData = {
   combinatieVerdeling: 50,
   combinatieVerandering: "",
   closingNodig: [],
+  closingToelichting: "",
   closingBelangrijk: 4,
   randWelBereiken: "",
   randNietBereiken: "",
@@ -346,12 +357,21 @@ function ScaleSlider({ value, onChange, labelLeft, labelMid, labelRight }: { val
 // ── Step definition ──
 // Each "screen" the user sees is one focused question block
 
+type Topic = "Medische gezondheid" | "Psychische gezondheid" | "Sociale gezondheid"
+
 interface Screen {
   id: string
   group: string // For the top progress bar
   title: string
   subtitle?: string
-  render: (fd: FormData, update: (p: Partial<FormData>) => void, toggleMulti: (field: keyof FormData, value: string, max?: number) => void) => React.ReactNode
+  topic: Topic
+  tooltip: string
+  optionalNoteField?: keyof FormData
+  render: (
+    fd: FormData,
+    update: (p: Partial<FormData>) => void,
+    toggleMulti: (field: keyof FormData, value: string, max?: number) => void,
+  ) => React.ReactNode
   isVisible?: (fd: FormData) => boolean
 }
 
@@ -363,38 +383,58 @@ function buildScreens(): Screen[] {
       group: "Situatie",
       title: "Wat brengt jou tot deze aanvraag?",
       subtitle: "Kies wat nu het meest speelt.",
+      topic: "Psychische gezondheid",
+      tooltip: "Hier gaat het om wat jou vooral richting een time-out brengt, zonder in medische details te gaan.",
+      optionalNoteField: "hoofdoorzaakToelichting",
       render: (fd, update) => (
         <>
           <div className="grid gap-3 sm:grid-cols-2">
             {HOOFDOORZAAK_OPTIONS.map((opt) => (
-              <SelectCard key={opt.id} selected={fd.hoofdoorzaak === opt.id} onClick={() => update({ hoofdoorzaak: opt.id })} label={opt.label} />
+              <SelectCard
+                key={opt.id}
+                selected={fd.hoofdoorzaak === opt.id}
+                onClick={() => update({ hoofdoorzaak: opt.id })}
+                label={opt.label}
+              />
             ))}
           </div>
           {fd.hoofdoorzaak === "anders" && (
-            <div className="mt-4">
-              <Input value={fd.andersText} onChange={(e) => update({ andersText: e.target.value })} placeholder="Kort omschrijven..." maxLength={100} />
+            <div className="mt-4 space-y-3">
+              <Input
+                value={fd.andersText}
+                onChange={(e) => update({ andersText: e.target.value })}
+                placeholder="Kort omschrijven..."
+                maxLength={100}
+              />
             </div>
           )}
+          <div className="mt-6 space-y-4">
+            <div>
+              <Label className="mb-2 block text-sm">Hoe zwaar voelt dit nu voor je?</Label>
+              <ScaleSlider
+                value={fd.zwaarte}
+                onChange={(v) => update({ zwaarte: v })}
+                labelLeft="Licht"
+                labelMid="Gemiddeld"
+                labelRight="Zeer zwaar"
+              />
+            </div>
+          </div>
         </>
-      ),
-    },
-    {
-      id: "zwaarte",
-      group: "Situatie",
-      title: "Hoe zwaar voelt dit voor je op dit moment?",
-      render: (fd, update) => (
-        <ScaleSlider value={fd.zwaarte} onChange={(v) => update({ zwaarte: v })} labelLeft="Licht" labelMid="Gemiddeld" labelRight="Zeer zwaar" />
       ),
     },
     {
       id: "factoren",
       group: "Situatie",
       title: "Spelen er nog andere factoren mee?",
-      subtitle: "Meerdere mogelijk, optioneel.",
+      subtitle: "Meerdere mogelijk, optioneel. Bijvoorbeeld privé, thuis of andere omstandigheden buiten het werk.",
+      topic: "Sociale gezondheid",
+      tooltip: "Hier kun je aangeven welke dingen naast je werk of binnen je werk het zwaarder maken.",
+      optionalNoteField: "factorenToelichting",
       render: (fd, _, toggleMulti) => (
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Priv\u00e9 / persoonlijk</h4>
+            <h4 className="mb-3 text-sm font-semibold text-foreground">Privé / persoonlijk</h4>
             <CheckboxList options={FACTOREN_PRIVE} selected={fd.factoren} onToggle={(v) => toggleMulti("factoren", v)} />
           </div>
           <div>
@@ -407,7 +447,9 @@ function buildScreens(): Screen[] {
     {
       id: "sinds",
       group: "Situatie",
-      title: "Sinds wanneer speelt dit?",
+      title: "Sinds wanneer is dit een probleem?",
+      topic: "Psychische gezondheid",
+      tooltip: "Dit helpt om in te schatten hoe lang de situatie al zwaarder voelt dan normaal.",
       render: (fd, update) => (
         <RadioGroup value={fd.sinds} onValueChange={(v) => update({ sinds: v })} className="space-y-2">
           {SINDS_OPTIONS.map((opt) => (
@@ -423,17 +465,45 @@ function buildScreens(): Screen[] {
       id: "risico",
       group: "Situatie",
       title: "Hoe groot is de kans dat dit zonder verandering richting verzuim gaat?",
-      render: (fd, update) => (
-        <ScaleSlider value={fd.risico} onChange={(v) => update({ risico: v })} labelLeft="Nauwelijks" labelMid="Twijfel" labelRight="Zeer groot" />
+      topic: "Medische gezondheid",
+      tooltip: "Dit gaat over jouw gevoel van risico op uitval, niet om een medische inschatting.",
+      render: (fd, update, toggleMulti) => (
+        <div className="space-y-6">
+          <div>
+            <ScaleSlider
+              value={fd.risico}
+              onChange={(v) => update({ risico: v })}
+              labelLeft="Nauwelijks"
+              labelMid="Twijfel"
+              labelRight="Zeer groot"
+            />
+          </div>
+          <div>
+            <Label className="mb-2 block text-sm">Welke signalen herken je bij jezelf op het werk?</Label>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Meerdere antwoorden zijn mogelijk. Kies wat nu het beste past.
+            </p>
+            <CheckboxList options={SIGNALEN_OPTIONS} selected={fd.signalen} onToggle={(v) => toggleMulti("signalen", v)} />
+          </div>
+        </div>
       ),
     },
     {
-      id: "signalen",
+      id: "signalen-toelichting",
       group: "Situatie",
-      title: "Welke signalen herken je bij jezelf op het werk?",
-      subtitle: "Meerdere mogelijk.",
-      render: (fd, _, toggleMulti) => (
-        <CheckboxList options={SIGNALEN_OPTIONS} selected={fd.signalen} onToggle={(v) => toggleMulti("signalen", v)} />
+      title: "Wil je de signalen kort toelichten? (optioneel)",
+      subtitle: "Alleen invullen als je dat prettig vindt.",
+      topic: "Psychische gezondheid",
+      tooltip: "Gebruik dit veld als je in je eigen woorden iets wilt toevoegen over wat je merkt.",
+      optionalNoteField: "signalenToelichting",
+      render: (fd, update) => (
+        <Textarea
+          value={fd.signalenToelichting}
+          onChange={(e) => update({ signalenToelichting: e.target.value })}
+          placeholder="Bijvoorbeeld: ik merk het vooral aan mijn concentratie of hoe ik thuis binnenkom..."
+          maxLength={300}
+          rows={3}
+        />
       ),
     },
     {
@@ -441,6 +511,9 @@ function buildScreens(): Screen[] {
       group: "Situatie",
       title: "Wat wil je uit het eerste gesprek halen?",
       subtitle: "Kies maximaal 2.",
+      topic: "Psychische gezondheid",
+      tooltip: "Dit helpt de time-out coach om het gesprek aan te laten sluiten op jouw behoefte.",
+      optionalNoteField: "doelenToelichting",
       render: (fd, update, toggleMulti) => (
         <>
           <ChipSelect options={DOEL_OPTIONS} selected={fd.doelen} onToggle={(v) => toggleMulti("doelen", v, 2)} max={2} />
@@ -454,6 +527,8 @@ function buildScreens(): Screen[] {
       id: "belangrijkheid",
       group: "Situatie",
       title: "Hoe belangrijk is dit gesprek voor je op dit moment?",
+      topic: "Psychische gezondheid",
+      tooltip: "Dit geeft aan hoeveel urgentie jij zelf voelt bij het voeren van dit gesprek.",
       render: (fd, update) => (
         <ScaleSlider value={fd.belangrijkheid} onChange={(v) => update({ belangrijkheid: v })} labelLeft="Handig" labelMid="Belangrijk" labelRight="Noodzakelijk" />
       ),
@@ -468,6 +543,8 @@ function buildScreens(): Screen[] {
       title: "Wat geeft je nu de meeste druk?",
       subtitle: "Meerdere opties mogelijk.",
       isVisible: (fd) => fd.hoofdoorzaak === "werkdruk" || fd.hoofdoorzaak === "incident",
+      topic: "Psychische gezondheid",
+      tooltip: "Hier kun je aangeven waar de druk vooral vandaan komt zonder in details over klachten te gaan.",
       render: (fd, _, toggleMulti) => (
         <CheckboxList options={WERKDRUK_DRUK} selected={fd.werkdrukDruk} onToggle={(v) => toggleMulti("werkdrukDruk", v)} />
       ),
@@ -477,6 +554,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Hoe lang speelt dit al?",
       isVisible: (fd) => fd.hoofdoorzaak === "werkdruk" || fd.hoofdoorzaak === "incident",
+      topic: "Psychische gezondheid",
+      tooltip: "Dit zegt iets over hoe lang je deze druk al zo ervaart.",
       render: (fd, update) => (
         <RadioGroup value={fd.werkdrukDuur} onValueChange={(v) => update({ werkdrukDuur: v })} className="space-y-2">
           {WERKDRUK_DUUR.map((opt) => (
@@ -494,6 +573,8 @@ function buildScreens(): Screen[] {
       title: "Wat heb je al geprobeerd?",
       subtitle: "Meerdere opties mogelijk.",
       isVisible: (fd) => fd.hoofdoorzaak === "werkdruk" || fd.hoofdoorzaak === "incident",
+      topic: "Sociale gezondheid",
+      tooltip: "Hier gaat het om wat jij zelf of samen met anderen al hebt gedaan om het lichter te maken.",
       render: (fd, _, toggleMulti) => (
         <CheckboxList options={WERKDRUK_GEPROBEERD} selected={fd.werkdrukGeprobeerd} onToggle={(v) => toggleMulti("werkdrukGeprobeerd", v)} />
       ),
@@ -503,6 +584,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Wat zou de komende 1-2 weken het meest helpen?",
       isVisible: (fd) => fd.hoofdoorzaak === "werkdruk" || fd.hoofdoorzaak === "incident",
+      topic: "Sociale gezondheid",
+      tooltip: "Dit helpt om samen te kijken welke praktische steun of ruimte je nu nodig hebt.",
       render: (fd, update) => (
         <>
           <RadioGroup value={fd.werkdrukHelpt} onValueChange={(v) => update({ werkdrukHelpt: v })} className="space-y-2">
@@ -526,6 +609,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Met wie speelt dit vooral?",
       isVisible: (fd) => fd.hoofdoorzaak === "samenwerking",
+      topic: "Sociale gezondheid",
+      tooltip: "Hier gaat het om met wie de spanning of frictie vooral te maken heeft.",
       render: (fd, update) => (
         <RadioGroup value={fd.conflictMet} onValueChange={(v) => update({ conflictMet: v })} className="space-y-2">
           {CONFLICT_MET.map((opt) => (
@@ -543,6 +628,8 @@ function buildScreens(): Screen[] {
       title: "Waar gaat het vooral over?",
       subtitle: "Meerdere opties mogelijk.",
       isVisible: (fd) => fd.hoofdoorzaak === "samenwerking",
+      topic: "Sociale gezondheid",
+      tooltip: "Kies waar het conflict of de spanning vooral over gaat, zonder in vertrouwelijke details te treden.",
       render: (fd, _, toggleMulti) => (
         <CheckboxList options={CONFLICT_WAAROVER} selected={fd.conflictWaarover} onToggle={(v) => toggleMulti("conflictWaarover", v)} />
       ),
@@ -552,6 +639,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Hoe veilig voelt het om dit intern te bespreken?",
       isVisible: (fd) => fd.hoofdoorzaak === "samenwerking",
+      topic: "Psychische gezondheid",
+      tooltip: "Dit gaat over jouw gevoel van veiligheid om dit binnen de organisatie te bespreken.",
       render: (fd, update) => (
         <ScaleSlider value={fd.conflictVeilig} onChange={(v) => update({ conflictVeilig: v })} labelLeft="Onveilig" labelMid="Neutraal" labelRight="Veilig" />
       ),
@@ -561,6 +650,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Mag er contact zijn met je leidinggevende hierover?",
       isVisible: (fd) => fd.hoofdoorzaak === "samenwerking",
+      topic: "Sociale gezondheid",
+      tooltip: "Hier geef je aan wat voor jou op dit moment prettig en veilig voelt richting je leidinggevende.",
       render: (fd, update) => (
         <RadioGroup value={fd.conflictContact} onValueChange={(v) => update({ conflictContact: v })} className="space-y-2">
           {[{ id: "ja", label: "Ja" }, { id: "nee", label: "Nee" }, { id: "weet-niet", label: "Weet ik nog niet" }].map((opt) => (
@@ -577,6 +668,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Gewenste uitkomst van het gesprek",
       isVisible: (fd) => fd.hoofdoorzaak === "samenwerking",
+      topic: "Psychische gezondheid",
+      tooltip: "Wat hoop je dat het gesprek oplevert rondom de samenwerking of het conflict?",
       render: (fd, update) => (
         <RadioGroup value={fd.conflictUitkomst} onValueChange={(v) => update({ conflictUitkomst: v })} className="space-y-2">
           {CONFLICT_UITKOMST.map((opt) => (
@@ -596,6 +689,8 @@ function buildScreens(): Screen[] {
       title: "Waar gaat het vooral over?",
       subtitle: "Meerdere opties mogelijk.",
       isVisible: (fd) => fd.hoofdoorzaak === "prive",
+      topic: "Sociale gezondheid",
+      tooltip: "Hier kun je in grote lijnen aangeven welke privésituatie meespeelt, zonder details te hoeven delen.",
       render: (fd, _, toggleMulti) => (
         <CheckboxList options={PRIVE_WAAROVER} selected={fd.priveWaarover} onToggle={(v) => toggleMulti("priveWaarover", v)} />
       ),
@@ -605,6 +700,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Wil je vooraf al iets delen?",
       isVisible: (fd) => fd.hoofdoorzaak === "prive",
+      topic: "Sociale gezondheid",
+      tooltip: "Je kiest zelf of je nu al iets kort wilt delen of liever wacht tot het gesprek.",
       render: (fd, update) => (
         <>
           <RadioGroup value={fd.priveDelen} onValueChange={(v) => update({ priveDelen: v })} className="space-y-2">
@@ -627,6 +724,8 @@ function buildScreens(): Screen[] {
       title: "Wat heb je vanuit werk het meest nodig?",
       subtitle: "Meerdere opties mogelijk.",
       isVisible: (fd) => fd.hoofdoorzaak === "prive",
+      topic: "Sociale gezondheid",
+      tooltip: "Dit gaat om praktische steun of ruimte die je vanuit werk kan helpen.",
       render: (fd, _, toggleMulti) => (
         <CheckboxList options={PRIVE_NODIG} selected={fd.priveNodig} onToggle={(v) => toggleMulti("priveNodig", v)} />
       ),
@@ -638,6 +737,8 @@ function buildScreens(): Screen[] {
       title: "Mantelzorg - extra vragen",
       subtitle: "Omdat je mantelzorg hebt aangevinkt.",
       isVisible: (fd) => fd.hoofdoorzaak === "prive" && fd.priveWaarover.includes("Mantelzorg"),
+      topic: "Sociale gezondheid",
+      tooltip: "Hier kun je kort aangeven hoe mantelzorg jouw belasting beïnvloedt, zonder medische gegevens te delen.",
       render: (fd, update) => (
         <div className="space-y-4">
           <div>
@@ -661,6 +762,8 @@ function buildScreens(): Screen[] {
       title: "Relatie / thuis - extra vragen",
       subtitle: "Omdat je relatie/thuissituatie hebt aangevinkt.",
       isVisible: (fd) => fd.hoofdoorzaak === "prive" && fd.priveWaarover.includes("Relatie / thuissituatie"),
+      topic: "Sociale gezondheid",
+      tooltip: "Hier kun je in je eigen woorden kort beschrijven wat er thuis speelt en waar je het meest last van hebt.",
       render: (fd, update) => (
         <div className="space-y-4">
           <div>
@@ -680,6 +783,8 @@ function buildScreens(): Screen[] {
       title: "Kinderen / gezin - extra vragen",
       subtitle: "Omdat je kinderen/gezin hebt aangevinkt.",
       isVisible: (fd) => fd.hoofdoorzaak === "prive" && fd.priveWaarover.includes("Kinderen / gezin"),
+      topic: "Sociale gezondheid",
+      tooltip: "Hier gaat het om wat er in je gezin speelt dat invloed heeft op je energie en werk.",
       render: (fd, update) => (
         <div className="space-y-4">
           <div>
@@ -701,6 +806,8 @@ function buildScreens(): Screen[] {
       title: "Wat merk je vooral?",
       subtitle: "Meerdere opties mogelijk.",
       isVisible: (fd) => fd.hoofdoorzaak === "energie",
+      topic: "Medische gezondheid",
+      tooltip: "Kies wat je vooral merkt in je energie en lijf, zonder dat het om een diagnose gaat.",
       render: (fd, _, toggleMulti) => (
         <CheckboxList options={ENERGIE_MERKT} selected={fd.energieMerkt} onToggle={(v) => toggleMulti("energieMerkt", v)} />
       ),
@@ -711,6 +818,8 @@ function buildScreens(): Screen[] {
       title: "Wat is je grootste zorg als dit zo doorgaat?",
       subtitle: "Meerdere opties mogelijk.",
       isVisible: (fd) => fd.hoofdoorzaak === "energie",
+      topic: "Psychische gezondheid",
+      tooltip: "Dit gaat over jouw zorgen als de situatie niet verandert, zowel privé als op het werk.",
       render: (fd, _, toggleMulti) => (
         <CheckboxList
           options={["Uitval / verzuim", "Relatie onder druk", "Niet meer kunnen functioneren", "Geen energie meer voor priv\u00e9", "Fouten op het werk"]}
@@ -724,6 +833,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Is er al professionele hulp gezocht?",
       isVisible: (fd) => fd.hoofdoorzaak === "energie",
+      topic: "Medische gezondheid",
+      tooltip: "Hier kun je aangeven of je al ergens ondersteuning hebt gezocht, zonder inhoudelijke details.",
       render: (fd, update) => (
         <RadioGroup value={fd.energieHulp} onValueChange={(v) => update({ energieHulp: v })} className="space-y-2">
           {[{ id: "ja", label: "Ja" }, { id: "nee", label: "Nee" }, { id: "liever-niet", label: "Liever niet zeggen" }].map((opt) => (
@@ -743,6 +854,8 @@ function buildScreens(): Screen[] {
       title: "Hoe verdeelt de belasting zich?",
       subtitle: "Schuif de verdeling tussen werk en priv\u00e9.",
       isVisible: (fd) => fd.hoofdoorzaak === "combinatie",
+      topic: "Sociale gezondheid",
+      tooltip: "Hier geef je in grote lijnen aan hoeveel van de belasting uit werk en hoeveel uit privé komt.",
       render: (fd, update) => (
         <div>
           <Slider value={[fd.combinatieVerdeling]} onValueChange={([v]) => update({ combinatieVerdeling: v })} min={0} max={100} step={5} className="w-full" />
@@ -758,6 +871,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Wat zou een eerste kleine verandering zijn die direct lucht geeft?",
       isVisible: (fd) => fd.hoofdoorzaak === "combinatie",
+      topic: "Psychische gezondheid",
+      tooltip: "Denk aan een kleine stap die de druk direct iets kan verlagen, thuis of op het werk.",
       render: (fd, update) => (
         <Input value={fd.combinatieVerandering} onChange={(e) => update({ combinatieVerandering: e.target.value })} placeholder="Optioneel - kort omschrijven..." maxLength={200} />
       ),
@@ -769,6 +884,8 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Je hebt 'Anders' gekozen",
       isVisible: (fd) => fd.hoofdoorzaak === "anders",
+      topic: "Psychische gezondheid",
+      tooltip: "Hier hoef je niets in te vullen; dit is alleen een korte uitleg bij je keuze voor 'Anders'.",
       render: () => (
         <div className="rounded-xl border border-border bg-secondary/20 p-5">
           <p className="text-sm text-muted-foreground">
@@ -784,6 +901,9 @@ function buildScreens(): Screen[] {
       group: "Verdieping",
       title: "Wat kunnen we nu doen om te voorkomen dat dit richting verzuim gaat?",
       subtitle: "Meerdere opties mogelijk.",
+      topic: "Sociale gezondheid",
+      tooltip: "Dit gaat om wat jou kan helpen om uitval te voorkomen, vooral in afspraken en ondersteuning.",
+      optionalNoteField: "closingToelichting",
       render: (fd, _, toggleMulti) => (
         <CheckboxList options={CLOSING_OPTIONS} selected={fd.closingNodig} onToggle={(v) => toggleMulti("closingNodig", v)} />
       ),
@@ -792,6 +912,8 @@ function buildScreens(): Screen[] {
       id: "closing-belangrijk",
       group: "Verdieping",
       title: "Hoe belangrijk is dat voor je?",
+      topic: "Psychische gezondheid",
+      tooltip: "Dit geeft aan hoeveel gewicht je zelf aan deze afspraken of steun hecht.",
       render: (fd, update) => (
         <>
           <ScaleSlider value={fd.closingBelangrijk} onChange={(v) => update({ closingBelangrijk: v })} labelLeft="Handig" labelMid="Belangrijk" labelRight="Noodzakelijk" />
@@ -807,6 +929,8 @@ function buildScreens(): Screen[] {
       id: "rand-wel",
       group: "Randvoorwaarden",
       title: "Wat wil je absoluut wel bereiken met deze time-out?",
+      topic: "Psychische gezondheid",
+      tooltip: "Hier kun je beschrijven wat jij hoopt dat dit traject jou oplevert.",
       render: (fd, update) => (
         <>
           <Textarea value={fd.randWelBereiken} onChange={(e) => update({ randWelBereiken: e.target.value })} placeholder="Bijv. rust en overzicht, duidelijke afspraken..." maxLength={200} rows={3} />
@@ -818,6 +942,8 @@ function buildScreens(): Screen[] {
       id: "rand-niet",
       group: "Randvoorwaarden",
       title: "Wat wil je absoluut niet dat dit gesprek wordt?",
+      topic: "Sociale gezondheid",
+      tooltip: "Hier kun je aangeven wat je liever niet wilt dat er gebeurt in of rond het gesprek.",
       render: (fd, update) => (
         <>
           <Textarea value={fd.randNietBereiken} onChange={(e) => update({ randNietBereiken: e.target.value })} placeholder="Bijv. geen beoordelingsgesprek, geen diagnose..." maxLength={200} rows={3} />
@@ -829,6 +955,8 @@ function buildScreens(): Screen[] {
       id: "terugkoppeling",
       group: "Randvoorwaarden",
       title: "Mag er terugkoppeling richting je werkgever plaatsvinden?",
+      topic: "Sociale gezondheid",
+      tooltip: "Je bepaalt zelf wat er wel of niet naar je werkgever teruggekoppeld mag worden.",
       render: (fd, update) => (
         <>
           <RadioGroup value={fd.terugkoppeling} onValueChange={(v) => update({ terugkoppeling: v })} className="space-y-2">
@@ -901,13 +1029,12 @@ const GROUP_LABELS = ["Situatie", "Verdieping", "Randvoorwaarden", "Samenvatting
 
 export default function TimeoutFormPage() {
   const router = useRouter()
-  const [screenIndex, setScreenIndex] = useState(0)
+  const searchParams = useSearchParams()
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [isGenerating, setIsGenerating] = useState(false)
   const [summaryText, setSummaryText] = useState("")
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isSummaryStep, setIsSummaryStep] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -917,10 +1044,48 @@ export default function TimeoutFormPage() {
     }
   }, [router])
 
+  // Load saved form state from sessionStorage once
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const stored = window.sessionStorage.getItem("timeoutFormV2")
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as FormData
+        setFormData((prev) => ({ ...prev, ...parsed }))
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }, [])
+
+  // Persist form state for refresh-safety
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    window.sessionStorage.setItem("timeoutFormV2", JSON.stringify(formData))
+  }, [formData])
+
   const allScreens = buildScreens()
   const visibleScreens = allScreens.filter((s) => !s.isVisible || s.isVisible(formData))
-  const currentScreen = visibleScreens[screenIndex]
+
+  const stepFromUrl = searchParams.get("stap") || visibleScreens[0]?.id
+  const isSummaryStep = stepFromUrl === "samenvatting"
+
+  const currentScreenIndex = isSummaryStep
+    ? visibleScreens.length - 1
+    : Math.max(
+        0,
+        visibleScreens.findIndex((s) => s.id === stepFromUrl) === -1
+          ? 0
+          : visibleScreens.findIndex((s) => s.id === stepFromUrl),
+      )
+
+  const currentScreen = isSummaryStep ? null : visibleScreens[currentScreenIndex]
   const totalVisible = visibleScreens.length
+
+  // Overall progress including samenvatting
+  const totalStepsWithSummary = totalVisible + 1
+  const currentStepNumber = isSummaryStep ? totalVisible + 1 : currentScreenIndex + 1
+  const overallPercent = Math.round((currentStepNumber / totalStepsWithSummary) * 100)
 
   // Figure out which group we're in for progress bar
   const currentGroup = currentScreen?.group || "Samenvatting"
@@ -948,14 +1113,23 @@ export default function TimeoutFormPage() {
   const handleNext = async () => {
     if (isSummaryStep) return
 
-    if (screenIndex < totalVisible - 1) {
-      setScreenIndex(screenIndex + 1)
+    const currentIndex = currentScreenIndex
+
+    if (currentIndex < totalVisible - 1) {
+      const nextId = visibleScreens[currentIndex + 1].id
+      const params = new URLSearchParams(Array.from(searchParams.entries()))
+      params.set("stap", nextId)
+      router.push(`/timeout/run/demo/form?${params.toString()}`)
       scrollToTop()
     } else {
-      // Last question screen -> generate summary via AI
-      setIsSummaryStep(true)
-      setIsGenerating(true)
+      // Last question screen -> go to summary step
+      const params = new URLSearchParams(Array.from(searchParams.entries()))
+      params.set("stap", "samenvatting")
+      router.push(`/timeout/run/demo/form?${params.toString()}`)
       scrollToTop()
+
+      // Trigger summary generation
+      setIsGenerating(true)
       try {
         const res = await fetch("/api/timeout/summarize", {
           method: "POST",
@@ -975,13 +1149,23 @@ export default function TimeoutFormPage() {
 
   const handleBack = () => {
     if (isSummaryStep) {
-      setIsSummaryStep(false)
-      setIsGenerating(false)
-      scrollToTop()
+      // Back from summary to last visible vraag
+      const lastId = visibleScreens[visibleScreens.length - 1]?.id
+      if (lastId) {
+        const params = new URLSearchParams(Array.from(searchParams.entries()))
+        params.set("stap", lastId)
+        router.push(`/timeout/run/demo/form?${params.toString()}`)
+        scrollToTop()
+      }
       return
     }
-    if (screenIndex > 0) {
-      setScreenIndex(screenIndex - 1)
+
+    const currentIndex = currentScreenIndex
+    if (currentIndex > 0) {
+      const prevId = visibleScreens[currentIndex - 1].id
+      const params = new URLSearchParams(Array.from(searchParams.entries()))
+      params.set("stap", prevId)
+      router.push(`/timeout/run/demo/form?${params.toString()}`)
       scrollToTop()
     }
   }
@@ -1004,6 +1188,22 @@ export default function TimeoutFormPage() {
           {/* Top progress bar - groups */}
           {!isSubmitted && (
             <div className="mb-8">
+              {/* Overall progress based on actieve vragen + samenvatting */}
+              <div className="mb-4">
+                <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>
+                    Stap {currentStepNumber} van {totalStepsWithSummary}
+                  </span>
+                  <span>{overallPercent}% voltooid</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${overallPercent}%` }}
+                  />
+                </div>
+              </div>
+
               <div className="mb-3 flex justify-between">
                 {GROUP_LABELS.map((label, i) => {
                   const isActive = i === groupIndex
@@ -1121,12 +1321,56 @@ export default function TimeoutFormPage() {
               {/* ── Question screen ── */}
               <Card ref={cardRef} className="rounded-2xl">
                 <CardContent className="p-6">
-                  <h2 className="mb-1 text-xl font-semibold text-foreground">{currentScreen?.title}</h2>
-                  {currentScreen?.subtitle && (
-                    <p className="mb-6 text-sm text-muted-foreground">{currentScreen.subtitle}</p>
+                  {currentScreen && (
+                    <>
+                      <div className="mb-4 flex items-start justify-between gap-3">
+                        <div>
+                          <h2 className="mb-1 text-xl font-semibold text-foreground">{currentScreen.title}</h2>
+                          {currentScreen.subtitle && (
+                            <p className="text-sm text-muted-foreground">{currentScreen.subtitle}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
+                            {currentScreen.topic}
+                          </span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background text-muted-foreground hover:bg-muted"
+                                aria-label="Uitleg bij deze vraag"
+                              >
+                                <Info className="h-3.5 w-3.5" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="left">
+                              <p>{currentScreen.tooltip}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </div>
+                      <div className="mt-4 space-y-6">
+                        {currentScreen.render(formData, update, toggleMulti)}
+                        {currentScreen.optionalNoteField && (
+                          <div className="pt-2">
+                            <Label className="mb-1 block text-sm">
+                              Wil je dit kort toelichten? (optioneel)
+                            </Label>
+                            <Textarea
+                              value={formData[currentScreen.optionalNoteField] as string}
+                              onChange={(e) =>
+                                update({ [currentScreen.optionalNoteField]: e.target.value } as Partial<FormData>)
+                              }
+                              placeholder="In je eigen woorden, zo kort als jij wilt."
+                              rows={3}
+                              maxLength={400}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </>
                   )}
-                  {!currentScreen?.subtitle && <div className="mb-6" />}
-                  {currentScreen?.render(formData, update, toggleMulti)}
                 </CardContent>
               </Card>
 
