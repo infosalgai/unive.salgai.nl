@@ -1,19 +1,19 @@
-\"use client\"
+"use client";
 
-import React from \"react\"
-import { useState, useEffect, useRef, useCallback } from \"react\"
-import { useRouter, useSearchParams } from \"next/navigation\"
-import { Button } from \"@/components/ui/button\"
-import { Card, CardContent } from \"@/components/ui/card\"
-import { Slider } from \"@/components/ui/slider\"
-import { Textarea } from \"@/components/ui/textarea\"
-import { Input } from \"@/components/ui/input\"
-import { RadioGroup, RadioGroupItem } from \"@/components/ui/radio-group\"
-import { Label } from \"@/components/ui/label\"
-import { Checkbox } from \"@/components/ui/checkbox\"
-import { NavHeader } from \"@/components/nav-header\"
-import { AppFooter } from \"@/components/app-footer\"
-import { ArrowLeft, ArrowRight, Sparkles, CheckCircle, Send, Info } from \"lucide-react\"
+import React from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Slider } from "@/components/ui/slider"
+import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { NavHeader } from "@/components/nav-header"
+import { AppFooter } from "@/components/app-footer"
+import { ArrowLeft, ArrowRight, Sparkles, CheckCircle, Send, Info } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -21,9 +21,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from \"@/components/ui/dialog\"
-import { Tooltip, TooltipContent, TooltipTrigger } from \"@/components/ui/tooltip\"
-import { getDemoContext } from \"@/lib/demo-data\"
+} from "@/components/ui/dialog"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { getDemoContext } from "@/lib/demo-data"
 
 // ── Options ──
 
