@@ -53,6 +53,7 @@ export default function DemoRouteSelectionPage() {
       medewerker: "/dashboard/employee",
       coach: "/dashboard/coach",
       hr: "/dashboard/hr",
+      manager: "/dashboard/leidinggevende",
     }
     router.push(`${dashboardRoutes[role]}?flow=${selectedRoute}`)
   }

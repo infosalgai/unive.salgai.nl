@@ -1,21 +1,26 @@
 import Link from "next/link"
+import Image from "next/image"
 
 export function AppFooter() {
   return (
     <footer className="mt-auto border-t border-border bg-card py-6">
-      <div className="mx-auto flex max-w-[900px] flex-col items-center justify-center gap-2 px-4">
-        <Link 
-          href="https://www.salgai.nl" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <span>Powered by</span>
-          <svg 
-            viewBox="0 0 1080 1080" 
-            className="w-24 h-24"
+      <div className="mx-auto flex max-w-[900px] flex-col items-center justify-center gap-3 px-4">
+        <p className="text-center text-sm text-muted-foreground">
+          Onderdeel van de Mensgericht Casemanagement Toolkit van Verzuimdynamiek & Salgai
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-6">
+          <Link
+            href="https://www.salgai.nl"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center text-muted-foreground transition-opacity hover:opacity-80"
             aria-label="Salgai"
           >
+            <svg
+              viewBox="0 0 1080 1080"
+              className="h-16 w-16"
+              aria-hidden
+            >
             <defs>
               <linearGradient id="salgai-gradient" x1="176.38" y1="518.82" x2="444.93" y2="518.82" gradientUnits="userSpaceOnUse">
                 <stop offset="0" stopColor="#173b60" stopOpacity="0"/>
@@ -69,7 +74,23 @@ export function AppFooter() {
               <path d="M901.73,496.02c-3,0-5.45-.94-7.38-2.82-1.93-1.88-2.89-4.19-2.89-6.93,0-2.57.96-4.79,2.89-6.67,1.92-1.88,4.38-2.82,7.38-2.82s5.45.88,7.38,2.63c1.92,1.75,2.89,4,2.89,6.74s-.94,5.07-2.82,6.99c-1.88,1.92-4.36,2.89-7.44,2.89ZM893.78,575.83v-68.52h15.91v68.52h-15.91Z"/>
             </g>
           </svg>
-        </Link>
+          </Link>
+          <Link
+            href="https://verzuimdynamiek.nl/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center transition-opacity hover:opacity-80"
+            aria-label="Verzuimdynamiek"
+          >
+            <Image
+              src="/images/verzuimdynamiek-logo.png"
+              alt=""
+              width={88}
+              height={51}
+              className="h-7 w-auto object-contain"
+            />
+          </Link>
+        </div>
       </div>
     </footer>
   )

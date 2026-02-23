@@ -9,6 +9,7 @@ import { DashboardHeader } from "@/components/dashboard-header"
 import { AppFooter } from "@/components/app-footer"
 import { Shield, Users, FileText, Clock, TrendingUp, BarChart3 } from "lucide-react"
 import { hrStats, getDemoContext, ROUTE_CONFIG, type DemoRole, type DemoRoute } from "@/lib/demo-data"
+import { hasRole, DEMO_ROLE_TO_USER_ROLE } from "@/lib/rbac"
 
 function StatCard({ 
   title, 
@@ -94,20 +95,31 @@ export default function HRDashboard() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [demoRoute, setDemoRoute] = useState<DemoRoute>("navigation")
+  const [allowed, setAllowed] = useState<boolean | null>(null)
 
   useEffect(() => {
     const { role, route } = getDemoContext()
     if (!role) {
-      router.push("/demo")
+      router.replace("/demo")
       return
     }
     if (!route) {
-      router.push("/demo/what")
+      router.replace("/demo/what")
       return
     }
+    const userRole = DEMO_ROLE_TO_USER_ROLE[role as DemoRole]
+    if (!hasRole(userRole, ["hr"])) {
+      router.replace("/demo")
+      return
+    }
+    setAllowed(true)
     const flowParam = searchParams.get("flow") as DemoRoute | null
     setDemoRoute(flowParam || route)
   }, [router, searchParams])
+
+  if (allowed !== true) {
+    return null
+  }
 
   const routeConfig = ROUTE_CONFIG[demoRoute]
 

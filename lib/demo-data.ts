@@ -1,7 +1,8 @@
 // Demo data for Navigatiegesprek prototype
 // All dates are static strings to avoid Date.now()
 
-export type DemoRole = "medewerker" | "coach" | "hr"
+/** Rol in de demo. HR en Leidinggevende zijn gescheiden (RBAC + eigen dashboards). */
+export type DemoRole = "medewerker" | "coach" | "hr" | "manager"
 export type DemoRoute = "timeout" | "navigation"
 
 // Demo context helpers
@@ -14,9 +15,14 @@ export function getDemoContext(): { role: DemoRole | null; route: DemoRoute | nu
   return { role, route }
 }
 
+const DEMO_ROLE_COOKIE = "demoRole"
+
 export function setDemoContext({ role, route }: { role?: DemoRole; route?: DemoRoute }) {
   if (typeof window === "undefined") return
-  if (role) localStorage.setItem("demoRole", role)
+  if (role) {
+    localStorage.setItem("demoRole", role)
+    document.cookie = `${DEMO_ROLE_COOKIE}=${encodeURIComponent(role)};path=/;max-age=86400;samesite=lax`
+  }
   if (route) localStorage.setItem("demoRoute", route)
 }
 
@@ -24,6 +30,7 @@ export function clearDemoContext() {
   if (typeof window === "undefined") return
   localStorage.removeItem("demoRole")
   localStorage.removeItem("demoRoute")
+  document.cookie = `${DEMO_ROLE_COOKIE}=;path=/;max-age=0`
 }
 
 // Route configuration
@@ -195,6 +202,28 @@ export const hrStats: HRStats = {
   ],
 }
 
+/** Leidinggevende: alleen team-scope, procesniveau (geen inhoudelijke/medische details). */
+export interface ManagerTeamStats {
+  teamLabel: string
+  ongoingTrajecten: number
+  statusOverzicht: { status: string; count: number }[]
+  volgendeActies: { label: string; count: number }[]
+}
+
+export const managerTeamStats: ManagerTeamStats = {
+  teamLabel: "Mijn team (demo)",
+  ongoingTrajecten: 3,
+  statusOverzicht: [
+    { status: "Time-out aangevraagd", count: 1 },
+    { status: "In gesprek met coach", count: 2 },
+    { status: "Afgerond (30 dagen)", count: 4 },
+  ],
+  volgendeActies: [
+    { label: "Plan gesprek inplannen", count: 1 },
+    { label: "Geen actie", count: 6 },
+  ],
+}
+
 // Status configuration for UI display
 export const STATUS_CONFIG: Record<RequestStatus, { label: string; color: string }> = {
   concept: { label: "Concept", color: "bg-secondary text-secondary-foreground" },
@@ -208,9 +237,10 @@ export const STATUS_CONFIG: Record<RequestStatus, { label: string; color: string
   ingetrokken: { label: "Ingetrokken", color: "bg-red-100 text-red-700" },
 }
 
-// Role configuration
+// Role configuration (RBAC: HR = organisatiebreed geanonimiseerd, manager = alleen team/procesniveau)
 export const ROLE_CONFIG: Record<DemoRole, { label: string; tooltip: string }> = {
   medewerker: { label: "Medewerker", tooltip: "Jij houdt regie" },
   coach: { label: "Coach", tooltip: "Alleen na toestemming" },
-  hr: { label: "HR", tooltip: "Alleen geanonimiseerde data" },
+  hr: { label: "HR", tooltip: "Alleen geanonimiseerde data, geen medische details" },
+  manager: { label: "Leidinggevende", tooltip: "Alleen team-scope, status/proces, geen inhoudelijke antwoorden" },
 }
