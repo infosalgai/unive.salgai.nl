@@ -25,6 +25,63 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { getDemoContext } from "@/lib/demo-data"
 
+// ── Option meta (thema + tooltips voor hoofdoorzaken) ──
+
+export type ThemeTag = "psychisch" | "mentaal" | "medisch"
+
+export interface OptionMeta {
+  themeTag: ThemeTag
+  label: string
+  help: string
+  why?: string
+}
+
+/** Centrale mapping: per hoofdoorzaak-id het thema en tooltip-teksten (B1/B2, geen diagnose). */
+export const HOOFDOORZAAK_OPTION_META: Record<string, OptionMeta> = {
+  werkdruk: {
+    themeTag: "psychisch",
+    label: "Psychische gezondheid",
+    help: "We bedoelen: hoe druk of spanning door werk op je af komt, zonder dat we een oordeel of diagnose stellen.",
+    why: "Zo kan de time-out coach het gesprek goed voorbereiden.",
+  },
+  samenwerking: {
+    themeTag: "mentaal",
+    label: "Mentale gezondheid",
+    help: "We bedoelen: spanning of conflict in het contact met anderen op het werk, zonder in te gaan op wie gelijk heeft.",
+    why: "Zo weten we waar het gesprek over kan gaan.",
+  },
+  prive: {
+    themeTag: "mentaal",
+    label: "Mentale gezondheid",
+    help: "We bedoelen: omstandigheden thuis of in je privéleven die nu veel van je vragen. Je hoeft geen details te delen.",
+    why: "Zo kunnen we rekening houden met wat je nodig hebt vanuit werk.",
+  },
+  energie: {
+    themeTag: "medisch",
+    label: "Medische gezondheid",
+    help: "We bedoelen: hoe je je lichamelijk of mentaal voelt (bijv. moe, weinig energie), zonder te vragen naar een diagnose of ziekte.",
+    why: "Zo kan er beter worden gekeken naar wat je nu nodig hebt.",
+  },
+  combinatie: {
+    themeTag: "psychisch",
+    label: "Psychische gezondheid",
+    help: "We bedoelen: als zowel werk als privé nu zwaar voelen en door elkaar lopen.",
+    why: "Dan kan het gesprek over beide kanten gaan.",
+  },
+  incident: {
+    themeTag: "psychisch",
+    label: "Psychische gezondheid",
+    help: "We bedoelen: iets wat is gebeurd (op werk of daarbuiten) dat nu nog invloed op je heeft.",
+    why: "Zo kan de coach daar in het gesprek aandacht voor hebben.",
+  },
+  anders: {
+    themeTag: "mentaal",
+    label: "Mentale gezondheid",
+    help: "Je kiest zelf of je in het formulier meer wilt toelichten. In het gesprek kun je altijd verder vertellen.",
+    why: "Iedere situatie is anders; we sluiten daarop aan.",
+  },
+}
+
 // ── Options ──
 
 const HOOFDOORZAAK_OPTIONS = [
@@ -297,7 +354,82 @@ function SelectCard({ selected, onClick, label }: { selected: boolean; onClick: 
   )
 }
 
-function CheckboxList({ options, selected, onToggle }: { options: string[]; selected: string[]; onToggle: (v: string) => void }) {
+/** Option card met klein info-icoon en tooltip (thema + uitleg). Hover en click (mobiel) ondersteund. Geen nested buttons (div role="button" voor kaart). */
+function SelectCardWithTooltip({
+  selected,
+  onClick,
+  label,
+  meta,
+}: {
+  selected: boolean
+  onClick: () => void
+  label: string
+  meta: OptionMeta
+}) {
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+
+  const handleCardKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      onClick()
+    }
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={handleCardKeyDown}
+      className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 text-left transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+        selected
+          ? "border-primary bg-primary/5 text-foreground"
+          : "border-border bg-card text-muted-foreground hover:border-primary/50"
+      }`}
+    >
+      <span className="min-w-0 flex-1 text-sm font-medium">{label}</span>
+      <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setTooltipOpen((prev) => !prev)
+            }}
+            onPointerEnter={() => setTooltipOpen(true)}
+            onPointerLeave={() => setTooltipOpen(false)}
+            className="inline-flex h-6 w-6 shrink-0 cursor-help items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            aria-label={`Uitleg bij ${label}`}
+          >
+            <Info className="h-3.5 w-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" sideOffset={6} className="max-w-[280px] px-3 py-2.5 text-left text-xs">
+          <p className="font-medium text-background">{meta.label}</p>
+          <p className="mt-1 text-background/90">{meta.help}</p>
+          {meta.why && (
+            <p className="mt-1.5 border-t border-background/20 pt-1.5 text-background/80 italic">{meta.why}</p>
+          )}
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
+
+function CheckboxList({
+  options,
+  selected,
+  onToggle,
+  showNotRelevant,
+}: {
+  options: string[]
+  selected: string[]
+  onToggle: (v: string) => void
+  showNotRelevant?: boolean
+}) {
+  const hasNotRelevant = selected.includes(CHECKBOX_NOT_RELEVANT.value)
+
   return (
     <div className="space-y-2">
       {options.map((opt) => (
@@ -305,20 +437,47 @@ function CheckboxList({ options, selected, onToggle }: { options: string[]; sele
           key={opt}
           className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
         >
-          <Checkbox checked={selected.includes(opt)} onCheckedChange={() => onToggle(opt)} />
+          <Checkbox
+            checked={selected.includes(opt)}
+            onCheckedChange={() => onToggle(opt)}
+            disabled={hasNotRelevant && opt !== CHECKBOX_NOT_RELEVANT.value}
+          />
           <span className="text-sm text-muted-foreground">{opt}</span>
         </label>
       ))}
+      {showNotRelevant && (
+        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+          <Checkbox
+            checked={hasNotRelevant}
+            onCheckedChange={() => onToggle(CHECKBOX_NOT_RELEVANT.value)}
+          />
+          <span className="text-sm text-muted-foreground">{CHECKBOX_NOT_RELEVANT.label}</span>
+        </label>
+      )}
     </div>
   )
 }
 
-function ChipSelect({ options, selected, onToggle, max }: { options: string[]; selected: string[]; onToggle: (v: string) => void; max?: number }) {
+function ChipSelect({
+  options,
+  selected,
+  onToggle,
+  max,
+  showNotRelevant,
+}: {
+  options: string[]
+  selected: string[]
+  onToggle: (v: string) => void
+  max?: number
+  showNotRelevant?: boolean
+}) {
+  const hasNotRelevant = selected.includes(CHECKBOX_NOT_RELEVANT.value)
+
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((opt) => {
         const isSelected = selected.includes(opt)
-        const isDisabled = !isSelected && max !== undefined && selected.length >= max
+        const isDisabled = hasNotRelevant || (!isSelected && max !== undefined && selected.length >= max)
         return (
           <button
             key={opt}
@@ -337,6 +496,19 @@ function ChipSelect({ options, selected, onToggle, max }: { options: string[]; s
           </button>
         )
       })}
+      {showNotRelevant && (
+        <button
+          type="button"
+          onClick={() => onToggle(CHECKBOX_NOT_RELEVANT.value)}
+          className={`rounded-full border border-dashed px-4 py-2 text-sm transition-all ${
+            hasNotRelevant
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-border bg-card text-muted-foreground hover:border-primary/50"
+          }`}
+        >
+          {CHECKBOX_NOT_RELEVANT.label}
+        </button>
+      )}
     </div>
   )
 }
@@ -357,22 +529,75 @@ function ScaleSlider({ value, onChange, labelLeft, labelMid, labelRight }: { val
 // ── Step definition ──
 // Each "screen" the user sees is one focused question block
 
+/** Eenduidige styling voor sub-vraag labels op een pagina (zelfde lettergrootte/gewicht). */
+const QUESTION_LABEL_CLASS = "mb-2 block text-base font-semibold text-foreground"
+/** Subtiele scheidingslijn tussen twee vraagblokken op dezelfde pagina. */
+const QUESTION_DIVIDER = <hr className="my-6 border-0 border-t border-border/50" />
+
+/** Neutrale opties voor radio/single-choice vragen (geen inhoudelijke disclosure forceren). */
+const NEUTRAL_OPTIONS_RADIO = [
+  { id: "unknown", label: "Weet ik niet" },
+  { id: "not_relevant", label: "Niet relevant voor mij" },
+] as const
+
+/** Label en value voor de "n.v.t." optie bij checkbox-lijsten (mutual exclusive met andere opties). */
+const CHECKBOX_NOT_RELEVANT = { value: "not_relevant", label: "Niet relevant / n.v.t." } as const
+
 type Topic = "Medische gezondheid" | "Psychische gezondheid" | "Sociale gezondheid"
 
 interface Screen {
   id: string
-  group: string // For the top progress bar
+  group: string
   title: string
   subtitle?: string
   topic: Topic
   tooltip: string
+  /** Of deze stap verplicht een keuze vereist voordat Volgende enabled is. Default true als choiceField of multiChoiceField is gezet. */
+  required?: boolean
+  /** Veld voor single choice (radio/select): moet een waarde hebben (incl. unknown/not_relevant). */
+  choiceField?: keyof FormData
+  /** Veld voor multi choice (checkbox): min. 1 gekozen of not_relevant. */
+  multiChoiceField?: keyof FormData
+  /** Toon "Weet ik niet" bij single choice. Default true. */
+  allowUnknown?: boolean
+  /** Toon "Niet relevant voor mij" bij single, of "Niet relevant / n.v.t." bij multi. Default true. */
+  allowNotRelevant?: boolean
+  /** Optioneel: checkbox die ook aangevinkt moet zijn (bijv. terugkoppelingAkkoord). */
+  requiredCheckbox?: keyof FormData
   optionalNoteField?: keyof FormData
   render: (
     fd: FormData,
     update: (p: Partial<FormData>) => void,
     toggleMulti: (field: keyof FormData, value: string, max?: number) => void,
+    getMultiToggleWithNotRelevant?: (field: keyof FormData) => (value: string, max?: number) => void,
   ) => React.ReactNode
   isVisible?: (fd: FormData) => boolean
+}
+
+/** Bepaalt of de huidige stap geldig is (keuze gemaakt indien verplicht). */
+function isStepValid(screen: Screen | null, fd: FormData): boolean {
+  if (!screen) return true
+  if (screen.required === false) return true
+
+  if (screen.choiceField) {
+    const val = fd[screen.choiceField]
+    const str = typeof val === "string" ? val.trim() : ""
+    if (!str) return false
+  }
+
+  if (screen.multiChoiceField) {
+    const arr = fd[screen.multiChoiceField] as string[] | undefined
+    if (!Array.isArray(arr)) return false
+    if (arr.includes(CHECKBOX_NOT_RELEVANT.value)) return true
+    if (arr.length < 1) return false
+  }
+
+  if (screen.requiredCheckbox) {
+    const checked = fd[screen.requiredCheckbox]
+    if (checked !== true) return false
+  }
+
+  return true
 }
 
 function buildScreens(): Screen[] {
@@ -385,11 +610,21 @@ function buildScreens(): Screen[] {
       subtitle: "Kies wat nu het meest speelt.",
       topic: "Psychische gezondheid",
       tooltip: "Hier gaat het om wat jou vooral richting een time-out brengt, zonder in medische details te gaan.",
+      choiceField: "hoofdoorzaak",
       optionalNoteField: "hoofdoorzaakToelichting",
       render: (fd, update) => (
         <>
           <div className="grid gap-3 sm:grid-cols-2">
             {HOOFDOORZAAK_OPTIONS.map((opt) => (
+              <SelectCardWithTooltip
+                key={opt.id}
+                selected={fd.hoofdoorzaak === opt.id}
+                onClick={() => update({ hoofdoorzaak: opt.id })}
+                label={opt.label}
+                meta={HOOFDOORZAAK_OPTION_META[opt.id] ?? HOOFDOORZAAK_OPTION_META.anders}
+              />
+            ))}
+            {NEUTRAL_OPTIONS_RADIO.map((opt) => (
               <SelectCard
                 key={opt.id}
                 selected={fd.hoofdoorzaak === opt.id}
@@ -408,9 +643,10 @@ function buildScreens(): Screen[] {
               />
             </div>
           )}
-          <div className="mt-6 space-y-4">
+          {QUESTION_DIVIDER}
+          <div className="space-y-4">
             <div>
-              <Label className="mb-2 block text-sm">Hoe zwaar voelt dit nu voor je?</Label>
+              <Label className={QUESTION_LABEL_CLASS}>Hoe zwaar voelt dit nu voor je?</Label>
               <ScaleSlider
                 value={fd.zwaarte}
                 onChange={(v) => update({ zwaarte: v })}
@@ -430,19 +666,26 @@ function buildScreens(): Screen[] {
       subtitle: "Meerdere mogelijk, optioneel. Bijvoorbeeld privé, thuis of andere omstandigheden buiten het werk.",
       topic: "Sociale gezondheid",
       tooltip: "Hier kun je aangeven welke dingen naast je werk of binnen je werk het zwaarder maken.",
+      multiChoiceField: "factoren",
       optionalNoteField: "factorenToelichting",
-      render: (fd, _, toggleMulti) => (
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Privé / persoonlijk</h4>
-            <CheckboxList options={FACTOREN_PRIVE} selected={fd.factoren} onToggle={(v) => toggleMulti("factoren", v)} />
+      render: (fd, _, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("factoren")(v) : (v: string) => toggleMulti("factoren", v)
+        return (
+          <div className="space-y-6">
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div>
+                <h4 className={QUESTION_LABEL_CLASS + " mb-3"}>Privé / persoonlijk</h4>
+                <CheckboxList options={FACTOREN_PRIVE} selected={fd.factoren} onToggle={onToggle} />
+              </div>
+              <div>
+                <h4 className={QUESTION_LABEL_CLASS + " mb-3"}>Werk & energie</h4>
+                <CheckboxList options={FACTOREN_WERK} selected={fd.factoren} onToggle={onToggle} />
+              </div>
+            </div>
+            <CheckboxList options={[]} selected={fd.factoren} onToggle={onToggle} showNotRelevant />
           </div>
-          <div>
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Werk & energie</h4>
-            <CheckboxList options={FACTOREN_WERK} selected={fd.factoren} onToggle={(v) => toggleMulti("factoren", v)} />
-          </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       id: "sinds",
@@ -450,10 +693,17 @@ function buildScreens(): Screen[] {
       title: "Sinds wanneer is dit een probleem?",
       topic: "Psychische gezondheid",
       tooltip: "Dit helpt om in te schatten hoe lang de situatie al zwaarder voelt dan normaal.",
+      choiceField: "sinds",
       render: (fd, update) => (
         <RadioGroup value={fd.sinds} onValueChange={(v) => update({ sinds: v })} className="space-y-2">
           {SINDS_OPTIONS.map((opt) => (
             <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+              <RadioGroupItem value={opt.id} id={`sinds-${opt.id}`} />
+              <Label htmlFor={`sinds-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
+            </div>
+          ))}
+          {NEUTRAL_OPTIONS_RADIO.map((opt) => (
+            <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-border border-dashed p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
               <RadioGroupItem value={opt.id} id={`sinds-${opt.id}`} />
               <Label htmlFor={`sinds-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
             </div>
@@ -467,26 +717,31 @@ function buildScreens(): Screen[] {
       title: "Hoe groot is de kans dat dit zonder verandering richting verzuim gaat?",
       topic: "Medische gezondheid",
       tooltip: "Dit gaat over jouw gevoel van risico op uitval, niet om een medische inschatting.",
-      render: (fd, update, toggleMulti) => (
-        <div className="space-y-6">
-          <div>
-            <ScaleSlider
-              value={fd.risico}
-              onChange={(v) => update({ risico: v })}
-              labelLeft="Nauwelijks"
-              labelMid="Twijfel"
-              labelRight="Zeer groot"
-            />
+      multiChoiceField: "signalen",
+      render: (fd, update, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("signalen")(v) : (v: string) => toggleMulti("signalen", v)
+        return (
+          <div className="space-y-6">
+            <div>
+              <ScaleSlider
+                value={fd.risico}
+                onChange={(v) => update({ risico: v })}
+                labelLeft="Nauwelijks"
+                labelMid="Twijfel"
+                labelRight="Zeer groot"
+              />
+            </div>
+            {QUESTION_DIVIDER}
+            <div>
+              <Label className={QUESTION_LABEL_CLASS}>Welke signalen herken je bij jezelf op het werk?</Label>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Meerdere antwoorden zijn mogelijk. Kies wat nu het beste past.
+              </p>
+              <CheckboxList options={SIGNALEN_OPTIONS} selected={fd.signalen} onToggle={onToggle} showNotRelevant />
+            </div>
           </div>
-          <div>
-            <Label className="mb-2 block text-sm">Welke signalen herken je bij jezelf op het werk?</Label>
-            <p className="mb-3 text-xs text-muted-foreground">
-              Meerdere antwoorden zijn mogelijk. Kies wat nu het beste past.
-            </p>
-            <CheckboxList options={SIGNALEN_OPTIONS} selected={fd.signalen} onToggle={(v) => toggleMulti("signalen", v)} />
-          </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       id: "signalen-toelichting",
@@ -495,6 +750,7 @@ function buildScreens(): Screen[] {
       subtitle: "Alleen invullen als je dat prettig vindt.",
       topic: "Psychische gezondheid",
       tooltip: "Gebruik dit veld als je in je eigen woorden iets wilt toevoegen over wat je merkt.",
+      required: false,
       optionalNoteField: "signalenToelichting",
       render: (fd, update) => (
         <Textarea
@@ -513,15 +769,19 @@ function buildScreens(): Screen[] {
       subtitle: "Kies maximaal 2.",
       topic: "Psychische gezondheid",
       tooltip: "Dit helpt de time-out coach om het gesprek aan te laten sluiten op jouw behoefte.",
+      multiChoiceField: "doelen",
       optionalNoteField: "doelenToelichting",
-      render: (fd, update, toggleMulti) => (
-        <>
-          <ChipSelect options={DOEL_OPTIONS} selected={fd.doelen} onToggle={(v) => toggleMulti("doelen", v, 2)} max={2} />
-          {fd.doelen.length >= 2 && (
-            <p className="mt-2 text-xs text-muted-foreground">Maximum bereikt. Deselecteer er een om te wisselen.</p>
-          )}
-        </>
-      ),
+      render: (fd, update, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("doelen")(v, 2) : (v: string) => toggleMulti("doelen", v, 2)
+        return (
+          <>
+            <ChipSelect options={DOEL_OPTIONS} selected={fd.doelen} onToggle={onToggle} max={2} showNotRelevant />
+            {fd.doelen.length >= 2 && !fd.doelen.includes(CHECKBOX_NOT_RELEVANT.value) && (
+              <p className="mt-2 text-xs text-muted-foreground">Maximum bereikt. Deselecteer er een om te wisselen.</p>
+            )}
+          </>
+        )
+      },
     },
     {
       id: "belangrijkheid",
@@ -545,9 +805,11 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "werkdruk" || fd.hoofdoorzaak === "incident",
       topic: "Psychische gezondheid",
       tooltip: "Hier kun je aangeven waar de druk vooral vandaan komt zonder in details over klachten te gaan.",
-      render: (fd, _, toggleMulti) => (
-        <CheckboxList options={WERKDRUK_DRUK} selected={fd.werkdrukDruk} onToggle={(v) => toggleMulti("werkdrukDruk", v)} />
-      ),
+      multiChoiceField: "werkdrukDruk",
+      render: (fd, _, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("werkdrukDruk")(v) : (v: string) => toggleMulti("werkdrukDruk", v)
+        return <CheckboxList options={WERKDRUK_DRUK} selected={fd.werkdrukDruk} onToggle={onToggle} showNotRelevant />
+      },
     },
     {
       id: "werkdruk-duur",
@@ -556,10 +818,17 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "werkdruk" || fd.hoofdoorzaak === "incident",
       topic: "Psychische gezondheid",
       tooltip: "Dit zegt iets over hoe lang je deze druk al zo ervaart.",
+      choiceField: "werkdrukDuur",
       render: (fd, update) => (
         <RadioGroup value={fd.werkdrukDuur} onValueChange={(v) => update({ werkdrukDuur: v })} className="space-y-2">
           {WERKDRUK_DUUR.map((opt) => (
             <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+              <RadioGroupItem value={opt.id} id={`wd-${opt.id}`} />
+              <Label htmlFor={`wd-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
+            </div>
+          ))}
+          {NEUTRAL_OPTIONS_RADIO.map((opt) => (
+            <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-dashed border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
               <RadioGroupItem value={opt.id} id={`wd-${opt.id}`} />
               <Label htmlFor={`wd-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
             </div>
@@ -575,9 +844,11 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "werkdruk" || fd.hoofdoorzaak === "incident",
       topic: "Sociale gezondheid",
       tooltip: "Hier gaat het om wat jij zelf of samen met anderen al hebt gedaan om het lichter te maken.",
-      render: (fd, _, toggleMulti) => (
-        <CheckboxList options={WERKDRUK_GEPROBEERD} selected={fd.werkdrukGeprobeerd} onToggle={(v) => toggleMulti("werkdrukGeprobeerd", v)} />
-      ),
+      multiChoiceField: "werkdrukGeprobeerd",
+      render: (fd, _, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("werkdrukGeprobeerd")(v) : (v: string) => toggleMulti("werkdrukGeprobeerd", v)
+        return <CheckboxList options={WERKDRUK_GEPROBEERD} selected={fd.werkdrukGeprobeerd} onToggle={onToggle} showNotRelevant />
+      },
     },
     {
       id: "werkdruk-helpt",
@@ -586,11 +857,18 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "werkdruk" || fd.hoofdoorzaak === "incident",
       topic: "Sociale gezondheid",
       tooltip: "Dit helpt om samen te kijken welke praktische steun of ruimte je nu nodig hebt.",
+      choiceField: "werkdrukHelpt",
       render: (fd, update) => (
         <>
           <RadioGroup value={fd.werkdrukHelpt} onValueChange={(v) => update({ werkdrukHelpt: v })} className="space-y-2">
             {WERKDRUK_HELPT.map((opt) => (
               <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+                <RadioGroupItem value={opt.id} id={`wh-${opt.id}`} />
+                <Label htmlFor={`wh-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
+              </div>
+            ))}
+            {NEUTRAL_OPTIONS_RADIO.map((opt) => (
+              <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-dashed border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
                 <RadioGroupItem value={opt.id} id={`wh-${opt.id}`} />
                 <Label htmlFor={`wh-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
               </div>
@@ -611,10 +889,17 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "samenwerking",
       topic: "Sociale gezondheid",
       tooltip: "Hier gaat het om met wie de spanning of frictie vooral te maken heeft.",
+      choiceField: "conflictMet",
       render: (fd, update) => (
         <RadioGroup value={fd.conflictMet} onValueChange={(v) => update({ conflictMet: v })} className="space-y-2">
           {CONFLICT_MET.map((opt) => (
             <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+              <RadioGroupItem value={opt.id} id={`cm-${opt.id}`} />
+              <Label htmlFor={`cm-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
+            </div>
+          ))}
+          {NEUTRAL_OPTIONS_RADIO.map((opt) => (
+            <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-dashed border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
               <RadioGroupItem value={opt.id} id={`cm-${opt.id}`} />
               <Label htmlFor={`cm-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
             </div>
@@ -630,9 +915,11 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "samenwerking",
       topic: "Sociale gezondheid",
       tooltip: "Kies waar het conflict of de spanning vooral over gaat, zonder in vertrouwelijke details te treden.",
-      render: (fd, _, toggleMulti) => (
-        <CheckboxList options={CONFLICT_WAAROVER} selected={fd.conflictWaarover} onToggle={(v) => toggleMulti("conflictWaarover", v)} />
-      ),
+      multiChoiceField: "conflictWaarover",
+      render: (fd, _, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("conflictWaarover")(v) : (v: string) => toggleMulti("conflictWaarover", v)
+        return <CheckboxList options={CONFLICT_WAAROVER} selected={fd.conflictWaarover} onToggle={onToggle} showNotRelevant />
+      },
     },
     {
       id: "conflict-veilig",
@@ -652,10 +939,17 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "samenwerking",
       topic: "Sociale gezondheid",
       tooltip: "Hier geef je aan wat voor jou op dit moment prettig en veilig voelt richting je leidinggevende.",
+      choiceField: "conflictContact",
       render: (fd, update) => (
         <RadioGroup value={fd.conflictContact} onValueChange={(v) => update({ conflictContact: v })} className="space-y-2">
           {[{ id: "ja", label: "Ja" }, { id: "nee", label: "Nee" }, { id: "weet-niet", label: "Weet ik nog niet" }].map((opt) => (
             <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+              <RadioGroupItem value={opt.id} id={`cc-${opt.id}`} />
+              <Label htmlFor={`cc-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
+            </div>
+          ))}
+          {NEUTRAL_OPTIONS_RADIO.map((opt) => (
+            <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-dashed border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
               <RadioGroupItem value={opt.id} id={`cc-${opt.id}`} />
               <Label htmlFor={`cc-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
             </div>
@@ -670,10 +964,17 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "samenwerking",
       topic: "Psychische gezondheid",
       tooltip: "Wat hoop je dat het gesprek oplevert rondom de samenwerking of het conflict?",
+      choiceField: "conflictUitkomst",
       render: (fd, update) => (
         <RadioGroup value={fd.conflictUitkomst} onValueChange={(v) => update({ conflictUitkomst: v })} className="space-y-2">
           {CONFLICT_UITKOMST.map((opt) => (
             <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+              <RadioGroupItem value={opt.id} id={`cu-${opt.id}`} />
+              <Label htmlFor={`cu-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
+            </div>
+          ))}
+          {NEUTRAL_OPTIONS_RADIO.map((opt) => (
+            <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-dashed border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
               <RadioGroupItem value={opt.id} id={`cu-${opt.id}`} />
               <Label htmlFor={`cu-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
             </div>
@@ -691,9 +992,11 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "prive",
       topic: "Sociale gezondheid",
       tooltip: "Hier kun je in grote lijnen aangeven welke privésituatie meespeelt, zonder details te hoeven delen.",
-      render: (fd, _, toggleMulti) => (
-        <CheckboxList options={PRIVE_WAAROVER} selected={fd.priveWaarover} onToggle={(v) => toggleMulti("priveWaarover", v)} />
-      ),
+      multiChoiceField: "priveWaarover",
+      render: (fd, _, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("priveWaarover")(v) : (v: string) => toggleMulti("priveWaarover", v)
+        return <CheckboxList options={PRIVE_WAAROVER} selected={fd.priveWaarover} onToggle={onToggle} showNotRelevant />
+      },
     },
     {
       id: "prive-delen",
@@ -702,11 +1005,18 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "prive",
       topic: "Sociale gezondheid",
       tooltip: "Je kiest zelf of je nu al iets kort wilt delen of liever wacht tot het gesprek.",
+      choiceField: "priveDelen",
       render: (fd, update) => (
         <>
           <RadioGroup value={fd.priveDelen} onValueChange={(v) => update({ priveDelen: v })} className="space-y-2">
             {[{ id: "ja", label: "Ja, kort" }, { id: "gesprek", label: "Liever tijdens het gesprek" }, { id: "niet", label: "Liever niet" }].map((opt) => (
               <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+                <RadioGroupItem value={opt.id} id={`pd-${opt.id}`} />
+                <Label htmlFor={`pd-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
+              </div>
+            ))}
+            {NEUTRAL_OPTIONS_RADIO.map((opt) => (
+              <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-dashed border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
                 <RadioGroupItem value={opt.id} id={`pd-${opt.id}`} />
                 <Label htmlFor={`pd-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
               </div>
@@ -726,31 +1036,36 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "prive",
       topic: "Sociale gezondheid",
       tooltip: "Dit gaat om praktische steun of ruimte die je vanuit werk kan helpen.",
-      render: (fd, _, toggleMulti) => (
-        <CheckboxList options={PRIVE_NODIG} selected={fd.priveNodig} onToggle={(v) => toggleMulti("priveNodig", v)} />
-      ),
+      multiChoiceField: "priveNodig",
+      render: (fd, _, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("priveNodig")(v) : (v: string) => toggleMulti("priveNodig", v)
+        return <CheckboxList options={PRIVE_NODIG} selected={fd.priveNodig} onToggle={onToggle} showNotRelevant />
+      },
     },
-    // Privé sub-questions
+    // Privé sub-questions (geen verplichte keuze)
     {
       id: "mantelzorg",
       group: "Verdieping",
+      required: false,
       title: "Mantelzorg - extra vragen",
       subtitle: "Omdat je mantelzorg hebt aangevinkt.",
       isVisible: (fd) => fd.hoofdoorzaak === "prive" && fd.priveWaarover.includes("Mantelzorg"),
       topic: "Sociale gezondheid",
       tooltip: "Hier kun je kort aangeven hoe mantelzorg jouw belasting beïnvloedt, zonder medische gegevens te delen.",
       render: (fd, update) => (
-        <div className="space-y-4">
+        <div>
           <div>
-            <Label className="mb-2 block text-sm">Voor wie zorg je?</Label>
+            <Label className={QUESTION_LABEL_CLASS}>Voor wie zorg je?</Label>
             <Input value={fd.mantelzorgVoor} onChange={(e) => update({ mantelzorgVoor: e.target.value })} placeholder="Bijv. ouder, partner, kind..." maxLength={100} />
           </div>
+          {QUESTION_DIVIDER}
           <div>
-            <Label className="mb-2 block text-sm">Hoe zwaar is dit?</Label>
+            <Label className={QUESTION_LABEL_CLASS}>Hoe zwaar is dit?</Label>
             <ScaleSlider value={fd.mantelzorgZwaar} onChange={(v) => update({ mantelzorgZwaar: v })} labelLeft="Licht" labelMid="Gemiddeld" labelRight="Zeer zwaar" />
           </div>
+          {QUESTION_DIVIDER}
           <div>
-            <Label className="mb-2 block text-sm">Wat knelt het meest?</Label>
+            <Label className={QUESTION_LABEL_CLASS}>Wat knelt het meest?</Label>
             <Input value={fd.mantelzorgKnelt} onChange={(e) => update({ mantelzorgKnelt: e.target.value })} placeholder="Bijv. combinatie met werk, emotioneel..." maxLength={200} />
           </div>
         </div>
@@ -759,19 +1074,21 @@ function buildScreens(): Screen[] {
     {
       id: "relatie",
       group: "Verdieping",
+      required: false,
       title: "Relatie / thuis - extra vragen",
       subtitle: "Omdat je relatie/thuissituatie hebt aangevinkt.",
       isVisible: (fd) => fd.hoofdoorzaak === "prive" && fd.priveWaarover.includes("Relatie / thuissituatie"),
       topic: "Sociale gezondheid",
       tooltip: "Hier kun je in je eigen woorden kort beschrijven wat er thuis speelt en waar je het meest last van hebt.",
       render: (fd, update) => (
-        <div className="space-y-4">
+        <div>
           <div>
-            <Label className="mb-2 block text-sm">Wat past het best?</Label>
+            <Label className={QUESTION_LABEL_CLASS}>Wat past het best?</Label>
             <Input value={fd.relatieWat} onChange={(e) => update({ relatieWat: e.target.value })} placeholder="Kort omschrijven..." maxLength={200} />
           </div>
+          {QUESTION_DIVIDER}
           <div>
-            <Label className="mb-2 block text-sm">Waar merk je dit vooral in?</Label>
+            <Label className={QUESTION_LABEL_CLASS}>Waar merk je dit vooral in?</Label>
             <Input value={fd.relatieMerkt} onChange={(e) => update({ relatieMerkt: e.target.value })} placeholder="Bijv. concentratie, slaap, stemming..." maxLength={200} />
           </div>
         </div>
@@ -780,19 +1097,21 @@ function buildScreens(): Screen[] {
     {
       id: "kinderen",
       group: "Verdieping",
+      required: false,
       title: "Kinderen / gezin - extra vragen",
       subtitle: "Omdat je kinderen/gezin hebt aangevinkt.",
       isVisible: (fd) => fd.hoofdoorzaak === "prive" && fd.priveWaarover.includes("Kinderen / gezin"),
       topic: "Sociale gezondheid",
       tooltip: "Hier gaat het om wat er in je gezin speelt dat invloed heeft op je energie en werk.",
       render: (fd, update) => (
-        <div className="space-y-4">
+        <div>
           <div>
-            <Label className="mb-2 block text-sm">Wat speelt vooral?</Label>
+            <Label className={QUESTION_LABEL_CLASS}>Wat speelt vooral?</Label>
             <Input value={fd.kinderenWat} onChange={(e) => update({ kinderenWat: e.target.value })} placeholder="Kort omschrijven..." maxLength={200} />
           </div>
+          {QUESTION_DIVIDER}
           <div>
-            <Label className="mb-2 block text-sm">Grootste knelpunt richting verzuim?</Label>
+            <Label className={QUESTION_LABEL_CLASS}>Grootste knelpunt richting verzuim?</Label>
             <Input value={fd.kinderenKnelpunt} onChange={(e) => update({ kinderenKnelpunt: e.target.value })} placeholder="Bijv. tijd, energie, stress..." maxLength={200} />
           </div>
         </div>
@@ -808,9 +1127,11 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "energie",
       topic: "Medische gezondheid",
       tooltip: "Kies wat je vooral merkt in je energie en lijf, zonder dat het om een diagnose gaat.",
-      render: (fd, _, toggleMulti) => (
-        <CheckboxList options={ENERGIE_MERKT} selected={fd.energieMerkt} onToggle={(v) => toggleMulti("energieMerkt", v)} />
-      ),
+      multiChoiceField: "energieMerkt",
+      render: (fd, _, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("energieMerkt")(v) : (v: string) => toggleMulti("energieMerkt", v)
+        return <CheckboxList options={ENERGIE_MERKT} selected={fd.energieMerkt} onToggle={onToggle} showNotRelevant />
+      },
     },
     {
       id: "energie-zorg",
@@ -820,13 +1141,18 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "energie",
       topic: "Psychische gezondheid",
       tooltip: "Dit gaat over jouw zorgen als de situatie niet verandert, zowel privé als op het werk.",
-      render: (fd, _, toggleMulti) => (
-        <CheckboxList
-          options={["Uitval / verzuim", "Relatie onder druk", "Niet meer kunnen functioneren", "Geen energie meer voor priv\u00e9", "Fouten op het werk"]}
-          selected={fd.energieZorg}
-          onToggle={(v) => toggleMulti("energieZorg", v)}
-        />
-      ),
+      multiChoiceField: "energieZorg",
+      render: (fd, _, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("energieZorg")(v) : (v: string) => toggleMulti("energieZorg", v)
+        return (
+          <CheckboxList
+            options={["Uitval / verzuim", "Relatie onder druk", "Niet meer kunnen functioneren", "Geen energie meer voor priv\u00e9", "Fouten op het werk"]}
+            selected={fd.energieZorg}
+            onToggle={onToggle}
+            showNotRelevant
+          />
+        )
+      },
     },
     {
       id: "energie-hulp",
@@ -835,6 +1161,7 @@ function buildScreens(): Screen[] {
       isVisible: (fd) => fd.hoofdoorzaak === "energie",
       topic: "Medische gezondheid",
       tooltip: "Hier kun je aangeven of je al ergens ondersteuning hebt gezocht, zonder inhoudelijke details.",
+      choiceField: "energieHulp",
       render: (fd, update) => (
         <RadioGroup value={fd.energieHulp} onValueChange={(v) => update({ energieHulp: v })} className="space-y-2">
           {[{ id: "ja", label: "Ja" }, { id: "nee", label: "Nee" }, { id: "liever-niet", label: "Liever niet zeggen" }].map((opt) => (
@@ -843,14 +1170,21 @@ function buildScreens(): Screen[] {
               <Label htmlFor={`eh-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
             </div>
           ))}
+          {NEUTRAL_OPTIONS_RADIO.map((opt) => (
+            <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-dashed border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+              <RadioGroupItem value={opt.id} id={`eh-${opt.id}`} />
+              <Label htmlFor={`eh-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
+            </div>
+          ))}
         </RadioGroup>
       ),
     },
 
-    // Route E: Combinatie
+    // Route E: Combinatie (slider + open text, geen verplichte keuze)
     {
       id: "combinatie-verdeling",
       group: "Verdieping",
+      required: false,
       title: "Hoe verdeelt de belasting zich?",
       subtitle: "Schuif de verdeling tussen werk en priv\u00e9.",
       isVisible: (fd) => fd.hoofdoorzaak === "combinatie",
@@ -869,6 +1203,7 @@ function buildScreens(): Screen[] {
     {
       id: "combinatie-verandering",
       group: "Verdieping",
+      required: false,
       title: "Wat zou een eerste kleine verandering zijn die direct lucht geeft?",
       isVisible: (fd) => fd.hoofdoorzaak === "combinatie",
       topic: "Psychische gezondheid",
@@ -878,10 +1213,11 @@ function buildScreens(): Screen[] {
       ),
     },
 
-    // Anders fallback
+    // Anders fallback (geen keuze vereist)
     {
       id: "anders-info",
       group: "Verdieping",
+      required: false,
       title: "Je hebt 'Anders' gekozen",
       isVisible: (fd) => fd.hoofdoorzaak === "anders",
       topic: "Psychische gezondheid",
@@ -903,10 +1239,12 @@ function buildScreens(): Screen[] {
       subtitle: "Meerdere opties mogelijk.",
       topic: "Sociale gezondheid",
       tooltip: "Dit gaat om wat jou kan helpen om uitval te voorkomen, vooral in afspraken en ondersteuning.",
+      multiChoiceField: "closingNodig",
       optionalNoteField: "closingToelichting",
-      render: (fd, _, toggleMulti) => (
-        <CheckboxList options={CLOSING_OPTIONS} selected={fd.closingNodig} onToggle={(v) => toggleMulti("closingNodig", v)} />
-      ),
+      render: (fd, _, toggleMulti, getMulti) => {
+        const onToggle = getMulti ? (v: string) => getMulti("closingNodig")(v) : (v: string) => toggleMulti("closingNodig", v)
+        return <CheckboxList options={CLOSING_OPTIONS} selected={fd.closingNodig} onToggle={onToggle} showNotRelevant />
+      },
     },
     {
       id: "closing-belangrijk",
@@ -928,6 +1266,7 @@ function buildScreens(): Screen[] {
     {
       id: "rand-wel",
       group: "Randvoorwaarden",
+      required: false,
       title: "Wat wil je absoluut wel bereiken met deze time-out?",
       topic: "Psychische gezondheid",
       tooltip: "Hier kun je beschrijven wat jij hoopt dat dit traject jou oplevert.",
@@ -941,6 +1280,7 @@ function buildScreens(): Screen[] {
     {
       id: "rand-niet",
       group: "Randvoorwaarden",
+      required: false,
       title: "Wat wil je absoluut niet dat dit gesprek wordt?",
       topic: "Sociale gezondheid",
       tooltip: "Hier kun je aangeven wat je liever niet wilt dat er gebeurt in of rond het gesprek.",
@@ -957,11 +1297,19 @@ function buildScreens(): Screen[] {
       title: "Mag er terugkoppeling richting je werkgever plaatsvinden?",
       topic: "Sociale gezondheid",
       tooltip: "Je bepaalt zelf wat er wel of niet naar je werkgever teruggekoppeld mag worden.",
+      choiceField: "terugkoppeling",
+      requiredCheckbox: "terugkoppelingAkkoord",
       render: (fd, update) => (
         <>
           <RadioGroup value={fd.terugkoppeling} onValueChange={(v) => update({ terugkoppeling: v })} className="space-y-2">
             {TERUGKOPPELING_OPTIONS.map((opt) => (
               <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
+                <RadioGroupItem value={opt.id} id={`tk-${opt.id}`} />
+                <Label htmlFor={`tk-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
+              </div>
+            ))}
+            {NEUTRAL_OPTIONS_RADIO.map((opt) => (
+              <div key={opt.id} className="flex items-center space-x-3 rounded-lg border border-dashed border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5">
                 <RadioGroupItem value={opt.id} id={`tk-${opt.id}`} />
                 <Label htmlFor={`tk-${opt.id}`} className="flex-1 cursor-pointer text-sm">{opt.label}</Label>
               </div>
@@ -1025,8 +1373,6 @@ function generateSummary(fd: FormData): string {
 
 // ── Main component ──
 
-const GROUP_LABELS = ["Situatie", "Verdieping", "Randvoorwaarden", "Samenvatting"]
-
 export default function TimeoutFormPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -1035,7 +1381,9 @@ export default function TimeoutFormPage() {
   const [summaryText, setSummaryText] = useState("")
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [stepError, setStepError] = useState<string | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
+  const stepErrorRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
     const { role, route } = getDemoContext()
@@ -1082,14 +1430,9 @@ export default function TimeoutFormPage() {
   const currentScreen = isSummaryStep ? null : visibleScreens[currentScreenIndex]
   const totalVisible = visibleScreens.length
 
-  // Overall progress including samenvatting
   const totalStepsWithSummary = totalVisible + 1
   const currentStepNumber = isSummaryStep ? totalVisible + 1 : currentScreenIndex + 1
   const overallPercent = Math.round((currentStepNumber / totalStepsWithSummary) * 100)
-
-  // Figure out which group we're in for progress bar
-  const currentGroup = currentScreen?.group || "Samenvatting"
-  const groupIndex = GROUP_LABELS.indexOf(isSummaryStep ? "Samenvatting" : currentGroup)
 
   const update = useCallback((partial: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...partial }))
@@ -1106,13 +1449,40 @@ export default function TimeoutFormPage() {
     })
   }, [])
 
+  /** Voor multi-choice: bij "not_relevant" alleen die waarde; bij andere waarde not_relevant uitzetten en toggle. */
+  const getMultiToggleWithNotRelevant = useCallback((field: keyof FormData) => (value: string, max?: number) => {
+    setFormData((prev) => {
+      const current = (prev[field] as string[]) ?? []
+      if (value === CHECKBOX_NOT_RELEVANT.value) {
+        return { ...prev, [field]: [CHECKBOX_NOT_RELEVANT.value] }
+      }
+      const withoutNotRelevant = current.filter((v) => v !== CHECKBOX_NOT_RELEVANT.value)
+      if (withoutNotRelevant.includes(value)) {
+        const next = withoutNotRelevant.filter((v) => v !== value)
+        return { ...prev, [field]: next }
+      }
+      if (max && withoutNotRelevant.length >= max) return prev
+      return { ...prev, [field]: [...withoutNotRelevant, value] }
+    })
+  }, [])
+
+  // Clear step error when user makes a valid choice
+  useEffect(() => {
+    if (currentScreen && isStepValid(currentScreen, formData)) setStepError(null)
+  }, [currentScreen?.id, formData])
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const handleNext = async () => {
     if (isSummaryStep) return
-
+    if (currentScreen && !isStepValid(currentScreen, formData)) {
+      setStepError("Kies één optie om door te gaan. Je kunt ook 'Weet ik niet' of 'Niet relevant' kiezen.")
+      setTimeout(() => stepErrorRef.current?.focus(), 100)
+      return
+    }
+    setStepError(null)
     const currentIndex = currentScreenIndex
 
     if (currentIndex < totalVisible - 1) {
@@ -1148,6 +1518,7 @@ export default function TimeoutFormPage() {
   }
 
   const handleBack = () => {
+    setStepError(null)
     if (isSummaryStep) {
       // Back from summary to last visible vraag
       const lastId = visibleScreens[visibleScreens.length - 1]?.id
@@ -1175,70 +1546,25 @@ export default function TimeoutFormPage() {
     setIsSubmitted(true)
   }
 
-  // Progress within current group
-  const screensInCurrentGroup = visibleScreens.filter(s => s.group === currentGroup)
-  const indexInGroup = screensInCurrentGroup.findIndex(s => s.id === currentScreen?.id)
-
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <NavHeader showBack backHref="/timeout/start/demo" />
 
       <main className="mx-auto w-full max-w-[900px] flex-1 px-4 py-8">
         <div className="mx-auto max-w-2xl">
-          {/* Top progress bar - groups */}
           {!isSubmitted && (
             <div className="mb-8">
-              {/* Overall progress based on actieve vragen + samenvatting */}
-              <div className="mb-4">
-                <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>
-                    Stap {currentStepNumber} van {totalStepsWithSummary}
-                  </span>
-                  <span>{overallPercent}% voltooid</span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+              <div className="flex items-center gap-3">
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
                   <div
-                    className="h-full rounded-full bg-primary transition-all"
+                    className="h-full rounded-full bg-primary transition-all duration-300"
                     style={{ width: `${overallPercent}%` }}
                   />
                 </div>
+                <span className="min-w-[2.5rem] text-right text-sm font-medium text-muted-foreground tabular-nums">
+                  {overallPercent}%
+                </span>
               </div>
-
-              <div className="mb-3 flex justify-between">
-                {GROUP_LABELS.map((label, i) => {
-                  const isActive = i === groupIndex
-                  const isDone = i < groupIndex
-                  return (
-                    <div key={label} className="flex flex-1 flex-col items-center gap-1">
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors ${isDone ? "bg-primary text-primary-foreground" : isActive ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
-                        {isDone ? <CheckCircle className="h-4 w-4" /> : i + 1}
-                      </div>
-                      <span className={`text-center text-xs ${isActive || isDone ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                        {label}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="flex gap-1">
-                {GROUP_LABELS.map((_, i) => (
-                  <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i <= groupIndex ? "bg-primary" : "bg-secondary"}`} />
-                ))}
-              </div>
-
-              {/* Sub-progress within group */}
-              {!isSummaryStep && screensInCurrentGroup.length > 1 && (
-                <div className="mt-3 flex items-center justify-center gap-2">
-                  <span className="text-xs text-muted-foreground">
-                    Vraag {indexInGroup + 1} van {screensInCurrentGroup.length}
-                  </span>
-                  <div className="flex gap-1">
-                    {screensInCurrentGroup.map((_, i) => (
-                      <div key={i} className={`h-1 w-4 rounded-full transition-colors ${i <= indexInGroup ? "bg-primary/60" : "bg-secondary"}`} />
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -1274,6 +1600,9 @@ export default function TimeoutFormPage() {
               ) : (
                 <>
                   <div className="mb-4 text-center">
+                    <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+                      Samenvatting
+                    </p>
                     <h2 className="mb-1 text-xl font-semibold text-foreground">Samenvatting voor het gesprek</h2>
                     <p className="text-sm text-muted-foreground">Lees rustig. Jij bepaalt of dit klopt.</p>
                   </div>
@@ -1323,38 +1652,31 @@ export default function TimeoutFormPage() {
                 <CardContent className="p-6">
                   {currentScreen && (
                     <>
-                      <div className="mb-4 flex items-start justify-between gap-3">
-                        <div>
-                          <h2 className="mb-1 text-xl font-semibold text-foreground">{currentScreen.title}</h2>
-                          {currentScreen.subtitle && (
-                            <p className="text-sm text-muted-foreground">{currentScreen.subtitle}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
-                            {currentScreen.topic}
-                          </span>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background text-muted-foreground hover:bg-muted"
-                                aria-label="Uitleg bij deze vraag"
-                              >
-                                <Info className="h-3.5 w-3.5" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent side="left">
-                              <p>{currentScreen.tooltip}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
+                      <div className="mb-4">
+                        <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+                          {currentScreen.group === "Randvoorwaarden" ? "Voorwaarden" : currentScreen.group}
+                        </p>
+                        <h2 className="mb-1 text-xl font-semibold text-foreground">{currentScreen.title}</h2>
+                        {currentScreen.subtitle && (
+                          <p className="text-sm text-muted-foreground">{currentScreen.subtitle}</p>
+                        )}
                       </div>
                       <div className="mt-4 space-y-6">
-                        {currentScreen.render(formData, update, toggleMulti)}
+                        {currentScreen.render(formData, update, toggleMulti, getMultiToggleWithNotRelevant)}
+                        {stepError && (
+                          <p
+                            ref={stepErrorRef}
+                            role="alert"
+                            aria-live="polite"
+                            className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                            tabIndex={-1}
+                          >
+                            {stepError}
+                          </p>
+                        )}
                         {currentScreen.optionalNoteField && (
                           <div className="pt-2">
-                            <Label className="mb-1 block text-sm">
+                            <Label className={QUESTION_LABEL_CLASS + " mb-1"}>
                               Wil je dit kort toelichten? (optioneel)
                             </Label>
                             <Textarea
@@ -1385,7 +1707,11 @@ export default function TimeoutFormPage() {
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Vorige
                 </Button>
-                <Button onClick={handleNext} className="rounded-xl">
+                <Button
+                  onClick={handleNext}
+                  disabled={currentScreen ? !isStepValid(currentScreen, formData) : false}
+                  className="rounded-xl"
+                >
                   {currentScreenIndex === totalVisible - 1 ? (
                     <>
                       <Sparkles className="mr-2 h-4 w-4" />

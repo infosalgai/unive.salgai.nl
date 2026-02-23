@@ -8,14 +8,14 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { AppFooter } from "@/components/app-footer"
-import { User, Users, Building2, ArrowRight } from "lucide-react"
+import { User, Users, Building2, UserCog, ArrowRight } from "lucide-react"
 import { setDemoContext, type DemoRole } from "@/lib/demo-data"
 
 const ROLES: { value: DemoRole; label: string; description: string; icon: React.ElementType }[] = [
   {
     value: "medewerker",
     label: "Als medewerker",
-    description: "Vraag een navigatiegesprek aan en behoud de regie over je eigen gegevens.",
+    description: "Vraag een navigatiegesprek of time-out aan en behoud de regie over je eigen gegevens.",
     icon: User,
   },
   {
@@ -26,9 +26,15 @@ const ROLES: { value: DemoRole; label: string; description: string; icon: React.
   },
   {
     value: "hr",
-    label: "Als HR/Leidinggevende",
-    description: "Bekijk geanonimiseerde statistieken over het gebruik van navigatiegesprekken.",
+    label: "Als HR",
+    description: "Bekijk geanonimiseerde rapportages en trends. Geen medische details of vrije tekst van medewerkers.",
     icon: Building2,
+  },
+  {
+    value: "manager",
+    label: "Als leidinggevende",
+    description: "Zie alleen status en voortgang van je team op procesniveau. Geen inhoudelijke of gevoelige antwoorden.",
+    icon: UserCog,
   },
 ]
 
@@ -66,9 +72,6 @@ export default function DemoRoleSelectionPage() {
               <h1 className="mb-2 text-xl font-semibold text-foreground">
               Als wie wil je de demo bekijken?
             </h1>
-            <p className="mb-2 text-sm font-medium text-foreground">
-              Onderdeel van de Mensgericht Casemanagement Toolkit van Verzuimdynamiek & Salgai
-            </p>
             <p className="text-sm text-muted-foreground">
               Kies een rol om de bijbehorende weergave te zien.
             </p>
