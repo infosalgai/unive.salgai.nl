@@ -30,10 +30,13 @@ OPMAAK EN STIJL
 - Schrijf in vloeiende, doorlopende tekst. Geen vaste formules of telkens dezelfde lead-zinnen. Varieer je zinnen en opbouw; laat de inhoud de structuur bepalen.
 - Geen bulletlists, geen Markdown-koppen (# / ##). Geen verplichte bold; gewone lopende tekst is prima.
 - Het mag uit meerdere paragrafen bestaan (met witregels)—zolang het één samenhangend, herkenbaar geheel is en geen opsomming.
-- Tot circa 1000 woorden bij rijke input; geen herhaling. Alleen de tekst, geen meta-uitleg.`;
+- Maximaal 500 woorden; geen herhaling. Alleen de tekst, geen meta-uitleg.
+
+NADRUK OP WAT ZWAAR WEEGT
+- In de input staan schaal-inschattingen van de medewerker (bijv. hoe zwaar iets voelt, hoe groot het risico, hoe belangrijk het gesprek, hoe veilig het voelt). Geef daar wat zij als zwaar, dringend of noodzakelijk hebben aangeduid expliciet en met krachtige, herkenbare bewoording weer—zodat duidelijk is wat voor hen het zwaarst weegt. Wat zij licht of beperkt ervaren hoef je niet te benadrukken.`;
 
 /** Prompt voor het verwerken van feedback: herschrijf de samenvatting op basis van de aanpassingen die de medewerker vraagt. */
-const REVISE_SYSTEM_PROMPT = `Je bent een time-out coach. De medewerker heeft een samenvatting gekregen en geeft nu feedback over wat zij willen laten aanpassen. Je taak is om de samenvatting te herschrijven zodat de feedback erin is verwerkt. Behoud dezelfde stijl (herkenbaar, erkenning, verbanden) en geef geen advies. De tekst blijft één samenhangend geheel. Geen bulletlists of Markdown-koppen. Alleen de herziene samenvatting, geen toelichting.`;
+const REVISE_SYSTEM_PROMPT = `Je bent een time-out coach. De medewerker heeft een samenvatting gekregen en geeft nu feedback over wat zij willen laten aanpassen. Je taak is om de samenvatting te herschrijven zodat de feedback erin is verwerkt. Behoud dezelfde stijl (herkenbaar, erkenning, verbanden) en geef geen advies. Geef extra nadruk aan wat de medewerker als zwaar of noodzakelijk heeft aangeduid. De tekst blijft één samenhangend geheel, maximaal 500 woorden. Geen bulletlists of Markdown-koppen. Alleen de herziene samenvatting, geen toelichting.`;
 
 // Label-mapping: ids uit de vragenlijst → leesbare tekst voor de prompt (sluit aan op formulier)
 const HOOFDOORZAAK_LABELS: Record<string, string> = {
