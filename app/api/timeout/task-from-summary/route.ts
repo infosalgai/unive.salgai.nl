@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { randomUUID } from "crypto"
 import { generateTaskFromSummary } from "@/lib/task/generateTaskFromSummary"
 
 export const runtime = "nodejs"
@@ -29,8 +30,10 @@ export async function POST(req: Request) {
       )
     }
 
+    const submission_id = randomUUID()
+
     return NextResponse.json(
-      { task: result.task, ok: true },
+      { task: result.task, submission_id, ok: true },
       { headers: CACHE_HEADERS }
     )
   } catch {

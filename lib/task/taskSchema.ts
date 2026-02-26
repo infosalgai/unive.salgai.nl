@@ -39,6 +39,7 @@ const riskFlagsSchema = z.object({
 })
 
 export const taskFromSummarySchema = z.object({
+  summary_public: z.string().max(500).optional(), // Opdracht in het kort; dataminimal, veilig om te tonen
   recommended_expert: recommendedExpertSchema,
   conversation_points: z
     .array(conversationPointSchema)

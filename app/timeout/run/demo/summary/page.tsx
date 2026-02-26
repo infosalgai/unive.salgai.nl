@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -14,10 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { NavHeader } from "@/components/nav-header"
-import { Shield, Send, Edit, CheckCircle, Loader2, User, MessageSquare } from "lucide-react"
+import { Shield, Send, Edit, Loader2 } from "lucide-react"
 import { getDemoContext } from "@/lib/demo-data"
-import type { TaskFromSummary } from "@/lib/task/taskSchema"
-import { EXPERT_TYPE_LABELS } from "@/lib/task/taskSchema"
 import { useToast } from "@/hooks/use-toast"
 
 // Mock narrative based on form data
@@ -179,42 +176,24 @@ interface FormDataType {
   contactWerkgever: string
 }
 
-const TASK_STORAGE_KEY = "timeoutTask"
+const STORAGE_KEYS = {
+  task: "timeoutTask",
+  confirmedSummary: "timeoutConfirmedSummary",
+  submissionId: "timeoutSubmissionId",
+}
 
 export default function TimeoutSummaryPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitted, setIsSubmitted] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [narrative, setNarrative] = useState("")
-  const [task, setTask] = useState<TaskFromSummary | null>(null)
   const [taskLoading, setTaskLoading] = useState(false)
 
   useEffect(() => {
     const { role, route } = getDemoContext()
     if (!role || route !== "timeout") {
       router.push("/demo")
-      return
-    }
-
-    // Check if already submitted
-    const submitted = sessionStorage.getItem("timeoutSubmitted")
-    if (submitted === "true") {
-      setIsSubmitted(true)
-      const savedNarrative = sessionStorage.getItem("timeoutNarrative")
-      if (savedNarrative) {
-        setNarrative(savedNarrative)
-      }
-      const savedTask = sessionStorage.getItem(TASK_STORAGE_KEY)
-      if (savedTask) {
-        try {
-          setTask(JSON.parse(savedTask) as TaskFromSummary)
-        } catch {
-          /* ignore */
-        }
-      }
-      setIsLoading(false)
       return
     }
 
@@ -267,11 +246,11 @@ export default function TimeoutSummaryPage() {
         })
         return
       }
-      setTask(data.task)
-      sessionStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(data.task))
+      sessionStorage.setItem(STORAGE_KEYS.task, JSON.stringify(data.task))
+      sessionStorage.setItem(STORAGE_KEYS.confirmedSummary, narrative)
+      sessionStorage.setItem(STORAGE_KEYS.submissionId, data.submission_id)
       setShowConfirmModal(false)
-      sessionStorage.setItem("timeoutSubmitted", "true")
-      setIsSubmitted(true)
+      router.push("/timeout/run/demo/coach-task")
     } catch {
       toast({
         variant: "destructive",
@@ -281,13 +260,6 @@ export default function TimeoutSummaryPage() {
     } finally {
       setTaskLoading(false)
     }
-  }
-
-  const handleSendToCoach = () => {
-    toast({
-      title: "Verzonden",
-      description: "De opdracht is naar de Time-out coach gestuurd.",
-    })
   }
 
   const handleEdit = () => {
@@ -325,19 +297,17 @@ export default function TimeoutSummaryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavHeader showBack={!isSubmitted} backHref="/timeout/run/demo/form" />
+      <NavHeader showBack backHref="/timeout/run/demo/form" />
 
       <main className="mx-auto max-w-[900px] px-4 py-8">
         <div className="mx-auto max-w-2xl">
           {/* Header */}
           <div className="mb-6 text-center">
             <h1 className="mb-2 text-2xl font-semibold text-primary">
-              {isSubmitted ? "Samenvatting verstuurd" : "Jouw samenvatting"}
+              Jouw samenvatting
             </h1>
             <p className="text-muted-foreground">
-              {isSubmitted
-                ? "Je samenvatting is naar je time-out coach gestuurd."
-                : "Lees rustig. Jij bepaalt of dit klopt."}
+              Lees rustig. Jij bepaalt of dit klopt.
             </p>
           </div>
 
@@ -350,18 +320,6 @@ export default function TimeoutSummaryPage() {
               </span>
             </div>
           </div>
-
-          {/* Success state timestamp */}
-          {isSubmitted && (
-            <div className="mb-6 flex justify-center">
-              <div className="flex items-center gap-2 rounded-xl bg-green-500/10 px-4 py-3">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="text-sm font-medium text-green-700">
-                  Verstuurd op 12 jan 2026 om 10:30
-                </span>
-              </div>
-            </div>
-          )}
 
           {/* Narrative card */}
           <Card className="mb-6 rounded-2xl">
@@ -376,118 +334,21 @@ export default function TimeoutSummaryPage() {
             </CardContent>
           </Card>
 
-          {/* Task preview (after submit) */}
-          {isSubmitted && task && (
-            <div className="mb-6 space-y-4">
-              <Card className="rounded-2xl">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <User className="h-5 w-5" />
-                    Aanbevolen expert
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="mb-1 text-sm font-medium text-muted-foreground">
-                      Primair
-                    </p>
-                    <p className="font-medium">
-                      {EXPERT_TYPE_LABELS[task.recommended_expert.primary.type] ??
-                        task.recommended_expert.primary.type}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {task.recommended_expert.primary.motivation}
-                    </p>
-                  </div>
-                  {task.recommended_expert.alternatives.length > 0 && (
-                    <div>
-                      <p className="mb-1 text-sm font-medium text-muted-foreground">
-                        Alternatieven
-                      </p>
-                      <ul className="space-y-2">
-                        {task.recommended_expert.alternatives.map((alt, i) => (
-                          <li key={i}>
-                            <span className="font-medium">
-                              {EXPERT_TYPE_LABELS[alt.type] ?? alt.type}
-                            </span>
-                            <span className="ml-2 text-sm text-muted-foreground">
-                              — {alt.motivation}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <MessageSquare className="h-5 w-5" />
-                    Gesprekspunten voor Time-Out gesprek
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-4">
-                    {task.conversation_points.map((cp, i) => (
-                      <li key={i} className="rounded-lg border p-4">
-                        <p className="mb-1 font-medium text-foreground">
-                          {cp.topic}
-                        </p>
-                        <p className="mb-2 text-sm text-muted-foreground">
-                          Doel: {cp.goal}
-                        </p>
-                        <p className="text-sm italic">
-                          Vraag voor coach: {cp.coach_prompt_question}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <div className="flex justify-center">
-                <Button
-                  onClick={handleSendToCoach}
-                  className="rounded-xl"
-                  size="lg"
-                >
-                  <Send className="mr-2 h-4 w-4" />
-                  Versturen naar Time-out coach
-                </Button>
-              </div>
-            </div>
-          )}
-
           {/* Action buttons */}
-          {!isSubmitted && (
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Button
-                variant="outline"
-                onClick={handleEdit}
-                className="rounded-xl bg-transparent"
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                Niet akkoord: aanpassen
-              </Button>
-              <Button onClick={handleApprove} className="rounded-xl">
-                <Send className="mr-2 h-4 w-4" />
-                Akkoord: stuur naar mijn time-out coach
-              </Button>
-            </div>
-          )}
-
-          {/* Post-submit actions */}
-          {isSubmitted && (
-            <div className="flex justify-center">
-              <Button variant="outline" asChild className="rounded-xl bg-transparent">
-                <Link href="/dashboard/employee?flow=timeout">
-                  Terug naar dashboard
-                </Link>
-              </Button>
-            </div>
-          )}
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button
+              variant="outline"
+              onClick={handleEdit}
+              className="rounded-xl bg-transparent"
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Niet akkoord: aanpassen
+            </Button>
+            <Button onClick={handleApprove} className="rounded-xl">
+              <Send className="mr-2 h-4 w-4" />
+              Ja, dit klopt, delen met time-out coach
+            </Button>
+          </div>
         </div>
       </main>
 
