@@ -1,14 +1,22 @@
 import React from "react";
 import type { Metadata, Viewport } from "next";
-import { Nunito_Sans } from "next/font/google";
+import { Open_Sans, Bree_Serif } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { AccessGuard } from "@/components/access-guard";
 import "./globals.css";
 
-const nunitoSans = Nunito_Sans({
+const openSans = Open_Sans({
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["400", "600", "700"],
   display: "swap",
+  variable: "--font-open-sans",
+});
+
+const breeSerif = Bree_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+  variable: "--font-bree-serif",
 });
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://unive.salgai.nl";
@@ -62,8 +70,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="nl" className={nunitoSans.className}>
-      <body className="antialiased">
+    <html lang="nl" className={`${openSans.variable} ${breeSerif.variable}`}>
+      <body className={`${openSans.className} antialiased`}>
         <AccessGuard>
           {children}
           <Toaster />

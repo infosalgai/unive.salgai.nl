@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { setAccessGranted } from "@/components/access-guard";
+import { UniveLogo } from "@/components/unive-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,11 +30,8 @@ export default function GatePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-primary">Univé</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Vragenlijst Melkveehouders
-          </p>
+        <div className="flex flex-col items-center text-center">
+          <UniveLogo height={48} className="mb-2" />
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

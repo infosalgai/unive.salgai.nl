@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { UniveLogo } from "@/components/unive-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Sparkles } from "lucide-react";
@@ -90,9 +91,7 @@ export default function ReviewPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="mx-auto flex h-14 max-w-[900px] items-center justify-between px-4">
-          <Link href="/intro" className="text-sm font-medium text-primary">
-            Univé · Vragenlijst
-          </Link>
+          <UniveLogo height={36} href="/intro" />
           <Link
             href="/vragenlijst?stap=q22-q23"
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"

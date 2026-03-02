@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { UniveLogo } from "@/components/unive-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   type UniveFormData,
   UNIVE_INITIAL_FORM_DATA,
@@ -130,9 +131,7 @@ export default function VragenlijstPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="mx-auto flex h-14 max-w-[900px] items-center justify-between px-4">
-          <Link href="/intro" className="text-sm font-medium text-primary">
-            Univé · Vragenlijst
-          </Link>
+          <UniveLogo height={36} href="/intro" />
           <Link
             href="/intro"
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"

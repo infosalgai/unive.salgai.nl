@@ -83,7 +83,7 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q_opmerkingen: "",
 }
 
-const TOTAL_QUESTIONS = 23
+const TOTAL_QUESTIONS = 22
 
 export { TOTAL_QUESTIONS as UNIVE_TOTAL_QUESTIONS }
 

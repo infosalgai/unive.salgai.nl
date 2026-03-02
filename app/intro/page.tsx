@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { UniveLogo } from "@/components/unive-logo";
 import { Button } from "@/components/ui/button";
 import { Shield, UserX, Clock } from "lucide-react";
 
@@ -9,8 +10,7 @@ export default function IntroPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border bg-card px-4 py-4">
         <div className="mx-auto max-w-[900px]">
-          <h1 className="text-xl font-bold text-primary">Univé</h1>
-          <p className="text-sm text-muted-foreground">Vragenlijst Melkveehouders</p>
+          <UniveLogo height={44} />
         </div>
       </header>
 
