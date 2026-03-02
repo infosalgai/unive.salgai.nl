@@ -1,5 +1,10 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import {
+  isUniveFormData,
+  buildUniveSummaryInput,
+  type UniveFormData,
+} from "@/lib/unive-questionnaire";
 
 export const runtime = "nodejs";
 
@@ -37,6 +42,15 @@ NADRUK OP WAT ZWAAR WEEGT
 
 /** Prompt voor het verwerken van feedback: herschrijf de samenvatting op basis van de aanpassingen die de medewerker vraagt. */
 const REVISE_SYSTEM_PROMPT = `Je bent een time-out coach. De medewerker heeft een samenvatting gekregen en geeft nu feedback over wat zij willen laten aanpassen. Je taak is om de samenvatting te herschrijven zodat de feedback erin is verwerkt. Behoud dezelfde stijl (herkenbaar, erkenning, verbanden) en geef geen advies. Geef extra nadruk aan wat de medewerker als zwaar of noodzakelijk heeft aangeduid. De tekst blijft één samenhangend geheel, maximaal 500 woorden. Geen bulletlists of Markdown-koppen. Alleen de herziene samenvatting, geen toelichting.`;
+
+/** Univé Vragenlijst Melkveehouders: samenvatting op basis van de ingevulde vragenlijst (geen PII). */
+const UNIVE_SYSTEM_PROMPT = `Je bent een ervaren adviseur voor de agrarische sector. Je hebt de ingevulde vragenlijst van een melkveehouder ontvangen en schrijft nu een korte, herkenbare samenvatting van hun situatie en perspectief. Het doel is één doorlopend stuk waarin de deelnemer zich herkent: "dit is mijn verhaal."
+
+REGELS
+- Gebruik uitsluitend de informatie uit de input. Geen namen, bedrijfsnamen, locaties of herleidbare gegevens.
+- Schrijf in vloeiende, doorlopende tekst. Geen bulletlists of Markdown-koppen. Geen cijfers of schalen letterlijk noemen (1–7 vertaal naar mensentaal).
+- Leg verbanden tussen wat zij noemen: bedrijfsfase, zorgen, aanpassingen, verdienmodel, ondersteuning. Minimaal drie van zulke verbanden.
+- Respectvol en niet-veroordelend. Maximaal 500 woorden. Alleen de samenvatting, geen advies of aanbevelingen.`;
 
 // Label-mapping: ids uit de vragenlijst → leesbare tekst voor de prompt (sluit aan op formulier)
 const HOOFDOORZAAK_LABELS: Record<string, string> = {
@@ -261,14 +275,18 @@ export async function POST(req: Request) {
       return Response.json({ summary });
     }
 
-    const userPrompt = buildUserPrompt(formData);
+    const isUnive = isUniveFormData(formData);
+    const userPrompt = isUnive
+      ? buildUniveSummaryInput(formData as UniveFormData)
+      : buildUserPrompt(formData);
+    const systemPrompt = isUnive ? UNIVE_SYSTEM_PROMPT : SYSTEM_PROMPT;
 
     const resp = await client.responses.create({
       model: "gpt-5.2",
       reasoning: { effort: "high" },
       max_output_tokens: 1800,
       input: [
-        { role: "developer", content: SYSTEM_PROMPT },
+        { role: "developer", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
     });

@@ -1,54 +1,51 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const DEMO_ROLE_COOKIE = "demoRole"
-const DEMO_ACCESS_COOKIE = "demo_access"
+/** Redirect old/demo routes to the new single-purpose app gate. */
+const REDIRECT_TO_GATE = [
+  "/demo",
+  "/dashboard",
+  "/dashboard/employee",
+  "/dashboard/coach",
+  "/dashboard/hr",
+  "/dashboard/leidinggevende",
+  "/timeout/start/demo",
+  "/run/demo",
+  "/coach/demo",
+  "/hr/demo",
+];
 
-/** Dashboard path -> required demo role value in cookie */
-const DASHBOARD_ROLE: Record<string, string> = {
-  "/dashboard/hr": "hr",
-  "/dashboard/leidinggevende": "manager",
-  "/dashboard/employee": "medewerker",
-  "/dashboard/coach": "coach",
+function pathMatches(path: string): boolean {
+  if (REDIRECT_TO_GATE.includes(path)) return true;
+  if (path.startsWith("/demo/") || path.startsWith("/dashboard/") || path.startsWith("/timeout/run/demo") || path.startsWith("/run/demo/") || path.startsWith("/coach/demo/") || path.startsWith("/hr/demo/")) return true;
+  return false;
 }
 
 export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname
-
-  // Demo access gate: /demo and subroutes require demo_access cookie, except /demo/access
-  if (path === "/demo" || path.startsWith("/demo/")) {
-    if (path === "/demo/access" || path.startsWith("/demo/access/")) {
-      return NextResponse.next()
-    }
-    const hasAccess = request.cookies.get(DEMO_ACCESS_COOKIE)?.value
-    if (!hasAccess) {
-      const url = request.nextUrl.clone()
-      url.pathname = "/demo/access"
-      url.searchParams.set("next", path)
-      return NextResponse.redirect(url)
-    }
-    return NextResponse.next()
+  const path = request.nextUrl.pathname;
+  if (pathMatches(path)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    url.searchParams.delete("next");
+    return NextResponse.redirect(url);
   }
-
-  const requiredRole = DASHBOARD_ROLE[path]
-  if (!requiredRole) return NextResponse.next()
-
-  const role = request.cookies.get(DEMO_ROLE_COOKIE)?.value
-  if (!role || role !== requiredRole) {
-    const url = request.nextUrl.clone()
-    url.pathname = "/demo"
-    return NextResponse.redirect(url)
-  }
-  return NextResponse.next()
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/dashboard/hr",
-    "/dashboard/leidinggevende",
-    "/dashboard/employee",
-    "/dashboard/coach",
     "/demo",
     "/demo/:path*",
+    "/dashboard",
+    "/dashboard/:path*",
+    "/timeout/start/demo",
+    "/timeout/run/demo",
+    "/timeout/run/demo/:path*",
+    "/run/demo",
+    "/run/demo/:path*",
+    "/coach/demo",
+    "/coach/demo/:path*",
+    "/hr/demo",
+    "/hr/demo/:path*",
   ],
-}
+};

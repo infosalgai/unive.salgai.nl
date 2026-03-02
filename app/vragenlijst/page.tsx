@@ -1,0 +1,216 @@
+"use client";
+
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  type UniveFormData,
+  UNIVE_INITIAL_FORM_DATA,
+} from "@/lib/unive-questionnaire";
+import {
+  buildUniveScreens,
+  isUniveStepValid,
+  UNIVE_TOTAL_QUESTIONS,
+} from "@/lib/unive-screens";
+
+const FORM_STORAGE_KEY = "univeFormV2";
+const QUESTION_LABEL_CLASS = "mb-2 block text-base font-semibold text-foreground";
+
+export default function VragenlijstPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+  const [formData, setFormData] = useState<UniveFormData>(UNIVE_INITIAL_FORM_DATA);
+  const [stepError, setStepError] = useState<string | null>(null);
+  const [currentStepPiiBlocked, setCurrentStepPiiBlocked] = useState(false);
+  const stepErrorRef = useRef<HTMLParagraphElement>(null);
+  const lastMilestoneRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(FORM_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as UniveFormData;
+        setFormData((prev) => ({ ...prev, ...parsed }));
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(formData));
+  }, [formData]);
+
+  const allScreens = useMemo(() => buildUniveScreens(), []);
+  const stepFromUrl = searchParams.get("stap") || allScreens[0]?.id;
+  const currentScreenIndex = Math.max(
+    0,
+    allScreens.findIndex((s) => s.id === stepFromUrl) === -1
+      ? 0
+      : allScreens.findIndex((s) => s.id === stepFromUrl)
+  );
+  const currentScreen = allScreens[currentScreenIndex];
+  const overallPercent = Math.round(((currentScreenIndex + 1) / UNIVE_TOTAL_QUESTIONS) * 100);
+
+  // Milestone toasts at 25%, 50%, 75%
+  useEffect(() => {
+    if (overallPercent >= 25 && lastMilestoneRef.current < 25) {
+      lastMilestoneRef.current = 25;
+      toast({ title: "25% voltooid", description: "Goed bezig!", duration: 3000 });
+    } else if (overallPercent >= 50 && lastMilestoneRef.current < 50) {
+      lastMilestoneRef.current = 50;
+      toast({ title: "Halverwege", description: "Nog even volhouden.", duration: 3000 });
+    } else if (overallPercent >= 75 && lastMilestoneRef.current < 75) {
+      lastMilestoneRef.current = 75;
+      toast({ title: "Bijna klaar", description: "Laatste vragen komen eraan.", duration: 3000 });
+    }
+  }, [overallPercent, toast]);
+
+  const update = useCallback((partial: Partial<UniveFormData>) => {
+    setFormData((prev) => ({ ...prev, ...partial }));
+  }, []);
+
+  const toggleMulti = useCallback((field: keyof UniveFormData, value: string, max?: number) => {
+    setFormData((prev) => {
+      const current = (prev[field] as string[]) ?? [];
+      if (current.includes(value)) {
+        return { ...prev, [field]: current.filter((v) => v !== value) };
+      }
+      if (max && current.length >= max) return prev;
+      return { ...prev, [field]: [...current, value] };
+    });
+  }, []);
+
+  useEffect(() => {
+    setCurrentStepPiiBlocked(false);
+  }, [stepFromUrl, currentScreenIndex]);
+
+  useEffect(() => {
+    if (currentScreen && isUniveStepValid(currentScreen, formData, currentStepPiiBlocked)) setStepError(null);
+  }, [currentScreen?.id, formData, currentStepPiiBlocked]);
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const handleNext = () => {
+    if (currentScreen && !isUniveStepValid(currentScreen, formData, currentStepPiiBlocked)) {
+      setStepError("Vul een geldig antwoord in om door te gaan. Vermijd namen of herleidbare gegevens in open velden.");
+      setTimeout(() => stepErrorRef.current?.focus(), 100);
+      return;
+    }
+    setStepError(null);
+
+    if (currentScreenIndex < allScreens.length - 1) {
+      const nextId = allScreens[currentScreenIndex + 1].id;
+      router.push(`/vragenlijst?stap=${nextId}`);
+      scrollToTop();
+    } else {
+      router.push("/vragenlijst/review");
+      scrollToTop();
+    }
+  };
+
+  const handleBack = () => {
+    setStepError(null);
+    if (currentScreenIndex > 0) {
+      const prevId = allScreens[currentScreenIndex - 1].id;
+      router.push(`/vragenlijst?stap=${prevId}`);
+      scrollToTop();
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="sticky top-0 z-50 border-b border-border bg-card">
+        <div className="mx-auto flex h-14 max-w-[900px] items-center justify-between px-4">
+          <Link href="/intro" className="text-sm font-medium text-primary">
+            Univé · Vragenlijst
+          </Link>
+          <Link
+            href="/intro"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Terug
+          </Link>
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-[900px] flex-1 px-4 py-8">
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-8">
+            <div className="flex items-center gap-3">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-300"
+                  style={{ width: `${overallPercent}%` }}
+                />
+              </div>
+              <span className="min-w-[6rem] text-right text-sm font-medium text-muted-foreground tabular-nums">
+                Vraag {currentScreenIndex + 1}/{UNIVE_TOTAL_QUESTIONS} ({overallPercent}%)
+              </span>
+            </div>
+          </div>
+
+          <Card ref={undefined} className="rounded-2xl">
+            <CardContent className="p-6">
+              {currentScreen && (
+                <>
+                  <div className="mb-4">
+                    <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+                      {currentScreen.group}
+                    </p>
+                    <h2 className="mb-1 text-xl font-semibold text-foreground">{currentScreen.title}</h2>
+                    {currentScreen.subtitle && (
+                      <p className="text-sm text-muted-foreground">{currentScreen.subtitle}</p>
+                    )}
+                  </div>
+                  <div className="mt-4 space-y-6">
+                    {currentScreen.render(formData, update, toggleMulti, setCurrentStepPiiBlocked)}
+                    {stepError && (
+                      <p
+                        ref={stepErrorRef}
+                        role="alert"
+                        className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                        tabIndex={-1}
+                      >
+                        {stepError}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="mt-6 flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentScreenIndex === 0}
+              className="rounded-xl"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Vorige
+            </Button>
+            <Button
+              onClick={handleNext}
+              disabled={currentScreen ? !isUniveStepValid(currentScreen, formData, currentStepPiiBlocked) : false}
+              className="rounded-xl"
+            >
+              {currentScreenIndex === allScreens.length - 1 ? "Naar overzicht" : "Volgende"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

@@ -4,47 +4,32 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* verzuimdynamiek.nl aligned colors */
-  --background: #F4F5F0;
-  --foreground: #1F2937;
+  /* Univé: fresh green primary, red accent for errors */
+  --background: #FAFBF9;
+  --foreground: #1A1A1A;
   --card: #FFFFFF;
-  --card-foreground: #1F2937;
+  --card-foreground: #1A1A1A;
   --popover: #FFFFFF;
-  --popover-foreground: #1F2937;
-  --primary: #2D3182;
+  --popover-foreground: #1A1A1A;
+  --primary: #00A651;
   --primary-foreground: #FFFFFF;
-  --secondary: #F1F5F9;
-  --secondary-foreground: #1F2937;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
-  --accent: #F7A521;
+  --secondary: #E8F5E9;
+  --secondary-foreground: #1A1A1A;
+  --muted: #F1F5F1;
+  --muted-foreground: #5F6B62;
+  --accent: #E85D4C;
   --accent-foreground: #FFFFFF;
-  --destructive: #DC2626;
+  --destructive: #E85D4C;
   --destructive-foreground: #FFFFFF;
-  --border: #E5E7EB;
-  --input: #E5E7EB;
-  --ring: #2D3182;
-  --chart-1: #2D3182;
-  --chart-2: #F7A521;
-  --chart-3: #64748B;
-  --chart-4: #10B981;
-  --chart-5: #8B5CF6;
+  --border: #E0E8E1;
+  --input: #E0E8E1;
+  --ring: #00A651;
   --radius: 1rem;
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #1F2937;
-  --sidebar-primary: #2D3182;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F1F5F9;
-  --sidebar-accent-foreground: #1F2937;
-  --sidebar-border: #E5E7EB;
-  --sidebar-ring: #2D3182;
-  
-  /* Vitalr additional colors */
-  --primary-dark: #222870;
-  --accent-dark: #E09518;
-  --heading: #2D3182;
-  --body: #555555;
-  --subtle: #888888;
+  --chart-1: #00A651;
+  --chart-2: #E85D4C;
+  --chart-3: #5F6B62;
+  --chart-4: #2E7D32;
+  --chart-5: #81C784;
 }
 
 .dark {
