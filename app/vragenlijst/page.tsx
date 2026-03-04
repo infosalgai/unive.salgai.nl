@@ -199,9 +199,6 @@ export default function VragenlijstPage() {
               {currentScreen && (
                 <>
                   <div className="mb-4">
-                    <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
-                      {currentScreen.group}
-                    </p>
                     <h2 className="mb-1 text-xl font-semibold text-foreground">{currentScreen.title}</h2>
                     {currentScreen.subtitle && (
                       <p className="text-sm text-muted-foreground">{currentScreen.subtitle}</p>
