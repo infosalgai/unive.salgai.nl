@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import type { UniveFormData } from "@/lib/unive-questionnaire";
-import { UNIVE_INITIAL_FORM_DATA } from "@/lib/unive-questionnaire";
+import { UNIVE_INITIAL_FORM_DATA, normalizeFormData } from "@/lib/unive-questionnaire";
 
 const FORM_STORAGE_KEY = "univeFormV2";
 
@@ -110,13 +110,9 @@ export default function ReviewPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const stored = window.localStorage.getItem(FORM_STORAGE_KEY);
-    if (stored) {
-      try {
-        setFormData(JSON.parse(stored) as UniveFormData);
-      } catch {
-        setFormData(UNIVE_INITIAL_FORM_DATA);
-      }
-    } else {
+    try {
+      setFormData(stored ? normalizeFormData(JSON.parse(stored) as unknown) : UNIVE_INITIAL_FORM_DATA);
+    } catch {
       setFormData(UNIVE_INITIAL_FORM_DATA);
     }
   }, []);

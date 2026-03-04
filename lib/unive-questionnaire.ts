@@ -115,6 +115,45 @@ const TOTAL_QUESTIONS = 19
 
 export { TOTAL_QUESTIONS as UNIVE_TOTAL_QUESTIONS }
 
+/** Keys that must be string arrays (for localStorage/parsed JSON). */
+const ARRAY_KEYS: (keyof UniveFormData)[] = ["q4", "q4a", "q9", "q11", "q14", "q16"];
+
+/** Slider/scale fields 1–7. */
+const SCALE_KEYS: (keyof UniveFormData)[] = ["q5a", "q5b", "q5c", "q7", "q12", "q15a"];
+
+/**
+ * Normaliseert ruwe (bijv. uit localStorage) formulierdata naar geldig UniveFormData.
+ * Zorgt dat ontbrekende velden, verkeerde types of oude schema's geen crashes geven.
+ * Gebruik deze overal waar formData uit externe bron komt (localStorage, URL state).
+ */
+export function normalizeFormData(parsed: unknown): UniveFormData {
+  const raw = parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
+  const base = { ...UNIVE_INITIAL_FORM_DATA };
+
+  for (const key of Object.keys(base) as (keyof UniveFormData)[]) {
+    const v = raw[key];
+    if (ARRAY_KEYS.includes(key)) {
+      const arr = Array.isArray(v) ? v : [];
+      (base as Record<string, unknown>)[key] = arr.filter((item): item is string => typeof item === "string");
+      continue;
+    }
+    if (SCALE_KEYS.includes(key)) {
+      const n = typeof v === "number" && Number.isFinite(v) ? Math.min(7, Math.max(1, Math.round(v))) : (UNIVE_INITIAL_FORM_DATA[key] as number);
+      (base as Record<string, unknown>)[key] = n;
+      continue;
+    }
+    if (key === "q2_cows" || key === "q2_hectares") {
+      const n = typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.floor(v) : 0;
+      (base as Record<string, unknown>)[key] = n;
+      continue;
+    }
+    // Alle overige velden zijn string
+    (base as Record<string, unknown>)[key] = typeof v === "string" ? v : (UNIVE_INITIAL_FORM_DATA[key] as string);
+  }
+
+  return base as UniveFormData;
+}
+
 /** Check if formData is Univé questionnaire (has stable keys). */
 export function isUniveFormData(fd: unknown): fd is UniveFormData {
   if (!fd || typeof fd !== "object") return false;

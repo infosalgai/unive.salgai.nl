@@ -8,13 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { type UniveFormData, UNIVE_INITIAL_FORM_DATA } from "@/lib/unive-questionnaire";
-import { buildUniveScreens, isUniveStepValid } from "@/lib/unive-screens";
+import { type UniveFormData, UNIVE_INITIAL_FORM_DATA, normalizeFormData } from "@/lib/unive-questionnaire";
+import { buildUniveScreens, isUniveStepValid, isStepConditionallyHidden } from "@/lib/unive-screens";
 
 const FORM_STORAGE_KEY = "univeFormV2";
-const QUESTION_LABEL_CLASS = "mb-2 block text-base font-semibold text-foreground";
-
-const ARRAY_FIELDS: (keyof UniveFormData)[] = ["q4", "q4a", "q9", "q11", "q14", "q16"];
 
 export default function VragenlijstPage() {
   const router = useRouter();
@@ -29,14 +26,10 @@ export default function VragenlijstPage() {
     const stored = window.localStorage.getItem(FORM_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as UniveFormData;
-        const normalized = { ...parsed };
-        for (const key of ARRAY_FIELDS) {
-          if (!Array.isArray(normalized[key])) (normalized as Record<string, unknown>)[key] = [];
-        }
-        setFormData((prev) => ({ ...prev, ...normalized }));
+        const parsed = JSON.parse(stored) as unknown;
+        setFormData(normalizeFormData(parsed));
       } catch {
-        // ignore
+        // bij parsefout: blijf bij initiële data
       }
     }
   }, []);
@@ -80,6 +73,30 @@ export default function VragenlijstPage() {
   useEffect(() => {
     if (currentScreen && isUniveStepValid(currentScreen, formData, currentStepPiiBlocked)) setStepError(null);
   }, [currentScreen?.id, formData, currentStepPiiBlocked]);
+
+  // Bij directe URL naar een voorwaardelijk scherm (q4a, q9): redirect naar een geldige stap
+  useEffect(() => {
+    if (!currentScreen) return;
+    if (!isStepConditionallyHidden(currentScreen.id, formData)) return;
+    let targetId: string | null = null;
+    for (let i = currentScreenIndex + 1; i < allScreens.length; i++) {
+      const c = allScreens[i];
+      if (c.id === "q4a" && !(Array.isArray(formData.q4) && formData.q4.includes("Regelgeving"))) continue;
+      if (c.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") continue;
+      targetId = c.id;
+      break;
+    }
+    if (!targetId) {
+      for (let i = currentScreenIndex - 1; i >= 0; i--) {
+        const c = allScreens[i];
+        if (c.id === "q4a" && !(Array.isArray(formData.q4) && formData.q4.includes("Regelgeving"))) continue;
+        if (c.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") continue;
+        targetId = c.id;
+        break;
+      }
+    }
+    if (targetId) router.replace(`/vragenlijst?stap=${targetId}`);
+  }, [currentScreen?.id, currentScreenIndex, formData.q4, formData.q8, allScreens, router]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
