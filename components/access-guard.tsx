@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const GATE_PATHS = ["/", "/toegang"];
+const GATE_PATHS = ["/"];
 const ACCESS_KEY = "unive_access_granted";
 
 export function useAccessGranted(): boolean | null {

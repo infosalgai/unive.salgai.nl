@@ -7,7 +7,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { PiiTextarea } from "@/components/pii-textarea";
 import type { UniveFormData } from "@/lib/unive-questionnaire";
-import { UNIVE_TOTAL_QUESTIONS } from "@/lib/unive-questionnaire";
 
 const QUESTION_LABEL_CLASS = "mb-2 block text-base font-semibold text-foreground";
 const OPTION_ROW_CLASS =
@@ -55,103 +54,96 @@ function ScaleSlider({
   );
 }
 
-// ── Options (exact Dutch wording) ──
+// ── Opties (exacte Nederlandse formulering conform nieuwe vragenlijst) ──
 const Q1_OPTIONS = [
   { id: "Gangbaar", label: "Gangbaar" },
+  { id: "Natuurinclusief", label: "Natuurinclusief" },
   { id: "Biologisch", label: "Biologisch" },
   { id: "In omschakeling", label: "In omschakeling" },
   { id: "Anders", label: "Anders, namelijk:" },
 ];
+
 const Q3_OPTIONS = [
-  { id: "Groei", label: "Groei / uitbreiding" },
+  { id: "Groei / uitbreiding", label: "Groei / uitbreiding" },
   { id: "Stabilisatie", label: "Stabilisatie" },
   { id: "Afschalen", label: "Afschalen" },
-  { id: "Overdracht", label: "Overdracht binnen 10 jaar" },
-  { id: "Onzeker", label: "Onzeker / nog geen duidelijke richting" },
+  { id: "Overdracht binnen 10 jaar", label: "Overdracht binnen 10 jaar" },
+  { id: "Onzeker / nog geen duidelijke richting", label: "Onzeker / nog geen duidelijke richting" },
 ];
-const Q6_OPTIONS = [
+
+const Q4_OPTIONS = [
   "Regelgeving",
   "Melkprijs",
   "Kosten (voer, energie, mest)",
-  "Klimaat / weersomstandigheden",
+  "Klimaatverandering / extreme weersomstandigheden",
+  "Herstel van biodiversiteit",
   "Financiering / bank",
   "Maatschappelijke druk",
   "Opvolging",
   "Werkplezier",
-  "Anders",
+  "Gebiedsgerichte aanpak / uitkoopregelingen",
+  "Anders, namelijk:",
 ];
+
+const Q4A_OPTIONS = [
+  "Stikstof- en vergunningenproblematiek",
+  "Natura2000 / ligging nabij natuurgebied",
+  "Mestbeleid en mestplaatsingsruimte",
+  "Fosfaatrechten",
+  "Afbouw derogatie / nitraateisen",
+  "Klimaat- en broeikasgasbeleid",
+  "Dierwelzijns- en stalregelgeving",
+  "Waterkwaliteitseisen (KRW)",
+  "Anders, namelijk:",
+];
+
 const Q8_OPTIONS = [
-  { id: "Ja meerdere", label: "Ja, meerdere" },
-  { id: "Ja beperkt", label: "Ja, beperkt" },
+  { id: "Ja, meerdere", label: "Ja, meerdere" },
+  { id: "Ja, beperkt", label: "Ja, beperkt" },
   { id: "Nee", label: "Nee" },
 ];
+
 const Q9_OPTIONS = [
   "Financiële noodzaak",
   "Nieuwe regelgeving",
-  "Risicospreiding",
   "Persoonlijke overtuiging",
-  "Voorwaarden of advies vanuit bank/accountant/zuivel",
-  "Niet van toepassing",
-  "Anders",
+  "Anders, namelijk:",
 ];
-const Q13_OPTIONS = [
-  "Melkprijs",
-  "Toeslagen/subsidies",
-  "Grondwaarde",
-  "Hoge vaste lasten",
-  "Contractuele afspraken",
-  "Anders",
-];
-const Q14_OPTIONS = [
-  "Kostenstructuur",
-  "Schaalgrootte",
-  "Grondgebruik",
-  "Samenwerking",
-  "Afzet",
-  "Diversificatie",
-  "Weinig invloed",
-  "Anders",
-];
-const Q15B_OPTIONS = [
-  { id: "Ja concreet", label: "Ja, concreet" },
-  { id: "Misschien", label: "Misschien, maar nog niet uitgewerkt" },
-  { id: "Nee", label: "Nee, weinig mogelijkheden" },
-  { id: "Weet ik niet", label: "Weet ik niet" },
-];
-const Q16_OPTIONS = [
-  "Landschapselementen (bijv. houtwallen)",
-  "Agroforestry / bomen met productie (bijv. noten of fruit)",
-  "Andere teelten",
-  "Extensiveren",
-  "Samenwerking met derden",
-  "Nieuwe verdienmodellen (bijv. vergoedingen voor koolstofvastlegging)",
-  "Geen van bovenstaande",
-  "Anders",
-];
-const Q17_OPTIONS = [
-  "Onzeker rendement op korte termijn",
-  "Onzeker rendement op lange termijn",
-  "Investering te groot",
+
+const Q11_OPTIONS = [
+  "Onzeker rendement",
+  "Investeringsmogelijkheden",
   "Onvoldoende kennis",
-  "Te veel administratie",
   "Onzeker beleid",
   "Onvoldoende steun van bank",
-  "Gebrek aan tijd",
   "Twijfel over praktische haalbaarheid",
-  "Anders",
+  "Anders, namelijk:",
 ];
-const Q19_OPTIONS = [
-  "Ondersteuning bij initiële investering",
-  "Structurele vergoeding",
-  "Prijszekerheid",
-  "Risicodekking bij tegenvallende opbrengst",
-  "Doorrekening van het verdienmodel",
-  "Praktische begeleiding",
-  "Inhoudelijke kennis en advies",
-  "Administratieve ontzorging",
-  "Langjarige afspraken",
-  "Samenwerking met andere partijen",
-  "Anders",
+
+const Q14_OPTIONS = [
+  "Landschapselementen als houtwallen",
+  "Agroforestry",
+  "Teelten als hennep",
+  "Productief kruidenrijk grasland",
+  "Biobased bouwen",
+  "Anders, namelijk:",
+];
+
+const Q15B_OPTIONS = [
+  { id: "Ja, concreet", label: "Ja, concreet" },
+  { id: "Misschien, maar nog niet uitgewerkt", label: "Misschien, maar nog niet uitgewerkt" },
+  { id: "Nee, weinig mogelijkheden", label: "Nee, weinig mogelijkheden" },
+  { id: "Weet ik niet", label: "Weet ik niet" },
+];
+
+const Q16_OPTIONS = [
+  "Voldoende marge per jaar",
+  "Lage schuldenlast",
+  "Continuïteit voor volgende generatie",
+  "Stabiliteit / weinig schommelingen",
+  "Bedrijf in huidige vorm kunnen voortzetten",
+  "Waardebehoud van grond en bedrijf",
+  "Anders, namelijk:",
 ];
 
 export interface UniveScreen {
@@ -277,51 +269,18 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q4",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 4,
-    title: "Hoe kijkt u op dit moment naar de toekomst van uw bedrijf?",
-    render: (fd, update) => (
-      <ScaleSlider
-        value={fd.q4}
-        onValueChange={(v) => update({ q4: v })}
-        labelLeft="Zeer onzeker"
-        labelRight="Veel vertrouwen"
-      />
-    ),
-  });
-
-  screens.push({
-    id: "q5",
-    group: "Deel 2 – Huidige situatie en toekomstbeeld",
-    questionNumber: 5,
-    title: "Wat zijn op dit moment uw grootste zorgen voor de komende 5–10 jaar?",
-    hasPiiField: true,
-    render: (fd, update, _, setPiiBlocked) => (
-      <PiiTextarea
-        value={fd.q5}
-        onChange={(v) => update({ q5: v })}
-        onPiiChange={setPiiBlocked}
-        placeholder="Uw antwoord"
-        rows={4}
-        maxLength={1000}
-      />
-    ),
-  });
-
-  screens.push({
-    id: "q6",
-    group: "Deel 2 – Huidige situatie en toekomstbeeld",
-    questionNumber: 6,
     title: "Welke ontwikkelingen hebben de meeste invloed op uw bedrijfsvoering?",
     subtitle: "Kies maximaal 3.",
-    multiChoiceField: "q6",
+    multiChoiceField: "q4",
     maxChoices: 3,
     render: (fd, update, toggleMulti) => {
-      const onToggle = (v: string) => toggleMulti("q6", v, 3);
-      const selected = fd.q6;
+      const onToggle = (v: string) => toggleMulti("q4", v, 3);
+      const selected = fd.q4;
       return (
         <div className="space-y-3">
           <p className={HELPER_TEXT_CLASS}>{selected.length}/3 gekozen</p>
           <div className="flex flex-wrap gap-2">
-            {Q6_OPTIONS.map((opt) => {
+            {Q4_OPTIONS.map((opt) => {
               const isSelected = selected.includes(opt);
               const disabled = !isSelected && selected.length >= 3;
               return (
@@ -339,12 +298,12 @@ export function buildUniveScreens(): UniveScreen[] {
               );
             })}
           </div>
-          {selected.includes("Anders") && (
+          {selected.includes("Anders, namelijk:") && (
             <div className="mt-3">
               <Label className={QUESTION_LABEL_CLASS}>Anders, namelijk:</Label>
               <Input
-                value={fd.q6_anders}
-                onChange={(e) => update({ q6_anders: e.target.value })}
+                value={fd.q4_anders}
+                onChange={(e) => update({ q4_anders: e.target.value })}
                 placeholder="Toelichting"
                 maxLength={200}
               />
@@ -353,6 +312,137 @@ export function buildUniveScreens(): UniveScreen[] {
         </div>
       );
     },
+  });
+
+  screens.push({
+    id: "q4a",
+    group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    questionNumber: 4,
+    title: "Welke regelgeving speelt vooral?",
+    subtitle: "Deze vraag is relevant als regelgeving een belangrijke ontwikkeling is.",
+    multiChoiceField: "q4a",
+    maxChoices: undefined,
+    render: (fd, update, toggleMulti) => {
+      const selected = fd.q4a;
+      // Alleen tonen als bij q4 "Regelgeving" is gekozen
+      const show = fd.q4.includes("Regelgeving");
+      if (!show) {
+        if (selected.length || fd.q4a_anders) {
+          update({ q4a: [], q4a_anders: "" });
+        }
+        return null;
+      }
+      return (
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {Q4A_OPTIONS.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => toggleMulti("q4a", opt)}
+                className={`rounded-full border px-4 py-2 text-sm ${
+                  selected.includes(opt) ? "border-primary bg-primary/10" : "border-border"
+                }`}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+          {selected.includes("Anders, namelijk:") && (
+            <div className="mt-3">
+              <Label className={QUESTION_LABEL_CLASS}>Anders, namelijk:</Label>
+              <Input
+                value={fd.q4a_anders}
+                onChange={(e) => update({ q4a_anders: e.target.value })}
+                placeholder="Toelichting"
+                maxLength={200}
+              />
+            </div>
+          )}
+        </div>
+      );
+    },
+  });
+
+  screens.push({
+    id: "q5",
+    group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    questionNumber: 5,
+    title: "In hoeverre is verduurzaming volgens u van belang voor de continuïteit van uw bedrijf?",
+    render: (fd, update) => (
+      <ScaleSlider
+        value={fd.q5a}
+        onValueChange={(v) => update({ q5a: v })}
+        labelLeft="Nauwelijks van belang"
+        labelRight="Zeer belangrijk"
+      />
+    ),
+  });
+
+  screens.push({
+    id: "q5b",
+    group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    questionNumber: 5,
+    title: "In hoeverre verwacht u dat CO₂-reductie invloed zal hebben in de komende 10 jaar?",
+    render: (fd, update) => (
+      <ScaleSlider
+        value={fd.q5b}
+        onValueChange={(v) => update({ q5b: v })}
+        labelLeft="Nauwelijks invloed"
+        labelRight="Grote invloed"
+      />
+    ),
+  });
+
+  screens.push({
+    id: "q5c",
+    group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    questionNumber: 5,
+    title: "In hoeverre ziet u biodiversiteit als relevant voor uw bedrijfsvoering?",
+    render: (fd, update) => (
+      <ScaleSlider
+        value={fd.q5c}
+        onValueChange={(v) => update({ q5c: v })}
+        labelLeft="Nauwelijks relevant"
+        labelRight="Zeer relevant"
+      />
+    ),
+  });
+
+  screens.push({
+    id: "q5_toelichting",
+    group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    questionNumber: 5,
+    title: "Toelichting (optioneel)",
+    hasPiiField: true,
+    render: (fd, update, _, setPiiBlocked) => (
+      <PiiTextarea
+        value={fd.q5_toelichting}
+        onChange={(v) => update({ q5_toelichting: v })}
+        onPiiChange={setPiiBlocked}
+        placeholder="Kunt u kort toelichten hoe u naar verduurzaming, CO₂-reductie en biodiversiteit kijkt?"
+        rows={4}
+        maxLength={800}
+      />
+    ),
+  });
+
+  screens.push({
+    id: "q6",
+    group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    questionNumber: 6,
+    title: "Wat zijn op dit moment uw grootste zorgen voor de komende 5–10 jaar?",
+    hasPiiField: true,
+    render: (fd, update, _, setPiiBlocked) => (
+      <PiiTextarea
+        value={fd.q6}
+        onChange={(v) => update({ q6: v })}
+        onPiiChange={setPiiBlocked}
+        placeholder="Uw antwoord"
+        rows={4}
+        maxLength={1000}
+      />
+    ),
   });
 
   screens.push({
@@ -370,17 +460,15 @@ export function buildUniveScreens(): UniveScreen[] {
     ),
   });
 
-  // Deel 3 – Veranderingen in bedrijfsvoering (q8 + q9 op één pagina; q9 alleen bij Ja meerdere/beperkt)
+  // Deel 3 – Veranderingen in bedrijfsvoering
   screens.push({
     id: "q8",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 8,
     title: "Heeft u de afgelopen 5 jaar aanpassingen gedaan in uw bedrijfsvoering?",
     choiceField: "q8",
-    multiChoiceField: "q9",
-    maxChoices: 2,
     hasPiiField: true,
-    render: (fd, update, toggleMulti, setPiiBlocked) => (
+    render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-6">
         <RadioGroup value={fd.q8} onValueChange={(v) => update({ q8: v })} className="space-y-2">
           {Q8_OPTIONS.map((opt) => (
@@ -390,7 +478,7 @@ export function buildUniveScreens(): UniveScreen[] {
             </div>
           ))}
         </RadioGroup>
-        {(fd.q8 === "Ja meerdere" || fd.q8 === "Ja beperkt") && (
+        {(fd.q8 === "Ja, meerdere" || fd.q8 === "Ja, beperkt") && (
           <>
             <div>
               <Label className={QUESTION_LABEL_CLASS}>Kunt u kort aangeven welke aanpassingen dit waren?</Label>
@@ -398,37 +486,10 @@ export function buildUniveScreens(): UniveScreen[] {
                 value={fd.q8a}
                 onChange={(v) => update({ q8a: v })}
                 onPiiChange={setPiiBlocked}
-                placeholder="Max 2–3 regels"
+                placeholder="Maximaal 2–3 regels"
                 rows={3}
                 maxLength={500}
               />
-            </div>
-            <div>
-              <Label className={QUESTION_LABEL_CLASS}>Wat waren de belangrijkste aanleidingen voor deze aanpassingen?</Label>
-              <p className={HELPER_TEXT_CLASS}>Kies maximaal 2.</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {Q9_OPTIONS.map((opt) => {
-                  const isSelected = fd.q9.includes(opt);
-                  const disabled = !isSelected && fd.q9.length >= 2;
-                  return (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => !disabled && toggleMulti("q9", opt, 2)}
-                      disabled={disabled}
-                      className={`rounded-full border px-4 py-2 text-sm ${isSelected ? "border-primary bg-primary/10" : "border-border"} ${disabled ? "opacity-50" : ""}`}
-                    >
-                      {opt}
-                    </button>
-                  );
-                })}
-              </div>
-              {fd.q9.includes("Anders") && (
-                <div className="mt-3">
-                  <Label className={QUESTION_LABEL_CLASS}>Anders, namelijk:</Label>
-                  <Input value={fd.q9_anders} onChange={(e) => update({ q9_anders: e.target.value })} maxLength={200} />
-                </div>
-              )}
             </div>
           </>
         )}
@@ -437,10 +498,87 @@ export function buildUniveScreens(): UniveScreen[] {
   });
 
   screens.push({
-    id: "q10",
+    id: "q9",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 9,
-    title: "Wat zou voor u een concrete aanleiding zijn om (opnieuw) aanpassingen te doen?",
+    title: "Wat waren de belangrijkste aanleidingen?",
+    subtitle: "Kies maximaal 2. Deze vraag is alleen van toepassing als u eerder 'ja' heeft geantwoord.",
+    multiChoiceField: "q9",
+    maxChoices: 2,
+    hasPiiField: true,
+    render: (fd, update, toggleMulti, setPiiBlocked) => {
+      const show = fd.q8 === "Ja, meerdere" || fd.q8 === "Ja, beperkt";
+      const selected = fd.q9;
+      if (!show) {
+        if (selected.length || fd.q9_anders || fd.q9_regelgeving) {
+          update({ q9: [], q9_anders: "", q9_regelgeving: "" });
+        }
+        return (
+          <p className={HELPER_TEXT_CLASS}>
+            Deze vraag is niet van toepassing omdat u geen aanpassingen in de afgelopen 5 jaar heeft aangegeven.
+          </p>
+        );
+      }
+      return (
+        <div className="space-y-4">
+          <div>
+            <p className={HELPER_TEXT_CLASS}>Kies maximaal 2.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {Q9_OPTIONS.map((opt) => {
+                const isSelected = selected.includes(opt);
+                const disabled = !isSelected && selected.length >= 2;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => !disabled && toggleMulti("q9", opt, 2)}
+                    disabled={disabled}
+                    className={`rounded-full border px-4 py-2 text-sm ${
+                      isSelected ? "border-primary bg-primary/10" : "border-border"
+                    } ${disabled ? "opacity-50" : ""}`}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {selected.includes("Nieuwe regelgeving") && (
+            <div>
+              <Label className={QUESTION_LABEL_CLASS}>Welke regelgeving?</Label>
+              <PiiTextarea
+                value={fd.q9_regelgeving}
+                onChange={(v) => update({ q9_regelgeving: v })}
+                onPiiChange={setPiiBlocked}
+                placeholder="Bijvoorbeeld: wijziging in mestbeleid, fosfaatrechten, etc."
+                rows={3}
+                maxLength={500}
+              />
+            </div>
+          )}
+
+          {selected.includes("Anders, namelijk:") && (
+            <div>
+              <Label className={QUESTION_LABEL_CLASS}>Anders, namelijk:</Label>
+              <Input
+                value={fd.q9_anders}
+                onChange={(e) => update({ q9_anders: e.target.value })}
+                placeholder="Toelichting"
+                maxLength={200}
+              />
+            </div>
+          )}
+        </div>
+      );
+    },
+  });
+
+  screens.push({
+    id: "q10",
+    group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    questionNumber: 10,
+    title: "Wat zou voor u een duidelijke aanleiding zijn om (opnieuw) aanpassingen te doen?",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <PiiTextarea value={fd.q10} onChange={(v) => update({ q10: v })} onPiiChange={setPiiBlocked} rows={4} maxLength={1000} />
@@ -450,79 +588,106 @@ export function buildUniveScreens(): UniveScreen[] {
   // Deel 4 – Verdienmodel en kwetsbaarheden
   screens.push({
     id: "q11",
-    group: "Deel 4 – Verdienmodel en kwetsbaarheden",
-    questionNumber: 10,
-    title: "Hoe beoordeelt u de stabiliteit van uw huidige verdienmodel?",
+    group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    questionNumber: 11,
+    title: "Wat houdt u het meest tegen?",
+    subtitle: "Kies maximaal 2.",
+    multiChoiceField: "q11",
+    maxChoices: 2,
     hasPiiField: true,
-    render: (fd, update, _, setPiiBlocked) => (
-      <div className="space-y-4">
-        <ScaleSlider
-          value={fd.q11}
-          onValueChange={(v) => update({ q11: v })}
-          labelLeft="Zeer kwetsbaar"
-          labelRight="Zeer stabiel"
-        />
-        <div>
-          <Label className={QUESTION_LABEL_CLASS}>Optioneel: toelichting</Label>
-          <PiiTextarea value={fd.q11_toelichting} onChange={(v) => update({ q11_toelichting: v })} onPiiChange={setPiiBlocked} rows={2} maxLength={300} />
+    render: (fd, update, toggleMulti, setPiiBlocked) => {
+      const selected = fd.q11;
+      return (
+        <div className="space-y-4">
+          <div>
+            <p className={HELPER_TEXT_CLASS}>{selected.length}/2 gekozen</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {Q11_OPTIONS.map((opt) => {
+                const isSelected = selected.includes(opt);
+                const disabled = !isSelected && selected.length >= 2;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => !disabled && toggleMulti("q11", opt, 2)}
+                    disabled={disabled}
+                    className={`rounded-full border px-4 py-2 text-sm ${
+                      isSelected ? "border-primary bg-primary/10" : "border-border"
+                    } ${disabled ? "opacity-50" : ""}`}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {selected.includes("Anders, namelijk:") && (
+            <div>
+              <Label className={QUESTION_LABEL_CLASS}>Anders, namelijk:</Label>
+              <Input
+                value={fd.q11_anders}
+                onChange={(e) => update({ q11_anders: e.target.value })}
+                placeholder="Toelichting"
+                maxLength={200}
+              />
+            </div>
+          )}
+          <div>
+            <Label className={QUESTION_LABEL_CLASS}>Optioneel: Kunt u dit kort toelichten?</Label>
+            <PiiTextarea
+              value={fd.q11_toelichting}
+              onChange={(v) => update({ q11_toelichting: v })}
+              onPiiChange={setPiiBlocked}
+              rows={3}
+              maxLength={500}
+            />
+          </div>
         </div>
-      </div>
-    ),
+      );
+    },
   });
 
+  // Deel 4 – Welke ondersteuning zou helpen?
   screens.push({
     id: "q12",
-    group: "Deel 4 – Verdienmodel en kwetsbaarheden",
-    questionNumber: 11,
-    title: "Waar zit volgens u de grootste kwetsbaarheid in uw verdienmodel?",
-    hasPiiField: true,
-    render: (fd, update, _, setPiiBlocked) => (
-      <PiiTextarea value={fd.q12} onChange={(v) => update({ q12: v })} onPiiChange={setPiiBlocked} rows={4} maxLength={1000} />
+    group: "Deel 4 – Welke ondersteuning zou helpen?",
+    questionNumber: 12,
+    title: "In hoeverre staat u open voor ondersteuning van Univé?",
+    subtitle:
+      "Bijv. financiële ondersteuning, pacht, vergoeding CO₂-opvang, premiekorting, klimaatadaptatie of biodiversiteitsherstel.",
+    render: (fd, update) => (
+      <ScaleSlider
+        value={fd.q12}
+        onValueChange={(v) => update({ q12: v })}
+        labelLeft="Niet open voor ondersteuning"
+        labelRight="Zeer open voor ondersteuning"
+      />
     ),
   });
 
   screens.push({
     id: "q13",
-    group: "Deel 4 – Verdienmodel en kwetsbaarheden",
-    questionNumber: 12,
-    title: "Waar is uw bedrijf financieel het meest afhankelijk van?",
-    subtitle: "Kies maximaal 3.",
-    multiChoiceField: "q13",
-    maxChoices: 3,
-    render: (fd, update, toggleMulti) => (
-      <div className="space-y-3">
-        <p className={HELPER_TEXT_CLASS}>{fd.q13.length}/3 gekozen</p>
-        <div className="flex flex-wrap gap-2">
-          {Q13_OPTIONS.map((opt) => {
-            const isSelected = fd.q13.includes(opt);
-            const disabled = !isSelected && fd.q13.length >= 3;
-            return (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => !disabled && toggleMulti("q13", opt, 3)}
-                disabled={disabled}
-                className={`rounded-full border px-4 py-2 text-sm ${isSelected ? "border-primary bg-primary/10" : "border-border"} ${disabled ? "opacity-50" : ""}`}
-              >
-                {opt}
-              </button>
-            );
-          })}
-        </div>
-        {fd.q13.includes("Anders") && (
-          <div className="mt-3">
-            <Input value={fd.q13_anders} onChange={(e) => update({ q13_anders: e.target.value })} placeholder="Anders, namelijk" maxLength={200} />
-          </div>
-        )}
-      </div>
+    group: "Deel 4 – Welke ondersteuning zou helpen?",
+    questionNumber: 13,
+    title: "Welke vormen van ondersteuning zouden voor u het meest waardevol zijn?",
+    hasPiiField: true,
+    render: (fd, update, _, setPiiBlocked) => (
+      <PiiTextarea
+        value={fd.q13}
+        onChange={(v) => update({ q13: v })}
+        onPiiChange={setPiiBlocked}
+        placeholder="Bijvoorbeeld: investeringssteun, langjarige afspraken, begeleiding op het erf..."
+        rows={4}
+        maxLength={800}
+      />
     ),
   });
 
   screens.push({
     id: "q14",
-    group: "Deel 4 – Verdienmodel en kwetsbaarheden",
-    questionNumber: 13,
-    title: "Op welke onderdelen van uw bedrijfsvoering ervaart u ruimte om zelf te sturen?",
+    group: "Deel 4 – Welke ondersteuning zou helpen?",
+    questionNumber: 14,
+    title: "Welke andere modellen of verduurzamingsopties zou u overwegen?",
     subtitle: "Meerdere antwoorden mogelijk.",
     multiChoiceField: "q14",
     render: (fd, update, toggleMulti) => (
@@ -533,25 +698,33 @@ export function buildUniveScreens(): UniveScreen[] {
               key={opt}
               type="button"
               onClick={() => toggleMulti("q14", opt)}
-              className={`rounded-full border px-4 py-2 text-sm ${fd.q14.includes(opt) ? "border-primary bg-primary/10" : "border-border"}`}
+              className={`rounded-full border px-4 py-2 text-sm ${
+                fd.q14.includes(opt) ? "border-primary bg-primary/10" : "border-border"
+              }`}
             >
               {opt}
             </button>
           ))}
         </div>
-        {fd.q14.includes("Anders") && (
+        {fd.q14.includes("Anders, namelijk:") && (
           <div className="mt-3">
-            <Input value={fd.q14_anders} onChange={(e) => update({ q14_anders: e.target.value })} placeholder="Anders, namelijk" maxLength={200} />
+            <Input
+              value={fd.q14_anders}
+              onChange={(e) => update({ q14_anders: e.target.value })}
+              placeholder="Anders, namelijk"
+              maxLength={200}
+            />
           </div>
         )}
       </div>
     ),
   });
 
+  // Deel 5 – Verdienmodel en kwetsbaarheden
   screens.push({
     id: "q15a",
-    group: "Deel 4 – Verdienmodel en kwetsbaarheden",
-    questionNumber: 14,
+    group: "Deel 5 – Verdienmodel en kwetsbaarheden",
+    questionNumber: 15,
     title: "In hoeverre heeft u behoefte aan aanvullende inkomsten of meer risicospreiding?",
     render: (fd, update) => (
       <ScaleSlider
@@ -565,16 +738,18 @@ export function buildUniveScreens(): UniveScreen[] {
 
   screens.push({
     id: "q15b",
-    group: "Deel 4 – Verdienmodel en kwetsbaarheden",
-    questionNumber: 15,
-    title: "Ziet u mogelijkheden om uw inkomsten te verbreden of risico's te spreiden?",
+    group: "Deel 5 – Verdienmodel en kwetsbaarheden",
+    questionNumber: 16,
+    title: "Ziet u mogelijkheden om uw inkomsten te verbreden of risico’s te spreiden?",
     choiceField: "q15b",
     render: (fd, update) => (
       <RadioGroup value={fd.q15b} onValueChange={(v) => update({ q15b: v })} className="space-y-2">
         {Q15B_OPTIONS.map((opt) => (
           <div key={opt.id} className={OPTION_ROW_CLASS}>
             <RadioGroupItem value={opt.id} id={`q15b-${opt.id}`} />
-            <Label htmlFor={`q15b-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">{opt.label}</Label>
+            <Label htmlFor={`q15b-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">
+              {opt.label}
+            </Label>
           </div>
         ))}
       </RadioGroup>
@@ -582,10 +757,28 @@ export function buildUniveScreens(): UniveScreen[] {
   });
 
   screens.push({
-    id: "q16",
-    group: "Deel 4 – Verdienmodel en kwetsbaarheden",
+    id: "q15b_toelichting",
+    group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     questionNumber: 16,
-    title: "Welke vormen van verbreding of aanpassing zou u overwegen?",
+    title: "Optional: toelichting",
+    hasPiiField: true,
+    render: (fd, update, _, setPiiBlocked) => (
+      <PiiTextarea
+        value={fd.q15b_toelichting}
+        onChange={(v) => update({ q15b_toelichting: v })}
+        onPiiChange={setPiiBlocked}
+        placeholder="Kunt u kort toelichten welke mogelijkheden u ziet of waarom u weinig mogelijkheden ervaart?"
+        rows={3}
+        maxLength={600}
+      />
+    ),
+  });
+
+  screens.push({
+    id: "q16",
+    group: "Deel 5 – Verdienmodel en kwetsbaarheden",
+    questionNumber: 16,
+    title: "Wat betekent rendabel ondernemen voor u persoonlijk?",
     subtitle: "Meerdere antwoorden mogelijk.",
     multiChoiceField: "q16",
     render: (fd, update, toggleMulti) => (
@@ -596,165 +789,142 @@ export function buildUniveScreens(): UniveScreen[] {
               key={opt}
               type="button"
               onClick={() => toggleMulti("q16", opt)}
-              className={`rounded-full border px-4 py-2 text-sm ${fd.q16.includes(opt) ? "border-primary bg-primary/10" : "border-border"}`}
+              className={`rounded-full border px-4 py-2 text-sm ${
+                fd.q16.includes(opt) ? "border-primary bg-primary/10" : "border-border"
+              }`}
             >
               {opt}
             </button>
           ))}
         </div>
-        {fd.q16.includes("Anders") && (
+        {fd.q16.includes("Anders, namelijk:") && (
           <div className="mt-3">
-            <Input value={fd.q16_anders} onChange={(e) => update({ q16_anders: e.target.value })} placeholder="Anders, namelijk" maxLength={200} />
+            <Input
+              value={fd.q16_anders}
+              onChange={(e) => update({ q16_anders: e.target.value })}
+              placeholder="Anders, namelijk"
+              maxLength={200}
+            />
           </div>
         )}
       </div>
-    ),
-  });
-
-  // Deel 5 – Wat houdt u tegen?
-  screens.push({
-    id: "q17",
-    group: "Deel 5 – Wat houdt u tegen?",
-    questionNumber: 17,
-    title: "Wat houdt u het meest tegen om aanpassingen te doen?",
-    subtitle: "Kies maximaal 3.",
-    multiChoiceField: "q17",
-    maxChoices: 3,
-    render: (fd, update, toggleMulti) => (
-      <div className="space-y-3">
-        <p className={HELPER_TEXT_CLASS}>{fd.q17.length}/3 gekozen</p>
-        <div className="flex flex-wrap gap-2">
-          {Q17_OPTIONS.map((opt) => {
-            const isSelected = fd.q17.includes(opt);
-            const disabled = !isSelected && fd.q17.length >= 3;
-            return (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => !disabled && toggleMulti("q17", opt, 3)}
-                disabled={disabled}
-                className={`rounded-full border px-4 py-2 text-sm ${isSelected ? "border-primary bg-primary/10" : "border-border"} ${disabled ? "opacity-50" : ""}`}
-              >
-                {opt}
-              </button>
-            );
-          })}
-        </div>
-        {fd.q17.includes("Anders") && (
-          <div className="mt-3">
-            <Input value={fd.q17_anders} onChange={(e) => update({ q17_anders: e.target.value })} placeholder="Anders, namelijk" maxLength={200} />
-          </div>
-        )}
-      </div>
-    ),
-  });
-
-  screens.push({
-    id: "q18",
-    group: "Deel 5 – Wat houdt u tegen?",
-    questionNumber: 18,
-    title: "In hoeverre speelt financiering een rol in uw afweging om te veranderen?",
-    hasPiiField: true,
-    render: (fd, update, _, setPiiBlocked) => (
-      <div className="space-y-4">
-        <ScaleSlider
-          value={fd.q18}
-          onValueChange={(v) => update({ q18: v })}
-          labelLeft="Speelt geen rol"
-          labelRight="Doorslaggevend"
-        />
-        <div>
-          <Label className={QUESTION_LABEL_CLASS}>Optioneel: toelichting</Label>
-          <PiiTextarea value={fd.q18_toelichting} onChange={(v) => update({ q18_toelichting: v })} onPiiChange={setPiiBlocked} rows={2} maxLength={300} />
-        </div>
-      </div>
-    ),
-  });
-
-  // Deel 6 – Welke ondersteuning zou helpen?
-  screens.push({
-    id: "q19",
-    group: "Deel 6 – Welke ondersteuning zou helpen?",
-    questionNumber: 19,
-    title: "Welke vormen van ondersteuning zouden voor u het meest waardevol zijn?",
-    subtitle: "Kies maximaal 3.",
-    multiChoiceField: "q19",
-    maxChoices: 3,
-    render: (fd, update, toggleMulti) => (
-      <div className="space-y-3">
-        <p className={HELPER_TEXT_CLASS}>{fd.q19.length}/3 gekozen</p>
-        <div className="flex flex-wrap gap-2">
-          {Q19_OPTIONS.map((opt) => {
-            const isSelected = fd.q19.includes(opt);
-            const disabled = !isSelected && fd.q19.length >= 3;
-            return (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => !disabled && toggleMulti("q19", opt, 3)}
-                disabled={disabled}
-                className={`rounded-full border px-4 py-2 text-sm ${isSelected ? "border-primary bg-primary/10" : "border-border"} ${disabled ? "opacity-50" : ""}`}
-              >
-                {opt}
-              </button>
-            );
-          })}
-        </div>
-        {fd.q19.includes("Anders") && (
-          <div className="mt-3">
-            <Input value={fd.q19_anders} onChange={(e) => update({ q19_anders: e.target.value })} placeholder="Anders, namelijk" maxLength={200} />
-          </div>
-        )}
-      </div>
-    ),
-  });
-
-  screens.push({
-    id: "q20",
-    group: "Deel 6 – Welke ondersteuning zou helpen?",
-    questionNumber: 20,
-    title: "Onder welke voorwaarden zou u openstaan voor het aanleggen van houtwallen?",
-    hasPiiField: true,
-    render: (fd, update, _, setPiiBlocked) => (
-      <PiiTextarea value={fd.q20} onChange={(v) => update({ q20: v })} onPiiChange={setPiiBlocked} rows={4} maxLength={1000} />
-    ),
-  });
-
-  screens.push({
-    id: "q21",
-    group: "Deel 6 – Welke ondersteuning zou helpen?",
-    questionNumber: 21,
-    title: "Onder welke voorwaarden zou u openstaan voor het inpassen van bomen met productie (bijv. noten of fruit) in uw bedrijfsvoering?",
-    hasPiiField: true,
-    render: (fd, update, _, setPiiBlocked) => (
-      <PiiTextarea value={fd.q21} onChange={(v) => update({ q21: v })} onPiiChange={setPiiBlocked} rows={4} maxLength={1000} />
     ),
   });
 
   // Deel 7 – Afsluiting
   screens.push({
-    id: "q22-q23",
+    id: "q17",
     group: "Deel 7 – Afsluiting",
-    questionNumber: 22,
-    title: "Afsluiting",
+    questionNumber: 17,
+    title:
+      "Wat zou u, als u volledig vrij kon kiezen, het liefst aanpassen aan uw huidige bedrijfsvoering?",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
-      <div className="space-y-6">
-        <div>
-          <Label className={QUESTION_LABEL_CLASS}>Wat zou u, als u volledig vrij kon kiezen, het liefst aanpassen aan uw huidige bedrijfsvoering?</Label>
-          <PiiTextarea value={fd.q22} onChange={(v) => update({ q22: v })} onPiiChange={setPiiBlocked} rows={3} maxLength={800} />
-        </div>
-        <hr className="border-border" />
-        <div>
-          <Label className={QUESTION_LABEL_CLASS}>Wat moeten partijen zoals verzekeraars beter begrijpen van de praktijk op uw erf?</Label>
-          <PiiTextarea value={fd.q23} onChange={(v) => update({ q23: v })} onPiiChange={setPiiBlocked} rows={3} maxLength={800} />
-        </div>
-        <div>
-          <Label className={QUESTION_LABEL_CLASS}>Optioneel: aanvullende opmerkingen</Label>
-          <PiiTextarea value={fd.q_opmerkingen} onChange={(v) => update({ q_opmerkingen: v })} onPiiChange={setPiiBlocked} rows={2} maxLength={500} />
-        </div>
-      </div>
+      <PiiTextarea
+        value={fd.q17}
+        onChange={(v) => update({ q17: v })}
+        onPiiChange={setPiiBlocked}
+        placeholder="Beschrijf kort wat u het liefst zou veranderen."
+        rows={4}
+        maxLength={800}
+      />
     ),
+  });
+
+  screens.push({
+    id: "q18",
+    group: "Deel 7 – Afsluiting",
+    questionNumber: 18,
+    title: "Wat moeten partijen zoals verzekeraars beter begrijpen van de praktijk op uw erf?",
+    hasPiiField: true,
+    render: (fd, update, _, setPiiBlocked) => (
+      <PiiTextarea
+        value={fd.q18}
+        onChange={(v) => update({ q18: v })}
+        onPiiChange={setPiiBlocked}
+        placeholder="Wat zouden partijen beter moeten zien, horen of begrijpen?"
+        rows={4}
+        maxLength={800}
+      />
+    ),
+  });
+
+  screens.push({
+    id: "q19",
+    group: "Deel 7 – Afsluiting",
+    questionNumber: 19,
+    title: "Staat u ervoor open dat er contact met u wordt opgenomen?",
+    hasPiiField: true,
+    render: (fd, update, _toggleMulti, setPiiBlocked) => {
+      const toestemming = fd.q19_toestemming_contact;
+      return (
+        <div className="space-y-5">
+          <RadioGroup
+            value={toestemming}
+            onValueChange={(v) => update({ q19_toestemming_contact: v })}
+            className="space-y-2"
+          >
+            <div className={OPTION_ROW_CLASS}>
+              <RadioGroupItem value="Ja" id="q19-ja" />
+              <Label htmlFor="q19-ja" className="flex-1 cursor-pointer text-sm font-medium">
+                Ja, er mag contact met mij worden opgenomen
+              </Label>
+            </div>
+            <div className={OPTION_ROW_CLASS}>
+              <RadioGroupItem value="Nee" id="q19-nee" />
+              <Label htmlFor="q19-nee" className="flex-1 cursor-pointer text-sm font-medium">
+                Nee, liever niet
+              </Label>
+            </div>
+          </RadioGroup>
+
+          {toestemming === "Ja" && (
+            <div className="space-y-4">
+              <div>
+                <Label className={QUESTION_LABEL_CLASS}>Naam</Label>
+                <Input
+                  value={fd.q19_naam}
+                  onChange={(e) => update({ q19_naam: e.target.value })}
+                  placeholder="Uw naam"
+                  maxLength={200}
+                />
+              </div>
+              <div>
+                <Label className={QUESTION_LABEL_CLASS}>E-mailadres</Label>
+                <Input
+                  type="email"
+                  value={fd.q19_email}
+                  onChange={(e) => update({ q19_email: e.target.value })}
+                  placeholder="bijvoorbeeld: boer@voorbeeld.nl"
+                  maxLength={200}
+                />
+                <p className={HELPER_TEXT_CLASS}>Let op: vul een geldig e-mailadres in.</p>
+              </div>
+              <div>
+                <Label className={QUESTION_LABEL_CLASS}>Telefoonnummer</Label>
+                <Input
+                  value={fd.q19_telefoon}
+                  onChange={(e) => update({ q19_telefoon: e.target.value })}
+                  placeholder="bijvoorbeeld: 06-12345678"
+                  maxLength={50}
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <Label className={QUESTION_LABEL_CLASS}>Aanvullende opmerkingen (optioneel)</Label>
+            <PiiTextarea
+              value={fd.q19_opmerkingen}
+              onChange={(v) => update({ q19_opmerkingen: v })}
+              onPiiChange={setPiiBlocked}
+              rows={3}
+              maxLength={600}
+            />
+          </div>
+        </div>
+      );
+    },
   });
 
   return screens;
@@ -769,10 +939,21 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
   if (screen.id === "q8") {
     const q8 = typeof fd.q8 === "string" ? fd.q8.trim() : "";
     if (!q8) return false;
-    const showQ9 = q8 === "Ja meerdere" || q8 === "Ja beperkt";
-    if (showQ9) {
-      const q9 = (fd.q9 as string[]) ?? [];
-      if (q9.length === 0) return false;
+    return true;
+  }
+  if (screen.id === "q9") {
+    // Alleen verplicht als eerder 'ja' op q8 is gegeven
+    const show = fd.q8 === "Ja, meerdere" || fd.q8 === "Ja, beperkt";
+    if (!show) return true;
+    const q9 = (fd.q9 as string[]) ?? [];
+    if (q9.length === 0) return false;
+    return true;
+  }
+  if (screen.id === "q19") {
+    const toestemming = typeof fd.q19_toestemming_contact === "string" ? fd.q19_toestemming_contact.trim() : "";
+    if (!toestemming) return false;
+    if (toestemming === "Ja") {
+      if (!fd.q19_email || !fd.q19_email.includes("@")) return false;
     }
     return true;
   }
@@ -787,5 +968,3 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
   }
   return true;
 }
-
-export { UNIVE_TOTAL_QUESTIONS };

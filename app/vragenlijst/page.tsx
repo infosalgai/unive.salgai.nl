@@ -8,16 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import {
   type UniveFormData,
   UNIVE_INITIAL_FORM_DATA,
-} from "@/lib/unive-questionnaire";
-import {
-  buildUniveScreens,
-  isUniveStepValid,
   UNIVE_TOTAL_QUESTIONS,
-} from "@/lib/unive-screens";
+} from "@/lib/unive-questionnaire";
+import { buildUniveScreens, isUniveStepValid } from "@/lib/unive-screens";
 
 const FORM_STORAGE_KEY = "univeFormV2";
 const QUESTION_LABEL_CLASS = "mb-2 block text-base font-semibold text-foreground";
@@ -25,12 +21,10 @@ const QUESTION_LABEL_CLASS = "mb-2 block text-base font-semibold text-foreground
 export default function VragenlijstPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { toast } = useToast();
   const [formData, setFormData] = useState<UniveFormData>(UNIVE_INITIAL_FORM_DATA);
   const [stepError, setStepError] = useState<string | null>(null);
   const [currentStepPiiBlocked, setCurrentStepPiiBlocked] = useState(false);
   const stepErrorRef = useRef<HTMLParagraphElement>(null);
-  const lastMilestoneRef = useRef<number>(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -61,20 +55,6 @@ export default function VragenlijstPage() {
   const currentScreen = allScreens[currentScreenIndex];
   const overallPercent = Math.round(((currentScreenIndex + 1) / UNIVE_TOTAL_QUESTIONS) * 100);
 
-  // Milestone toasts at 25%, 50%, 75%
-  useEffect(() => {
-    if (overallPercent >= 25 && lastMilestoneRef.current < 25) {
-      lastMilestoneRef.current = 25;
-      toast({ title: "25% voltooid", description: "Goed bezig!", duration: 3000 });
-    } else if (overallPercent >= 50 && lastMilestoneRef.current < 50) {
-      lastMilestoneRef.current = 50;
-      toast({ title: "Halverwege", description: "Nog even volhouden.", duration: 3000 });
-    } else if (overallPercent >= 75 && lastMilestoneRef.current < 75) {
-      lastMilestoneRef.current = 75;
-      toast({ title: "Bijna klaar", description: "Laatste vragen komen eraan.", duration: 3000 });
-    }
-  }, [overallPercent, toast]);
-
   const update = useCallback((partial: Partial<UniveFormData>) => {
     setFormData((prev) => ({ ...prev, ...partial }));
   }, []);
@@ -100,6 +80,42 @@ export default function VragenlijstPage() {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
+  const findNextStepId = () => {
+    let idx = currentScreenIndex + 1;
+    while (idx < allScreens.length) {
+      const candidate = allScreens[idx];
+      // q4a alleen tonen als bij q4 "Regelgeving" is aangevinkt
+      if (candidate.id === "q4a" && !formData.q4.includes("Regelgeving")) {
+        idx++;
+        continue;
+      }
+      // q9 (aanleidingen) alleen tonen als bij q8 "Ja" is gekozen
+      if (candidate.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") {
+        idx++;
+        continue;
+      }
+      return candidate.id;
+    }
+    return null;
+  };
+
+  const findPrevStepId = () => {
+    let idx = currentScreenIndex - 1;
+    while (idx >= 0) {
+      const candidate = allScreens[idx];
+      if (candidate.id === "q4a" && !formData.q4.includes("Regelgeving")) {
+        idx--;
+        continue;
+      }
+      if (candidate.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") {
+        idx--;
+        continue;
+      }
+      return candidate.id;
+    }
+    return null;
+  };
+
   const handleNext = () => {
     if (currentScreen && !isUniveStepValid(currentScreen, formData, currentStepPiiBlocked)) {
       setStepError("Vul een geldig antwoord in om door te gaan. Vermijd namen of herleidbare gegevens in open velden.");
@@ -108,8 +124,8 @@ export default function VragenlijstPage() {
     }
     setStepError(null);
 
-    if (currentScreenIndex < allScreens.length - 1) {
-      const nextId = allScreens[currentScreenIndex + 1].id;
+    const nextId = findNextStepId();
+    if (nextId) {
       router.push(`/vragenlijst?stap=${nextId}`);
       scrollToTop();
     } else {
@@ -120,8 +136,8 @@ export default function VragenlijstPage() {
 
   const handleBack = () => {
     setStepError(null);
-    if (currentScreenIndex > 0) {
-      const prevId = allScreens[currentScreenIndex - 1].id;
+    const prevId = findPrevStepId();
+    if (prevId) {
       router.push(`/vragenlijst?stap=${prevId}`);
       scrollToTop();
     }

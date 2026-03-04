@@ -45,7 +45,7 @@ export default function SamenvattingPage() {
     let cancelled = false;
     setIsGenerating(true);
     setSummaryError(null);
-    fetch("/api/timeout/summarize", {
+    fetch("/api/summarize", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ formData }),
@@ -74,7 +74,7 @@ export default function SamenvattingPage() {
     setSummaryError(null);
     setIsGenerating(true);
     try {
-      const res = await fetch("/api/timeout/summarize", {
+      const res = await fetch("/api/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

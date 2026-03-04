@@ -1,7 +1,6 @@
 import React from "react";
 import type { Metadata, Viewport } from "next";
 import { Open_Sans, Bree_Serif } from "next/font/google";
-import { Toaster } from "@/components/ui/toaster";
 import { AccessGuard } from "@/components/access-guard";
 import "./globals.css";
 
@@ -25,7 +24,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: "Univé | Vragenlijst Melkveehouders",
   description: "Anonieme vragenlijst voor melkveehouders over toekomstbeeld, risico's en ondersteuning. Geen persoonsgegevens, circa 10–15 minuten.",
-  manifest: "/manifest.webmanifest",
   robots: {
     index: false,
     follow: false,
@@ -49,11 +47,6 @@ export const metadata: Metadata = {
     ],
     apple: "/icons/apple-touch-icon.png",
   },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Univé Vragenlijst",
-  },
 };
 
 export const viewport: Viewport = {
@@ -74,7 +67,6 @@ export default function RootLayout({
       <body className={`${openSans.className} antialiased`}>
         <AccessGuard>
           {children}
-          <Toaster />
         </AccessGuard>
       </body>
     </html>

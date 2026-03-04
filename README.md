@@ -1,30 +1,37 @@
-# Navigatiegesprek UI prototype
+# Univé Vragenlijst Melkveehouders
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+Anonieme vragenlijst voor melkveehouders over toekomstbeeld, risico's en ondersteuning. Gebouwd met Next.js (App Router), TypeScript en Tailwind CSS v4.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/info-50625908s-projects/v0-navigatiegesprek-ui-prototype)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/q8Ap3X3oF7T)
+## Ontwikkelen
 
-## Overview
+```bash
+npm install
+npm run dev
+```
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+Open [http://localhost:3000](http://localhost:3000).
 
-## Deployment
+## Scripts
 
-Your project is live at:
+| Script   | Beschrijving              |
+| -------- | ------------------------- |
+| `npm run dev`   | Development server        |
+| `npm run build` | Production build           |
+| `npm run start` | Production server          |
+| `npm run lint`  | ESLint                     |
 
-**[https://vercel.com/info-50625908s-projects/v0-navigatiegesprek-ui-prototype](https://vercel.com/info-50625908s-projects/v0-navigatiegesprek-ui-prototype)**
+## Omgeving
 
-## Build your app
+Kopieer `.env.example` naar `.env.local` en vul `OPENAI_API_KEY` (en optioneel `NEXT_PUBLIC_APP_URL`) in. Zie `.env.example` voor alle variabelen.
 
-Continue building your app on:
+## Techniek
 
-**[https://v0.app/chat/q8Ap3X3oF7T](https://v0.app/chat/q8Ap3X3oF7T)**
+- **Next.js 16** (App Router), **React 19**, **TypeScript**
+- **Tailwind CSS v4** – thema en varianten in `app/globals.css` (`@theme inline`)
+- **PWA** – `@ducanh2912/next-pwa` (service worker alleen in production)
+- **Samenvatting** – OpenAI API via `/api/summarize` (nodejs runtime)
 
-## How It Works
+## Build-artefacten
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+- `tsconfig.tsbuildinfo` en `.next/` zijn gegenereerd; staan in `.gitignore`.
+- Na wijzigingen in `package.json`: `npm install` uitvoeren om `package-lock.json` bij te werken.

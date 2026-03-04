@@ -27,35 +27,73 @@ function formatForReview(fd: UniveFormData): { section: string; lines: string[] 
     if (s) existing.lines.push(`${label}: ${s}`);
   };
 
+  // Deel 1 – Uw bedrijf
   push("Uw bedrijf", "Type bedrijf", fd.q1 === "Anders" && fd.q1_anders ? fd.q1_anders : fd.q1);
   if (fd.q2_cows > 0 || fd.q2_hectares > 0) {
-    push("Uw bedrijf", "Melkkoeien", fd.q2_cows);
-    push("Uw bedrijf", "Hectares", fd.q2_hectares);
+    push("Uw bedrijf", "Aantal melkvee", fd.q2_cows);
+    push("Uw bedrijf", "Aantal hectares landbouwgrond", fd.q2_hectares);
   }
-  push("Uw bedrijf", "Fase", fd.q3);
-  push("Toekomstbeeld", "Toekomstvertrouwen (1–7)", fd.q4);
-  if (fd.q5) push("Toekomstbeeld", "Grootste zorgen", fd.q5);
-  if (fd.q6.length) push("Toekomstbeeld", "Ontwikkelingen", fd.q6.join(", "));
-  push("Toekomstbeeld", "Invloed (1–7)", fd.q7);
-  push("Veranderingen", "Aanpassingen afgelopen 5 jaar", fd.q8);
-  if (fd.q8a) push("Veranderingen", "Welke aanpassingen", fd.q8a);
-  if (fd.q9.length) push("Veranderingen", "Aanleidingen", fd.q9.join(", "));
-  if (fd.q10) push("Veranderingen", "Concrete aanleiding", fd.q10);
-  push("Verdienmodel", "Stabiliteit (1–7)", fd.q11);
-  if (fd.q12) push("Verdienmodel", "Kwetsbaarheid", fd.q12);
-  if (fd.q13.length) push("Verdienmodel", "Afhankelijk van", fd.q13.join(", "));
-  if (fd.q14.length) push("Verdienmodel", "Ruimte om te sturen", fd.q14.join(", "));
-  push("Verdienmodel", "Behoefte verbreding (1–7)", fd.q15a);
-  push("Verdienmodel", "Mogelijkheden verbreding", fd.q15b);
-  if (fd.q16.length) push("Verdienmodel", "Vormen verbreding", fd.q16.join(", "));
-  if (fd.q17.length) push("Wat houdt tegen", "Houdt tegen", fd.q17.join(", "));
-  push("Wat houdt tegen", "Rol financiering (1–7)", fd.q18);
-  if (fd.q19.length) push("Ondersteuning", "Waardevolle ondersteuning", fd.q19.join(", "));
-  if (fd.q20) push("Ondersteuning", "Voorwaarden houtwallen", fd.q20);
-  if (fd.q21) push("Ondersteuning", "Voorwaarden bomen", fd.q21);
-  if (fd.q22) push("Afsluiting", "Liefst aanpassen", fd.q22);
-  if (fd.q23) push("Afsluiting", "Wat partijen moeten begrijpen", fd.q23);
-  if (fd.q_opmerkingen) push("Afsluiting", "Opmerkingen", fd.q_opmerkingen);
+  push("Uw bedrijf", "Fase van het bedrijf", fd.q3);
+
+  // Deel 2 – Huidige situatie en toekomstbeeld
+  if (fd.q4.length) push("Huidige situatie en toekomstbeeld", "Ontwikkelingen met meeste invloed", fd.q4.join(", "));
+  if (fd.q4.includes("Regelgeving") && fd.q4a.length)
+    push("Huidige situatie en toekomstbeeld", "Regelgeving die vooral speelt", fd.q4a.join(", "));
+  if (fd.q4.includes("Regelgeving") && fd.q4a.includes("Anders, namelijk:") && fd.q4a_anders)
+    push("Huidige situatie en toekomstbeeld", "Regelgeving anders", fd.q4a_anders);
+  push("Huidige situatie en toekomstbeeld", "Belang van verduurzaming (1–7)", fd.q5a);
+  push("Huidige situatie en toekomstbeeld", "Verwachte invloed CO₂-reductie (1–7)", fd.q5b);
+  push("Huidige situatie en toekomstbeeld", "Relevantie biodiversiteit (1–7)", fd.q5c);
+  if (fd.q5_toelichting)
+    push("Huidige situatie en toekomstbeeld", "Toelichting verduurzaming / CO₂ / biodiversiteit", fd.q5_toelichting);
+  if (fd.q6) push("Huidige situatie en toekomstbeeld", "Grootste zorgen komende 5–10 jaar", fd.q6);
+  push("Huidige situatie en toekomstbeeld", "Gevoel invloed op toekomst (1–7)", fd.q7);
+
+  // Deel 3 – Veranderingen in bedrijfsvoering
+  push("Veranderingen in bedrijfsvoering", "Aanpassingen afgelopen 5 jaar", fd.q8);
+  if (fd.q8a) push("Veranderingen in bedrijfsvoering", "Welke aanpassingen", fd.q8a);
+  if (fd.q9.length) push("Veranderingen in bedrijfsvoering", "Belangrijkste aanleidingen", fd.q9.join(", "));
+  if (fd.q9.includes("Anders, namelijk:") && fd.q9_anders)
+    push("Veranderingen in bedrijfsvoering", "Aanleidingen anders", fd.q9_anders);
+  if (fd.q9.includes("Nieuwe regelgeving") && fd.q9_regelgeving)
+    push("Veranderingen in bedrijfsvoering", "Welke regelgeving", fd.q9_regelgeving);
+  if (fd.q10) push("Veranderingen in bedrijfsvoering", "Aanleiding om (opnieuw) aanpassingen te doen", fd.q10);
+  if (fd.q11.length) push("Veranderingen in bedrijfsvoering", "Wat houdt u het meest tegen", fd.q11.join(", "));
+  if (fd.q11.includes("Anders, namelijk:") && fd.q11_anders)
+    push("Veranderingen in bedrijfsvoering", "Wat houdt tegen anders", fd.q11_anders);
+  if (fd.q11_toelichting)
+    push("Veranderingen in bedrijfsvoering", "Toelichting wat u tegenhoudt", fd.q11_toelichting);
+
+  // Deel 4 – Welke ondersteuning zou helpen?
+  push("Welke ondersteuning zou helpen", "Openheid voor ondersteuning van Univé (1–7)", fd.q12);
+  if (fd.q13) push("Welke ondersteuning zou helpen", "Vormen van ondersteuning die waardevol zijn", fd.q13);
+  if (fd.q14.length)
+    push("Welke ondersteuning zou helpen", "Andere modellen/verduurzamingsopties", fd.q14.join(", "));
+  if (fd.q14.includes("Anders, namelijk:") && fd.q14_anders)
+    push("Welke ondersteuning zou helpen", "Andere verduurzamingsopties anders", fd.q14_anders);
+
+  // Deel 5 – Verdienmodel en kwetsbaarheden
+  push("Verdienmodel en kwetsbaarheden", "Behoefte aan aanvullende inkomsten/risicospreiding (1–7)", fd.q15a);
+  push("Verdienmodel en kwetsbaarheden", "Mogelijkheden om inkomsten te verbreden/risico’s te spreiden", fd.q15b);
+  if (fd.q15b_toelichting)
+    push("Verdienmodel en kwetsbaarheden", "Toelichting bij mogelijkheden", fd.q15b_toelichting);
+  if (fd.q16.length)
+    push("Verdienmodel en kwetsbaarheden", "Wat rendabel ondernemen voor u betekent", fd.q16.join(", "));
+  if (fd.q16.includes("Anders, namelijk:") && fd.q16_anders)
+    push("Verdienmodel en kwetsbaarheden", "Rendabel ondernemen anders", fd.q16_anders);
+
+  // Deel 7 – Afsluiting
+  if (fd.q17)
+    push("Afsluiting", "Wat u het liefst zou aanpassen aan uw huidige bedrijfsvoering", fd.q17);
+  if (fd.q18)
+    push(
+      "Afsluiting",
+      "Wat partijen zoals verzekeraars beter moeten begrijpen van de praktijk op uw erf",
+      fd.q18,
+    );
+  if (fd.q19_toestemming_contact)
+    push("Afsluiting", "Toestemming voor contact", fd.q19_toestemming_contact);
+  if (fd.q19_opmerkingen) push("Afsluiting", "Aanvullende opmerkingen", fd.q19_opmerkingen);
   return sections;
 }
 
@@ -93,7 +131,7 @@ export default function ReviewPage() {
         <div className="mx-auto flex h-14 max-w-[900px] items-center justify-between px-4">
           <UniveLogo height={36} href="/intro" />
           <Link
-            href="/vragenlijst?stap=q22-q23"
+            href="/vragenlijst?stap=q19"
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -139,7 +177,7 @@ export default function ReviewPage() {
               <Sparkles className="mr-2 h-4 w-4" />
               Genereer samenvatting
             </Button>
-            <Link href="/vragenlijst?stap=q22-q23">
+            <Link href="/vragenlijst?stap=q19">
               <Button variant="outline" className="w-full rounded-xl">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Antwoorden aanpassen

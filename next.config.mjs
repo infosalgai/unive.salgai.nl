@@ -40,21 +40,7 @@ const pwa = withPWA({
           expiration: { maxEntries: 64, maxAgeSeconds: 30 * 24 * 60 * 60 },
         },
       },
-      // 4) RSC prefetch
-      {
-        urlPattern: ({ request, url, sameOrigin }) =>
-          sameOrigin &&
-          !url.pathname.startsWith("/api/") &&
-          request.headers.get("RSC") === "1" &&
-          request.headers.get("Next-Router-Prefetch") === "1",
-        handler: "NetworkFirst",
-        options: {
-          cacheName: "pages-rsc-prefetch",
-          expiration: { maxEntries: 32, maxAgeSeconds: 24 * 60 * 60 },
-          networkTimeoutSeconds: 10,
-        },
-      },
-      // 5) RSC (server components)
+      // 4) RSC (incl. prefetch): network-first
       {
         urlPattern: ({ request, url, sameOrigin }) =>
           sameOrigin && !url.pathname.startsWith("/api/") && request.headers.get("RSC") === "1",
@@ -65,7 +51,7 @@ const pwa = withPWA({
           networkTimeoutSeconds: 10,
         },
       },
-      // 6) Same-origin document/navigation (HTML): network-first
+      // 5) Same-origin document/navigation (HTML): network-first
       {
         urlPattern: ({ url, sameOrigin }) => sameOrigin && !url.pathname.startsWith("/api/"),
         handler: "NetworkFirst",
@@ -75,7 +61,7 @@ const pwa = withPWA({
           networkTimeoutSeconds: 10,
         },
       },
-      // 7) Cross-origin (fonts, etc.)
+      // 6) Cross-origin (fonts, etc.)
       {
         urlPattern: ({ sameOrigin }) => !sameOrigin,
         handler: "NetworkFirst",
@@ -90,12 +76,9 @@ const pwa = withPWA({
 });
 
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
+  // Verwijder ignoreBuildErrors zodra TypeScript-fouten zijn opgelost.
+  typescript: { ignoreBuildErrors: true },
+  images: { unoptimized: true },
 };
 
 export default pwa(nextConfig);
