@@ -38,8 +38,8 @@ export function AccessGuard({ children }: { children: React.ReactNode }) {
 
   if (!mounted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-background" role="status" aria-label="Laden">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden />
       </div>
     );
   }
@@ -48,8 +48,8 @@ export function AccessGuard({ children }: { children: React.ReactNode }) {
   const granted = typeof window !== "undefined" && localStorage.getItem(ACCESS_KEY) === "true";
   if (!isGate && !granted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-background" role="status" aria-label="Laden">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden />
       </div>
     );
   }

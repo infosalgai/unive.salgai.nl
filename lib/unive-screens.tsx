@@ -1,19 +1,44 @@
 "use client";
 
 import React from "react";
+import { Info } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { PiiTextarea } from "@/components/pii-textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { UniveFormData } from "@/lib/unive-questionnaire";
 
 const QUESTION_LABEL_CLASS = "mb-2 block text-base font-semibold text-foreground";
+
+/** Toont een term met een klein info-icoon; bij hover verschijnt uitleg voor de melkveehouder. */
+function TermWithTooltip({ term, explanation }: { term: string; explanation: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span>{term}</span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex shrink-0 rounded-full text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label={`Uitleg: ${term}`}
+          >
+            <Info className="h-3.5 w-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[260px]">
+          <p className="text-left">{explanation}</p>
+        </TooltipContent>
+      </Tooltip>
+    </span>
+  );
+}
 const OPTION_ROW_CLASS =
   "flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5";
 const HELPER_TEXT_CLASS = "text-xs text-muted-foreground";
 
-/** Slider 1–7 met links/rechts labels en cijfers eronder */
+/** Schaal 1–7: eerst de balk, daaronder de uitleg (links/rechts) en de cijfers 1–7 */
 function ScaleSlider({
   value,
   onValueChange,
@@ -27,34 +52,30 @@ function ScaleSlider({
 }) {
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-        <span className="text-sm text-muted-foreground whitespace-nowrap pr-1">{labelLeft}</span>
-        <Slider
-          value={[value]}
-          onValueChange={([v]) => onValueChange(v)}
-          min={1}
-          max={7}
-          step={1}
-          className="w-full"
-        />
-        <span className="text-sm text-muted-foreground whitespace-nowrap pl-1 text-right">{labelRight}</span>
-      </div>
-      <div className="grid grid-cols-[auto_1fr_auto] gap-3">
-        <span aria-hidden />
-        <div className="grid grid-cols-7 text-xs text-muted-foreground">
+      <Slider
+        value={[value]}
+        onValueChange={([v]) => onValueChange(v)}
+        min={1}
+        max={7}
+        step={1}
+        className="w-full"
+      />
+      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm text-muted-foreground">
+        <span className="whitespace-nowrap pr-1">{labelLeft}</span>
+        <div className="grid grid-cols-7 text-xs">
           {[1, 2, 3, 4, 5, 6, 7].map((n) => (
             <span key={n} className="tabular-nums text-center">
               {n}
             </span>
           ))}
         </div>
-        <span aria-hidden />
+        <span className="whitespace-nowrap pl-1 text-right">{labelRight}</span>
       </div>
     </div>
   );
 }
 
-/** Eén rij: label + slider 1–7 (voor meerdere sliders op één scherm) */
+/** Eén rij: label, dan balk 1–7, daaronder cijfers 1–7 (voor meerdere sliders op één scherm) */
 function SliderRow({
   label,
   value,
@@ -65,18 +86,29 @@ function SliderRow({
   onValueChange: (v: number) => void;
 }) {
   return (
-    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-      <Label className="min-w-[10rem] text-sm font-medium text-foreground">{label}</Label>
-      <div className="flex flex-1 items-center gap-2">
-        <Slider
-          value={[value]}
-          onValueChange={([v]) => onValueChange(v)}
-          min={1}
-          max={7}
-          step={1}
-          className="flex-1"
-        />
-        <span className="w-6 tabular-nums text-sm text-muted-foreground">{value}</span>
+    <div className="space-y-2">
+      <Label className="text-sm font-medium text-foreground">{label}</Label>
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <Slider
+            value={[value]}
+            onValueChange={([v]) => onValueChange(v)}
+            min={1}
+            max={7}
+            step={1}
+            className="flex-1"
+          />
+          <span className="w-6 shrink-0 tabular-nums text-sm text-muted-foreground" aria-hidden>
+            {value}
+          </span>
+        </div>
+        <div className="grid grid-cols-7 text-xs text-muted-foreground">
+          {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+            <span key={n} className="tabular-nums text-center">
+              {n}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -204,35 +236,50 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 1 – Je bedrijf",
     questionNumber: 1,
     title: "Wat typeert je bedrijf het beste?",
+    subtitle: "Denk aan je manier van boeren: gangbaar, biologisch of natuurinclusief. Kies het type dat het best past.",
     choiceField: "q1",
-    render: (fd, update, _, setPiiBlocked) => (
-      <>
-        <RadioGroup value={fd.q1 ?? ""} onValueChange={(v) => update({ q1: v })} className="space-y-2">
-          {Q1_OPTIONS.filter((o) => o.id !== "Anders").map((opt) => (
-            <div key={opt.id} className={OPTION_ROW_CLASS}>
-              <RadioGroupItem value={opt.id} id={`q1-${opt.id}`} />
-              <Label htmlFor={`q1-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">{opt.label}</Label>
+    render: (fd, update, _, setPiiBlocked) => {
+      const q1Tooltips: Record<string, string> = {
+        Gangbaar: "Conventionele melkveehouderij, niet gecertificeerd biologisch of natuurinclusief.",
+        Natuurinclusief: "Boeren met meer ruimte voor natuur op en rond het bedrijf (bijv. weidevogels, kruidenrijk grasland), zonder per se biologisch te zijn.",
+        Biologisch: "Gecertificeerd biologisch: o.a. biologisch voer, weidegang, beperkt gebruik van middelen.",
+        "In omschakeling": "Je bent bezig met de overstap naar bijvoorbeeld biologisch of natuurinclusief.",
+      };
+      return (
+        <>
+          <RadioGroup value={fd.q1 ?? ""} onValueChange={(v) => update({ q1: v })} className="space-y-2">
+            {Q1_OPTIONS.filter((o) => o.id !== "Anders").map((opt) => (
+              <div key={opt.id} className={OPTION_ROW_CLASS}>
+                <RadioGroupItem value={opt.id} id={`q1-${opt.id}`} />
+                <Label htmlFor={`q1-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">
+                  {q1Tooltips[opt.label] ? (
+                    <TermWithTooltip term={opt.label} explanation={q1Tooltips[opt.label]} />
+                  ) : (
+                    opt.label
+                  )}
+                </Label>
+              </div>
+            ))}
+            {Q1_OPTIONS.filter((o) => o.id === "Anders").map((opt) => (
+              <div key={opt.id} className={OPTION_ROW_CLASS}>
+                <RadioGroupItem value={opt.id} id={`q1-${opt.id}`} />
+                <Label htmlFor={`q1-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">{opt.label}</Label>
+              </div>
+            ))}
+          </RadioGroup>
+          {fd.q1 === "Anders" && (
+            <div className="mt-3">
+              <Input
+                value={fd.q1_anders ?? ""}
+                onChange={(e) => update({ q1_anders: e.target.value })}
+                placeholder="Anders, namelijk"
+                maxLength={200}
+              />
             </div>
-          ))}
-          {Q1_OPTIONS.filter((o) => o.id === "Anders").map((opt) => (
-            <div key={opt.id} className={OPTION_ROW_CLASS}>
-              <RadioGroupItem value={opt.id} id={`q1-${opt.id}`} />
-              <Label htmlFor={`q1-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">{opt.label}</Label>
-            </div>
-          ))}
-        </RadioGroup>
-        {fd.q1 === "Anders" && (
-          <div className="mt-3">
-            <Input
-              value={fd.q1_anders ?? ""}
-              onChange={(e) => update({ q1_anders: e.target.value })}
-              placeholder="Anders, namelijk"
-              maxLength={200}
-            />
-          </div>
-        )}
-      </>
-    ),
+          )}
+        </>
+      );
+    },
   });
 
   screens.push({
@@ -240,7 +287,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 1 – Je bedrijf",
     questionNumber: 2,
     title: "Hoe groot is je bedrijf?",
-    subtitle: "Geef aantallen (gehele getallen).",
+    subtitle: "Geef aantallen in gehele getallen. Melkkoeien = dieren die melk geven; hectares = totaal landbouwgrond van je bedrijf.",
     render: (fd, update) => (
       <div className="space-y-4">
         <div>
@@ -280,6 +327,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 1 – Je bedrijf",
     questionNumber: 3,
     title: "In welke fase bevindt je bedrijf zich?",
+    subtitle: "Waar staat je bedrijf de komende jaren: groei, stabilisatie, overdracht of nog onzeker?",
     choiceField: "q3",
     render: (fd, update) => (
       <RadioGroup value={fd.q3 ?? ""} onValueChange={(v) => update({ q3: v })} className="space-y-2">
@@ -299,7 +347,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 4,
     title: "Welke ontwikkelingen hebben de meeste invloed op je bedrijfsvoering?",
-    subtitle: "Kies maximaal 3.",
+    subtitle: "Denk aan wat op jouw melkveebedrijf het zwaarst weegt. Kies maximaal 3.",
     multiChoiceField: "q4",
     maxChoices: 3,
     render: (fd, update, toggleMulti) => {
@@ -348,7 +396,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 4,
     title: "Welke regelgeving speelt vooral?",
-    subtitle: "Deze vraag is relevant als u problemen ervaart met de huidige regelgeving. U kunt meerdere antwoorden kiezen.",
+    subtitle: "Je hebt bij de vorige vraag 'Regelgeving' gekozen. Welke regels hebben op jouw melkveebedrijf de meeste impact? Meerdere antwoorden mogelijk.",
     multiChoiceField: "q4a",
     maxChoices: undefined,
     render: (fd, update, toggleMulti) => {
@@ -362,6 +410,12 @@ export function buildUniveScreens(): UniveScreen[] {
         }
         return null;
       }
+      const q4aTooltips: Record<string, string> = {
+        "Natura2000 / ligging nabij natuurgebied": "Europese natuurgebieden; ligging in of nabij zo’n gebied heeft gevolgen voor vergunningen en stikstof.",
+        "Afbouw derogatie / nitraateisen": "Derogatie = uitzondering op de norm voor stikstof in mest; afbouw betekent strengere nitraateisen voor grasland.",
+        "Waterkwaliteitseisen (KRW)": "Kaderrichtlijn Water: eisen aan de kwaliteit van sloten en oppervlaktewater op en rond je bedrijf.",
+        "Dierwelzijns- en stalregelgeving": "Regels over huisvesting, weidegang en welzijn van melkvee.",
+      };
       return (
         <div className="space-y-3">
           <p className={HELPER_TEXT_CLASS}>Meerdere antwoorden mogelijk.</p>
@@ -371,11 +425,23 @@ export function buildUniveScreens(): UniveScreen[] {
                 key={opt}
                 type="button"
                 onClick={() => toggleMulti("q4a", opt)}
-                className={`rounded-full border px-4 py-2 text-sm ${
+                className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm ${
                   selected.includes(opt) ? "border-primary bg-primary/10" : "border-border"
                 }`}
               >
                 {opt}
+                {q4aTooltips[opt] && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex shrink-0 cursor-help" tabIndex={0} onClick={(e) => e.stopPropagation()}>
+                        <Info className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[260px]">
+                      <p className="text-left">{q4aTooltips[opt]}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </button>
             ))}
           </div>
@@ -400,6 +466,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 5,
     title: "In hoeverre is verduurzaming volgens jou van belang voor de continuïteit van je bedrijf?",
+    subtitle: "Verduurzaming: bijvoorbeeld minder uitstoot, meer biodiversiteit, kringlooplandbouw of aanpassing aan klimaat.",
     render: (fd, update) => (
       <ScaleSlider
         value={fd.q5a ?? 4}
@@ -414,7 +481,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q5b",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 5,
-    title: "In hoeverre verwacht u dat CO₂-reductie invloed zal hebben op uw bedrijf in de komende 10 jaar?",
+    title: "In hoeverre verwacht je dat CO₂-reductie invloed zal hebben op je bedrijf in de komende 10 jaar?",
+    subtitle: "CO₂-reductie: eisen vanuit klimaatbeleid of keten (bijv. methaan, broeikasgassen) voor jouw melkveebedrijf.",
     render: (fd, update) => (
       <ScaleSlider
         value={fd.q5b ?? 4}
@@ -429,7 +497,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q5c",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 5,
-    title: "In hoeverre ziet u biodiversiteit als relevant voor uw bedrijfsvoering?",
+    title: "In hoeverre zie je biodiversiteit als relevant voor je bedrijfsvoering?",
+    subtitle: "Biodiversiteit: variatie in planten en dieren op en rond je bedrijf (weidevogels, kruidenrijk grasland, sloten, etc.).",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <div className="space-y-4">
@@ -458,8 +527,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q6",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 6,
-    title: "Wat zijn op dit moment de grootste zorgen voor uw bedrijf voor de komende 5–10 jaar?",
-    subtitle: "Het gaat hier om uw bedrijf: wat houdt u als ondernemer het meest bezig?",
+    title: "Wat zijn op dit moment de grootste zorgen voor je bedrijf voor de komende 5–10 jaar?",
+    subtitle: "Denk aan jouw melkveebedrijf: wat houdt jou als ondernemer het meest bezig? Bijv. regelgeving, rendement, opvolging of klimaat.",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <PiiTextarea
@@ -477,7 +546,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q7",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 7,
-    title: "Gelet op alle regelgeving: in hoeverre heeft u het gevoel zelf invloed te hebben op de toekomst van uw bedrijf?",
+    title: "Gelet op alle regelgeving: in hoeverre heb je het gevoel zelf invloed te hebben op de toekomst van je bedrijf?",
+    subtitle: "Denk aan vergunningen, stikstof, mest, klimaat en andere regels die op jouw bedrijf van toepassing zijn.",
     render: (fd, update) => (
       <ScaleSlider
         value={fd.q7 ?? 4}
@@ -493,7 +563,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q8",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 8,
-    title: "Heeft u de afgelopen 5 jaar aanpassingen gedaan in uw bedrijfsvoering?",
+    title: "Heb je de afgelopen 5 jaar aanpassingen gedaan in je bedrijfsvoering?",
+    subtitle: "Bijvoorbeeld aanpassingen in stalbouw, voer, weidegang, grondgebruik of mest op je melkveebedrijf.",
     choiceField: "q8",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
@@ -509,7 +580,7 @@ export function buildUniveScreens(): UniveScreen[] {
         {(fd.q8 === "Ja, meerdere" || fd.q8 === "Ja, beperkt") && (
           <>
             <div>
-              <Label className={QUESTION_LABEL_CLASS}>Kunt u kort aangeven welke aanpassingen dit waren? (bijv. stalbouw, voer, grondgebruik)</Label>
+              <Label className={QUESTION_LABEL_CLASS}>Kun je kort aangeven welke aanpassingen dit waren? (bijv. stalbouw, voer, grondgebruik)</Label>
               <PiiTextarea
                 value={fd.q8a ?? ""}
                 onChange={(v) => update({ q8a: v })}
@@ -529,8 +600,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q9",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 9,
-    title: "Wat waren de belangrijkste oorzaken van de aanpassingen in uw bedrijfsvoering?",
-    subtitle: "Sluit aan op uw eerdere antwoord. Kies maximaal 2 aanleidingen.",
+    title: "Wat waren de belangrijkste oorzaken van de aanpassingen in je bedrijfsvoering?",
+    subtitle: "Sluit aan op je eerdere antwoord. Kies maximaal 2 aanleidingen.",
     multiChoiceField: "q9",
     maxChoices: 2,
     hasPiiField: true,
@@ -543,7 +614,7 @@ export function buildUniveScreens(): UniveScreen[] {
         }
         return (
           <p className={HELPER_TEXT_CLASS}>
-            Deze vraag is niet van toepassing omdat u geen aanpassingen in de afgelopen 5 jaar heeft aangegeven.
+            Deze vraag is niet van toepassing omdat je geen aanpassingen in de afgelopen 5 jaar hebt aangegeven.
           </p>
         );
       }
@@ -606,7 +677,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q10",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 10,
-    title: "Wat zou voor u een duidelijke aanleiding zijn om (opnieuw) aanpassingen te doen?",
+    title: "Wat zou voor jou een duidelijke aanleiding zijn om (opnieuw) aanpassingen te doen?",
     subtitle: "Bijvoorbeeld: zekerheid over vergoedingen, duidelijkheid in regelgeving, beschikbare kennis of begeleiding, financiële ondersteuning.",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
@@ -614,20 +685,20 @@ export function buildUniveScreens(): UniveScreen[] {
         value={fd.q10 ?? ""}
         onChange={(v) => update({ q10: v })}
         onPiiChange={setPiiBlocked}
-        placeholder="Beschrijf wat u zou helpen om de stap te zetten..."
+        placeholder="Beschrijf wat je zou helpen om de stap te zetten..."
         rows={4}
         maxLength={1000}
       />
     ),
   });
 
-  // Deel 4 – Verdienmodel en kwetsbaarheden
+  // Deel 3 – Veranderingen (vervolg): barrières
   screens.push({
     id: "q11",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 11,
-    title: "Wat houdt u tegen om aanpassingen in uw bedrijfsvoering te doen?",
-    subtitle: "Sluit aan op de vorige vragen. Kies maximaal 2.",
+    title: "Wat houdt je tegen om aanpassingen in je bedrijfsvoering te doen?",
+    subtitle: "Sluit aan op de vorige vragen. Denk aan wat je tegenhoudt om te verduurzamen of te investeren. Kies maximaal 2.",
     multiChoiceField: "q11",
     maxChoices: 2,
     hasPiiField: true,
@@ -696,8 +767,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q12",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     questionNumber: 12,
-    title: "In hoeverre staat u open voor ondersteuning van Univé per type?",
-    subtitle: "1 = niet open, 7 = zeer open. Sleep de schuif per onderwerp.",
+    title: "In hoeverre sta je open voor ondersteuning van Univé per type?",
+    subtitle: "Geef per onderwerp aan hoe open je ervoor staat (1 = niet open, 7 = zeer open). Het gaat om ondersteuning voor jouw melkveebedrijf.",
     render: (fd, update) => (
       <div className="space-y-5">
         {Q12_SLIDER_OPTIONS.map(({ key, label }) => (
@@ -724,7 +795,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q13",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     questionNumber: 13,
-    title: "Welke vormen van ondersteuning zijn voor u het meest waardevol?",
+    title: "Welke vormen van ondersteuning zijn voor jou het meest waardevol?",
     subtitle: "Geef per type aan hoe waardevol (1 = weinig, 7 = zeer waardevol).",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
@@ -756,11 +827,18 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q14",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     questionNumber: 14,
-    title: "Zou u andere modellen of verduurzamingsopties overwegen?",
-    subtitle: "Onderzoekend: meerdere antwoorden mogelijk. Geen verplichting.",
+    title: "Zou je andere modellen of verduurzamingsopties overwegen?",
+    subtitle: "Denk aan mogelijkheden naast of binnen je huidige melkveehouderij. Meerdere antwoorden mogelijk. Geen verplichting.",
     multiChoiceField: "q14",
     render: (fd, update, toggleMulti) => {
       const q14 = Array.isArray(fd.q14) ? fd.q14 : [];
+      const q14Tooltips: Record<string, string> = {
+        "Landschapselementen als houtwallen": "Bijv. houtwallen, singels, poelen: natuur op je perceel die ook waarde heeft voor biodiversiteit.",
+        "Agroforestry": "Combinatie van landbouw en bomen of struiken op hetzelfde perceel (bijv. bomen in de wei of langs percelen).",
+        "Teelten als hennep": "Andere gewassen naast gras, zoals hennep of andere nicheteelten, voor vezel of andere afzet.",
+        "Productief kruidenrijk grasland": "Grasland met meer kruiden en bloemen, goed voor weidevogels en insecten, met behoud van opbrengst.",
+        "Biobased bouwen": "Gebruik van natuurlijke materialen (bijv. hennep, hout) voor bouw of verbouw op je erf.",
+      };
       return (
       <div className="space-y-3">
         <div className="flex flex-wrap gap-2">
@@ -769,11 +847,23 @@ export function buildUniveScreens(): UniveScreen[] {
               key={opt}
               type="button"
               onClick={() => toggleMulti("q14", opt)}
-              className={`rounded-full border px-4 py-2 text-sm ${
+              className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm ${
                 q14.includes(opt) ? "border-primary bg-primary/10" : "border-border"
               }`}
             >
               {opt}
+              {q14Tooltips[opt] && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex shrink-0 cursor-help" tabIndex={0} onClick={(e) => e.stopPropagation()}>
+                      <Info className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[280px]">
+                    <p className="text-left">{q14Tooltips[opt]}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </button>
           ))}
         </div>
@@ -803,8 +893,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q15a",
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     questionNumber: 15,
-    title: "In hoeverre heeft u behoefte aan aanvullende inkomsten of risicospreiding?",
-    subtitle: "Geef per optie aan (1 = geen behoefte, 7 = sterke behoefte).",
+    title: "In hoeverre heb je behoefte aan aanvullende inkomsten of risicospreiding?",
+    subtitle: "Denk aan inkomsten of zekerheid naast de melkproductie. Geef per optie aan (1 = geen behoefte, 7 = sterke behoefte).",
     render: (fd, update) => (
       <div className="space-y-5">
         {Q15A_SLIDER_OPTIONS.map(({ key, label }) => (
@@ -824,7 +914,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     questionNumber: 16,
     subtitle: "Denk aan nevenactiviteiten, pacht, verzekering, andere teelten of inkomensbronnen naast de melkveehouderij.",
-    title: "Ziet u mogelijkheden om uw inkomsten te verbreden of risico’s te spreiden?",
+    title: "Zie je mogelijkheden om je inkomsten te verbreden of risico’s te spreiden?",
     hasPiiField: true,
     choiceField: "q15b",
     render: (fd, update, _, setPiiBlocked) => (
@@ -845,7 +935,7 @@ export function buildUniveScreens(): UniveScreen[] {
             value={fd.q15b_toelichting ?? ""}
             onChange={(v) => update({ q15b_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Welke mogelijkheden ziet u, of waarom weinig?"
+            placeholder="Welke mogelijkheden zie je, of waarom weinig?"
             rows={3}
             maxLength={600}
           />
@@ -866,8 +956,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q16",
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     questionNumber: 16,
-    title: "Wat betekent rendabel ondernemen voor u?",
-    subtitle: "Geef per aspect aan hoe belangrijk (1 = weinig, 7 = zeer belangrijk).",
+    title: "Wat betekent rendabel ondernemen voor jou?",
+    subtitle: "Geef per aspect aan hoe belangrijk dit voor jouw bedrijf is (1 = weinig, 7 = zeer belangrijk).",
     render: (fd, update) => (
       <div className="space-y-5">
         {Q16_SLIDER_OPTIONS.map(({ key, label }) => (
@@ -891,19 +981,20 @@ export function buildUniveScreens(): UniveScreen[] {
     ),
   });
 
-  // Deel 7 – Afsluiting
+  // Deel 6 – Afsluiting
   screens.push({
     id: "q17",
-    group: "Deel 7 – Afsluiting",
+    group: "Deel 6 – Afsluiting",
     questionNumber: 17,
-    title: "Wat zou u idealiter het liefst aanpassen aan uw huidige bedrijfsvoering?",
+    title: "Wat zou je idealiter het liefst aanpassen aan je huidige bedrijfsvoering?",
+    subtitle: "Denk aan je melkveebedrijf: wat zou je het eerste willen veranderen als het kon?",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <PiiTextarea
         value={fd.q17 ?? ""}
         onChange={(v) => update({ q17: v })}
         onPiiChange={setPiiBlocked}
-        placeholder="Beschrijf kort wat u het liefst zou veranderen."
+        placeholder="Beschrijf kort wat je het liefst zou veranderen."
         rows={4}
         maxLength={800}
       />
@@ -912,9 +1003,10 @@ export function buildUniveScreens(): UniveScreen[] {
 
   screens.push({
     id: "q18",
-    group: "Deel 7 – Afsluiting",
+    group: "Deel 6 – Afsluiting",
     questionNumber: 18,
     title: "Wat moeten partijen zoals verzekeraars beter begrijpen van de praktijk op je erf?",
+    subtitle: "Wat zouden zij beter moeten zien, horen of begrijpen over het runnen van een melkveebedrijf?",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <PiiTextarea
@@ -930,9 +1022,10 @@ export function buildUniveScreens(): UniveScreen[] {
 
   screens.push({
     id: "q19",
-    group: "Deel 7 – Afsluiting",
+    group: "Deel 6 – Afsluiting",
     questionNumber: 19,
     title: "Sta je ervoor open dat er contact met je wordt opgenomen?",
+    subtitle: "Optioneel. Als je 'Ja' kiest, kunnen we je gegevens gebruiken om later contact op te nemen over deze vragenlijst of ondersteuning.",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => {
       const toestemming = fd.q19_toestemming_contact ?? "";

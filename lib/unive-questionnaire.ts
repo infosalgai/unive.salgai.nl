@@ -69,7 +69,7 @@ export interface UniveFormData {
   q16_waardebehoud: number
   q16_anders: string
 
-  // Deel 7 – Afsluiting
+  // Deel 6 – Afsluiting
   q17: string
   q18: string
   q19_toestemming_contact: string
@@ -145,7 +145,7 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q16_waardebehoud: 4,
   q16_anders: "",
 
-  // Deel 7 – Afsluiting
+  // Deel 6 – Afsluiting
   q17: "",
   q18: "",
   q19_toestemming_contact: "",
@@ -292,7 +292,7 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   push("Rendabel: waardebehoud (1–7)", fd.q16_waardebehoud)
   if (fd.q16_anders) push("Rendabel ondernemen anders", fd.q16_anders)
 
-  // Deel 7 – Afsluiting (geen PII opnemen)
+  // Deel 6 – Afsluiting (geen PII opnemen)
   if (fd.q17) push("Vrije wens voor aanpassing in bedrijfsvoering", fd.q17)
   if (fd.q18) push("Wat verzekeraars beter moeten begrijpen van de praktijk", fd.q18)
   if (fd.q19_opmerkingen) push("Aanvullende opmerkingen", fd.q19_opmerkingen)

@@ -27,8 +27,8 @@ export default function ReviewPage() {
 
   if (formData === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-background" role="status" aria-label="Laden">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden />
       </div>
     );
   }
@@ -37,7 +37,7 @@ export default function ReviewPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="mx-auto flex h-16 max-w-[900px] items-center px-4">
-          <UniveLogo height={52} href="/intro" />
+          <UniveLogo height={80} href="/intro" />
         </div>
       </header>
 
@@ -47,9 +47,12 @@ export default function ReviewPage() {
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
               <CheckCircle className="h-8 w-8" />
             </div>
-            <h1 className="text-xl font-semibold text-foreground">Je antwoorden zijn verwerkt</h1>
+            <h1 className="text-xl font-semibold text-foreground">Maak een samenvatting op basis van je antwoorden</h1>
             <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              Bedankt voor het invullen van de vragenlijst. Je kunt nu een samenvatting van je antwoorden laten genereren, of eerst nog iets aanpassen.
+              Bedankt voor het invullen van de vragenlijst. Je kunt nu een samenvatting laten genereren: een lopend verhaal in eenvoudige taal, op basis van wat je hebt ingevuld. Of pas eerst nog iets aan.
+            </p>
+            <p className="mt-3 max-w-md text-xs text-muted-foreground">
+              De samenvatting wordt gegenereerd met behulp van een taalmodel: je antwoorden worden omgezet naar een begrijpelijke, doorlopende tekst in de &quot;je&quot;-vorm, zonder advies – puur een weergave van jouw situatie en keuzes.
             </p>
           </div>
 
