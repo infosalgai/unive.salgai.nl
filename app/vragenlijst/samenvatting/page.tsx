@@ -54,7 +54,10 @@ export default function SamenvattingPage() {
       .then((data) => {
         if (cancelled) return;
         if (data.summary) setSummaryText(data.summary);
-        else setSummaryText("De samenvatting kon niet worden gegenereerd. Controleer je verbinding of ga terug om je antwoorden te controleren.");
+        else {
+          const msg = data?.error ?? "De samenvatting kon niet worden gegenereerd. Controleer je verbinding of ga terug om je antwoorden te controleren.";
+          setSummaryText(msg);
+        }
       })
       .catch(() => {
         if (!cancelled) setSummaryText("De samenvatting kon niet worden gegenereerd. Controleer je verbinding en probeer het opnieuw.");

@@ -8,15 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import {
-  type UniveFormData,
-  UNIVE_INITIAL_FORM_DATA,
-  UNIVE_TOTAL_QUESTIONS,
-} from "@/lib/unive-questionnaire";
+import { type UniveFormData, UNIVE_INITIAL_FORM_DATA } from "@/lib/unive-questionnaire";
 import { buildUniveScreens, isUniveStepValid } from "@/lib/unive-screens";
 
 const FORM_STORAGE_KEY = "univeFormV2";
 const QUESTION_LABEL_CLASS = "mb-2 block text-base font-semibold text-foreground";
+
+const ARRAY_FIELDS: (keyof UniveFormData)[] = ["q4", "q4a", "q9", "q11", "q14", "q16"];
 
 export default function VragenlijstPage() {
   const router = useRouter();
@@ -32,7 +30,11 @@ export default function VragenlijstPage() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as UniveFormData;
-        setFormData((prev) => ({ ...prev, ...parsed }));
+        const normalized = { ...parsed };
+        for (const key of ARRAY_FIELDS) {
+          if (!Array.isArray(normalized[key])) (normalized as Record<string, unknown>)[key] = [];
+        }
+        setFormData((prev) => ({ ...prev, ...normalized }));
       } catch {
         // ignore
       }
@@ -53,7 +55,8 @@ export default function VragenlijstPage() {
       : allScreens.findIndex((s) => s.id === stepFromUrl)
   );
   const currentScreen = allScreens[currentScreenIndex];
-  const overallPercent = Math.round(((currentScreenIndex + 1) / UNIVE_TOTAL_QUESTIONS) * 100);
+  const totalScreens = allScreens.length;
+  const overallPercent = Math.round(((currentScreenIndex + 1) / totalScreens) * 100);
 
   const update = useCallback((partial: Partial<UniveFormData>) => {
     setFormData((prev) => ({ ...prev, ...partial }));
@@ -85,7 +88,7 @@ export default function VragenlijstPage() {
     while (idx < allScreens.length) {
       const candidate = allScreens[idx];
       // q4a alleen tonen als bij q4 "Regelgeving" is aangevinkt
-      if (candidate.id === "q4a" && !formData.q4.includes("Regelgeving")) {
+      if (candidate.id === "q4a" && !(Array.isArray(formData.q4) && formData.q4.includes("Regelgeving"))) {
         idx++;
         continue;
       }
@@ -103,7 +106,7 @@ export default function VragenlijstPage() {
     let idx = currentScreenIndex - 1;
     while (idx >= 0) {
       const candidate = allScreens[idx];
-      if (candidate.id === "q4a" && !formData.q4.includes("Regelgeving")) {
+      if (candidate.id === "q4a" && !(Array.isArray(formData.q4) && formData.q4.includes("Regelgeving"))) {
         idx--;
         continue;
       }
@@ -169,7 +172,7 @@ export default function VragenlijstPage() {
                 />
               </div>
               <span className="min-w-[6rem] text-right text-sm font-medium text-muted-foreground tabular-nums">
-                Vraag {currentScreenIndex + 1}/{UNIVE_TOTAL_QUESTIONS} ({overallPercent}%)
+                Vraag {currentScreenIndex + 1}/{totalScreens} ({overallPercent}%)
               </span>
             </div>
           </div>

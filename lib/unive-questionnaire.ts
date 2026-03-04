@@ -144,9 +144,11 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   push("Fase bedrijf", fd.q3)
 
   // Deel 2 – Huidige situatie en toekomstbeeld
-  if (fd.q4.length) push("Ontwikkelingen met meeste invloed", fd.q4)
-  if (fd.q4.includes("Regelgeving") && fd.q4a.length) push("Regelgeving met meeste invloed", fd.q4a)
-  if (fd.q4.includes("Regelgeving") && fd.q4a.includes("Anders") && fd.q4a_anders)
+  const q4 = Array.isArray(fd.q4) ? fd.q4 : [];
+  const q4a = Array.isArray(fd.q4a) ? fd.q4a : [];
+  if (q4.length) push("Ontwikkelingen met meeste invloed", q4)
+  if (q4.includes("Regelgeving") && q4a.length) push("Regelgeving met meeste invloed", q4a)
+  if (q4.includes("Regelgeving") && q4a.includes("Anders") && fd.q4a_anders)
     push("Regelgeving anders", fd.q4a_anders)
   push("Belang verduurzaming voor continuïteit (1–7)", fd.q5a)
   push("Verwachte invloed CO₂-reductie komende 10 jaar (1–7)", fd.q5b)
@@ -158,26 +160,30 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   // Deel 3 – Veranderingen in bedrijfsvoering
   push("Aanpassingen in bedrijfsvoering afgelopen 5 jaar", fd.q8)
   if (fd.q8a) push("Welke aanpassingen", fd.q8a)
-  if (fd.q9.length) push("Belangrijkste aanleidingen voor aanpassingen", fd.q9)
-  if (fd.q9.includes("Anders") && fd.q9_anders) push("Aanleidingen anders", fd.q9_anders)
-  if (fd.q9.includes("Nieuwe regelgeving") && fd.q9_regelgeving) push("Welke regelgeving als aanleiding", fd.q9_regelgeving)
+  const q9 = Array.isArray(fd.q9) ? fd.q9 : [];
+  const q11 = Array.isArray(fd.q11) ? fd.q11 : [];
+  if (q9.length) push("Belangrijkste aanleidingen voor aanpassingen", q9)
+  if (q9.includes("Anders") && fd.q9_anders) push("Aanleidingen anders", fd.q9_anders)
+  if (q9.includes("Nieuwe regelgeving") && fd.q9_regelgeving) push("Welke regelgeving als aanleiding", fd.q9_regelgeving)
   if (fd.q10) push("Aanleiding om (opnieuw) aanpassingen te doen", fd.q10)
-  if (fd.q11.length) push("Wat houdt het meest tegen", fd.q11)
-  if (fd.q11.includes("Anders") && fd.q11_anders) push("Wat houdt tegen anders", fd.q11_anders)
+  if (q11.length) push("Wat houdt het meest tegen", q11)
+  if (q11.includes("Anders") && fd.q11_anders) push("Wat houdt tegen anders", fd.q11_anders)
   if (fd.q11_toelichting) push("Toelichting wat het meest tegenhoudt", fd.q11_toelichting)
 
   // Deel 4 – Welke ondersteuning zou helpen?
   push("Openheid voor ondersteuning van Univé (1–7)", fd.q12)
   if (fd.q13) push("Gewenste vormen van ondersteuning", fd.q13)
-  if (fd.q14.length) push("Andere modellen of verduurzamingsopties", fd.q14)
-  if (fd.q14.includes("Anders, namelijk:") && fd.q14_anders) push("Andere verduurzamingsopties anders", fd.q14_anders)
+  const q14 = Array.isArray(fd.q14) ? fd.q14 : [];
+  const q16 = Array.isArray(fd.q16) ? fd.q16 : [];
+  if (q14.length) push("Andere modellen of verduurzamingsopties", q14)
+  if (q14.includes("Anders, namelijk:") && fd.q14_anders) push("Andere verduurzamingsopties anders", fd.q14_anders)
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
   push("Behoefte aanvullende inkomsten / risicospreiding (1–7)", fd.q15a)
   push("Ervaren mogelijkheden om inkomsten te verbreden of risico's te spreiden", fd.q15b)
   if (fd.q15b_toelichting) push("Toelichting mogelijkheden verbreding / risicospreiding", fd.q15b_toelichting)
-  if (fd.q16.length) push("Wat betekent rendabel ondernemen", fd.q16)
-  if (fd.q16.includes("Anders, namelijk:") && fd.q16_anders) push("Rendabel ondernemen anders", fd.q16_anders)
+  if (q16.length) push("Wat betekent rendabel ondernemen", q16)
+  if (q16.includes("Anders, namelijk:") && fd.q16_anders) push("Rendabel ondernemen anders", fd.q16_anders)
 
   // Deel 7 – Afsluiting (geen PII opnemen)
   if (fd.q17) push("Vrije wens voor aanpassing in bedrijfsvoering", fd.q17)

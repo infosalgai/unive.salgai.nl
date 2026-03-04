@@ -36,10 +36,12 @@ function formatForReview(fd: UniveFormData): { section: string; lines: string[] 
   push("Uw bedrijf", "Fase van het bedrijf", fd.q3);
 
   // Deel 2 – Huidige situatie en toekomstbeeld
-  if (fd.q4.length) push("Huidige situatie en toekomstbeeld", "Ontwikkelingen met meeste invloed", fd.q4.join(", "));
-  if (fd.q4.includes("Regelgeving") && fd.q4a.length)
-    push("Huidige situatie en toekomstbeeld", "Regelgeving die vooral speelt", fd.q4a.join(", "));
-  if (fd.q4.includes("Regelgeving") && fd.q4a.includes("Anders, namelijk:") && fd.q4a_anders)
+  const q4 = Array.isArray(fd.q4) ? fd.q4 : [];
+  const q4a = Array.isArray(fd.q4a) ? fd.q4a : [];
+  if (q4.length) push("Huidige situatie en toekomstbeeld", "Ontwikkelingen met meeste invloed", q4.join(", "));
+  if (q4.includes("Regelgeving") && q4a.length)
+    push("Huidige situatie en toekomstbeeld", "Regelgeving die vooral speelt", q4a.join(", "));
+  if (q4.includes("Regelgeving") && q4a.includes("Anders, namelijk:") && fd.q4a_anders)
     push("Huidige situatie en toekomstbeeld", "Regelgeving anders", fd.q4a_anders);
   push("Huidige situatie en toekomstbeeld", "Belang van verduurzaming (1–7)", fd.q5a);
   push("Huidige situatie en toekomstbeeld", "Verwachte invloed CO₂-reductie (1–7)", fd.q5b);
@@ -52,14 +54,16 @@ function formatForReview(fd: UniveFormData): { section: string; lines: string[] 
   // Deel 3 – Veranderingen in bedrijfsvoering
   push("Veranderingen in bedrijfsvoering", "Aanpassingen afgelopen 5 jaar", fd.q8);
   if (fd.q8a) push("Veranderingen in bedrijfsvoering", "Welke aanpassingen", fd.q8a);
-  if (fd.q9.length) push("Veranderingen in bedrijfsvoering", "Belangrijkste aanleidingen", fd.q9.join(", "));
-  if (fd.q9.includes("Anders, namelijk:") && fd.q9_anders)
+  const q9 = Array.isArray(fd.q9) ? fd.q9 : [];
+  const q11 = Array.isArray(fd.q11) ? fd.q11 : [];
+  if (q9.length) push("Veranderingen in bedrijfsvoering", "Belangrijkste aanleidingen", q9.join(", "));
+  if (q9.includes("Anders, namelijk:") && fd.q9_anders)
     push("Veranderingen in bedrijfsvoering", "Aanleidingen anders", fd.q9_anders);
-  if (fd.q9.includes("Nieuwe regelgeving") && fd.q9_regelgeving)
+  if (q9.includes("Nieuwe regelgeving") && fd.q9_regelgeving)
     push("Veranderingen in bedrijfsvoering", "Welke regelgeving", fd.q9_regelgeving);
   if (fd.q10) push("Veranderingen in bedrijfsvoering", "Aanleiding om (opnieuw) aanpassingen te doen", fd.q10);
-  if (fd.q11.length) push("Veranderingen in bedrijfsvoering", "Wat houdt u het meest tegen", fd.q11.join(", "));
-  if (fd.q11.includes("Anders, namelijk:") && fd.q11_anders)
+  if (q11.length) push("Veranderingen in bedrijfsvoering", "Wat houdt u het meest tegen", q11.join(", "));
+  if (q11.includes("Anders, namelijk:") && fd.q11_anders)
     push("Veranderingen in bedrijfsvoering", "Wat houdt tegen anders", fd.q11_anders);
   if (fd.q11_toelichting)
     push("Veranderingen in bedrijfsvoering", "Toelichting wat u tegenhoudt", fd.q11_toelichting);
@@ -67,9 +71,11 @@ function formatForReview(fd: UniveFormData): { section: string; lines: string[] 
   // Deel 4 – Welke ondersteuning zou helpen?
   push("Welke ondersteuning zou helpen", "Openheid voor ondersteuning van Univé (1–7)", fd.q12);
   if (fd.q13) push("Welke ondersteuning zou helpen", "Vormen van ondersteuning die waardevol zijn", fd.q13);
-  if (fd.q14.length)
-    push("Welke ondersteuning zou helpen", "Andere modellen/verduurzamingsopties", fd.q14.join(", "));
-  if (fd.q14.includes("Anders, namelijk:") && fd.q14_anders)
+  const q14 = Array.isArray(fd.q14) ? fd.q14 : [];
+  const q16 = Array.isArray(fd.q16) ? fd.q16 : [];
+  if (q14.length)
+    push("Welke ondersteuning zou helpen", "Andere modellen/verduurzamingsopties", q14.join(", "));
+  if (q14.includes("Anders, namelijk:") && fd.q14_anders)
     push("Welke ondersteuning zou helpen", "Andere verduurzamingsopties anders", fd.q14_anders);
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
@@ -77,9 +83,9 @@ function formatForReview(fd: UniveFormData): { section: string; lines: string[] 
   push("Verdienmodel en kwetsbaarheden", "Mogelijkheden om inkomsten te verbreden/risico’s te spreiden", fd.q15b);
   if (fd.q15b_toelichting)
     push("Verdienmodel en kwetsbaarheden", "Toelichting bij mogelijkheden", fd.q15b_toelichting);
-  if (fd.q16.length)
-    push("Verdienmodel en kwetsbaarheden", "Wat rendabel ondernemen voor u betekent", fd.q16.join(", "));
-  if (fd.q16.includes("Anders, namelijk:") && fd.q16_anders)
+  if (q16.length)
+    push("Verdienmodel en kwetsbaarheden", "Wat rendabel ondernemen voor u betekent", q16.join(", "));
+  if (q16.includes("Anders, namelijk:") && fd.q16_anders)
     push("Verdienmodel en kwetsbaarheden", "Rendabel ondernemen anders", fd.q16_anders);
 
   // Deel 7 – Afsluiting

@@ -275,7 +275,7 @@ export function buildUniveScreens(): UniveScreen[] {
     maxChoices: 3,
     render: (fd, update, toggleMulti) => {
       const onToggle = (v: string) => toggleMulti("q4", v, 3);
-      const selected = fd.q4;
+      const selected = Array.isArray(fd.q4) ? fd.q4 : [];
       return (
         <div className="space-y-3">
           <p className={HELPER_TEXT_CLASS}>{selected.length}/3 gekozen</p>
@@ -323,9 +323,10 @@ export function buildUniveScreens(): UniveScreen[] {
     multiChoiceField: "q4a",
     maxChoices: undefined,
     render: (fd, update, toggleMulti) => {
-      const selected = fd.q4a;
+      const selected = Array.isArray(fd.q4a) ? fd.q4a : [];
       // Alleen tonen als bij q4 "Regelgeving" is gekozen
-      const show = fd.q4.includes("Regelgeving");
+      const q4 = Array.isArray(fd.q4) ? fd.q4 : [];
+      const show = q4.includes("Regelgeving");
       if (!show) {
         if (selected.length || fd.q4a_anders) {
           update({ q4a: [], q4a_anders: "" });
@@ -508,7 +509,7 @@ export function buildUniveScreens(): UniveScreen[] {
     hasPiiField: true,
     render: (fd, update, toggleMulti, setPiiBlocked) => {
       const show = fd.q8 === "Ja, meerdere" || fd.q8 === "Ja, beperkt";
-      const selected = fd.q9;
+      const selected = Array.isArray(fd.q9) ? fd.q9 : [];
       if (!show) {
         if (selected.length || fd.q9_anders || fd.q9_regelgeving) {
           update({ q9: [], q9_anders: "", q9_regelgeving: "" });
@@ -596,7 +597,7 @@ export function buildUniveScreens(): UniveScreen[] {
     maxChoices: 2,
     hasPiiField: true,
     render: (fd, update, toggleMulti, setPiiBlocked) => {
-      const selected = fd.q11;
+      const selected = Array.isArray(fd.q11) ? fd.q11 : [];
       return (
         <div className="space-y-4">
           <div>
@@ -690,7 +691,9 @@ export function buildUniveScreens(): UniveScreen[] {
     title: "Welke andere modellen of verduurzamingsopties zou u overwegen?",
     subtitle: "Meerdere antwoorden mogelijk.",
     multiChoiceField: "q14",
-    render: (fd, update, toggleMulti) => (
+    render: (fd, update, toggleMulti) => {
+      const q14 = Array.isArray(fd.q14) ? fd.q14 : [];
+      return (
       <div className="space-y-3">
         <div className="flex flex-wrap gap-2">
           {Q14_OPTIONS.map((opt) => (
@@ -699,14 +702,14 @@ export function buildUniveScreens(): UniveScreen[] {
               type="button"
               onClick={() => toggleMulti("q14", opt)}
               className={`rounded-full border px-4 py-2 text-sm ${
-                fd.q14.includes(opt) ? "border-primary bg-primary/10" : "border-border"
+                q14.includes(opt) ? "border-primary bg-primary/10" : "border-border"
               }`}
             >
               {opt}
             </button>
           ))}
         </div>
-        {fd.q14.includes("Anders, namelijk:") && (
+        {q14.includes("Anders, namelijk:") && (
           <div className="mt-3">
             <Input
               value={fd.q14_anders}
@@ -717,7 +720,8 @@ export function buildUniveScreens(): UniveScreen[] {
           </div>
         )}
       </div>
-    ),
+    );
+    },
   });
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
@@ -781,7 +785,9 @@ export function buildUniveScreens(): UniveScreen[] {
     title: "Wat betekent rendabel ondernemen voor u persoonlijk?",
     subtitle: "Meerdere antwoorden mogelijk.",
     multiChoiceField: "q16",
-    render: (fd, update, toggleMulti) => (
+    render: (fd, update, toggleMulti) => {
+      const q16 = Array.isArray(fd.q16) ? fd.q16 : [];
+      return (
       <div className="space-y-3">
         <div className="flex flex-wrap gap-2">
           {Q16_OPTIONS.map((opt) => (
@@ -790,14 +796,14 @@ export function buildUniveScreens(): UniveScreen[] {
               type="button"
               onClick={() => toggleMulti("q16", opt)}
               className={`rounded-full border px-4 py-2 text-sm ${
-                fd.q16.includes(opt) ? "border-primary bg-primary/10" : "border-border"
+                q16.includes(opt) ? "border-primary bg-primary/10" : "border-border"
               }`}
             >
               {opt}
             </button>
           ))}
         </div>
-        {fd.q16.includes("Anders, namelijk:") && (
+        {q16.includes("Anders, namelijk:") && (
           <div className="mt-3">
             <Input
               value={fd.q16_anders}
@@ -808,7 +814,8 @@ export function buildUniveScreens(): UniveScreen[] {
           </div>
         )}
       </div>
-    ),
+    );
+    },
   });
 
   // Deel 7 – Afsluiting

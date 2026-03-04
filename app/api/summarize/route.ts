@@ -37,13 +37,21 @@ REGELS:
 - Respectvol en niet-veroordelend. Geen advies of aanbevelingen.
 - Alleen de samenvatting in bovenstaande structuur, geen extra tekst.`;
 
+/** Demo-samenvatting wanneer OPENAI_API_KEY ontbreekt (lokaal testen). */
+const DEMO_SUMMARY = `Dit is een **demoversie** van de samenvatting. Zet \`OPENAI_API_KEY\` in \`.env.local\` om een echte samenvatting op basis van je antwoorden te genereren.
+
+## Kernpunten
+- Je antwoorden zijn lokaal opgeslagen.
+- Met een geldige API-key wordt hier een persoonlijke samenvatting gegenereerd.
+- De structuur (inleiding, kernpunten, voor het gesprek) blijft hetzelfde.
+
+## Voor het gesprek
+Gebruik deze demo om de flow te testen. In productie verschijnt hier je echte samenvatting.`;
+
 export async function POST(req: Request) {
   const client = getClient();
   if (!client) {
-    return NextResponse.json(
-      { error: "OPENAI_API_KEY ontbreekt. Zet deze in .env.local." },
-      { status: 500 }
-    );
+    return NextResponse.json({ summary: DEMO_SUMMARY });
   }
 
   const model = process.env.OPENAI_SUMMARIZE_MODEL ?? DEFAULT_MODEL;
