@@ -4,7 +4,7 @@
  */
 
 export interface UniveFormData {
-  // Deel 1 – Uw bedrijf
+  // Deel 1 – Je bedrijf
   q1: string
   q1_anders: string
   q2_cows: number
@@ -35,16 +35,38 @@ export interface UniveFormData {
   q11_toelichting: string
 
   // Deel 4 – Welke ondersteuning zou helpen?
-  q12: number // openheid voor ondersteuning (1–7)
+  q12: number // legacy
+  q12_financieel: number
+  q12_pacht: number
+  q12_co2: number
+  q12_premiekorting: number
+  q12_klimaatadaptie: number
+  q12_biodiversiteit: number
   q13: string
+  q13_financieel: number
+  q13_pacht: number
+  q13_co2: number
+  q13_premiekorting: number
+  q13_klimaatadaptie: number
+  q13_biodiversiteit: number
   q14: string[]
   q14_anders: string
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
-  q15a: number // behoefte aanvullende inkomsten (1–7)
+  q15a: number // legacy
+  q15a_nevenactiviteiten: number
+  q15a_pacht: number
+  q15a_risicospreiding: number
+  q15a_verbreding: number
   q15b: string
   q15b_toelichting: string
-  q16: string[]
+  q16: string[] // legacy; gebruik q16_* sliders
+  q16_marge: number
+  q16_schuldenlast: number
+  q16_continuïteit: number
+  q16_stabiliteit: number
+  q16_voortzetten: number
+  q16_waardebehoud: number
   q16_anders: string
 
   // Deel 7 – Afsluiting
@@ -58,7 +80,7 @@ export interface UniveFormData {
 }
 
 export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
-  // Deel 1 – Uw bedrijf
+  // Deel 1 – Je bedrijf
   q1: "",
   q1_anders: "",
   q2_cows: 0,
@@ -90,15 +112,37 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
 
   // Deel 4 – Welke ondersteuning zou helpen?
   q12: 4,
+  q12_financieel: 4,
+  q12_pacht: 4,
+  q12_co2: 4,
+  q12_premiekorting: 4,
+  q12_klimaatadaptie: 4,
+  q12_biodiversiteit: 4,
   q13: "",
+  q13_financieel: 4,
+  q13_pacht: 4,
+  q13_co2: 4,
+  q13_premiekorting: 4,
+  q13_klimaatadaptie: 4,
+  q13_biodiversiteit: 4,
   q14: [],
   q14_anders: "",
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
   q15a: 4,
+  q15a_nevenactiviteiten: 4,
+  q15a_pacht: 4,
+  q15a_risicospreiding: 4,
+  q15a_verbreding: 4,
   q15b: "",
   q15b_toelichting: "",
   q16: [],
+  q16_marge: 4,
+  q16_schuldenlast: 4,
+  q16_continuïteit: 4,
+  q16_stabiliteit: 4,
+  q16_voortzetten: 4,
+  q16_waardebehoud: 4,
   q16_anders: "",
 
   // Deel 7 – Afsluiting
@@ -119,7 +163,13 @@ export { TOTAL_QUESTIONS as UNIVE_TOTAL_QUESTIONS }
 const ARRAY_KEYS: (keyof UniveFormData)[] = ["q4", "q4a", "q9", "q11", "q14", "q16"];
 
 /** Slider/scale fields 1–7. */
-const SCALE_KEYS: (keyof UniveFormData)[] = ["q5a", "q5b", "q5c", "q7", "q12", "q15a"];
+const SCALE_KEYS: (keyof UniveFormData)[] = [
+  "q5a", "q5b", "q5c", "q7", "q12",
+  "q12_financieel", "q12_pacht", "q12_co2", "q12_premiekorting", "q12_klimaatadaptie", "q12_biodiversiteit",
+  "q13_financieel", "q13_pacht", "q13_co2", "q13_premiekorting", "q13_klimaatadaptie", "q13_biodiversiteit",
+  "q15a", "q15a_nevenactiviteiten", "q15a_pacht", "q15a_risicospreiding", "q15a_verbreding",
+  "q16_marge", "q16_schuldenlast", "q16_continuïteit", "q16_stabiliteit", "q16_voortzetten", "q16_waardebehoud",
+];
 
 /**
  * Normaliseert ruwe (bijv. uit localStorage) formulierdata naar geldig UniveFormData.
@@ -176,7 +226,7 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
     if (s) lines.push(`${label}: ${s}`)
   }
 
-  // Deel 1 – Uw bedrijf
+  // Deel 1 – Je bedrijf
   push("Type bedrijf", fd.q1 === "Anders" && fd.q1_anders ? fd.q1_anders : fd.q1)
   if (fd.q2_cows > 0) push("Aantal melkkoeien", fd.q2_cows)
   if (fd.q2_hectares > 0) push("Aantal hectares landbouwgrond", fd.q2_hectares)
@@ -210,19 +260,37 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   if (fd.q11_toelichting) push("Toelichting wat het meest tegenhoudt", fd.q11_toelichting)
 
   // Deel 4 – Welke ondersteuning zou helpen?
-  push("Openheid voor ondersteuning van Univé (1–7)", fd.q12)
-  if (fd.q13) push("Gewenste vormen van ondersteuning", fd.q13)
+  push("Openheid financiële ondersteuning (1–7)", fd.q12_financieel)
+  push("Openheid pacht (1–7)", fd.q12_pacht)
+  push("Openheid vergoeding CO₂-opvang (1–7)", fd.q12_co2)
+  push("Openheid premiekorting (1–7)", fd.q12_premiekorting)
+  push("Openheid klimaatadaptie (1–7)", fd.q12_klimaatadaptie)
+  push("Openheid biodiversiteit (1–7)", fd.q12_biodiversiteit)
+  push("Waardevol financiële ondersteuning (1–7)", fd.q13_financieel)
+  push("Waardevol pacht (1–7)", fd.q13_pacht)
+  push("Waardevol vergoeding CO₂-opvang (1–7)", fd.q13_co2)
+  push("Waardevol premiekorting (1–7)", fd.q13_premiekorting)
+  push("Waardevol klimaatadaptie (1–7)", fd.q13_klimaatadaptie)
+  push("Waardevol biodiversiteit (1–7)", fd.q13_biodiversiteit)
+  if (fd.q13) push("Toelichting ondersteuning", fd.q13)
   const q14 = Array.isArray(fd.q14) ? fd.q14 : [];
-  const q16 = Array.isArray(fd.q16) ? fd.q16 : [];
   if (q14.length) push("Andere modellen of verduurzamingsopties", q14)
   if (q14.includes("Anders, namelijk:") && fd.q14_anders) push("Andere verduurzamingsopties anders", fd.q14_anders)
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
-  push("Behoefte aanvullende inkomsten / risicospreiding (1–7)", fd.q15a)
+  push("Behoefte nevenactiviteiten (1–7)", fd.q15a_nevenactiviteiten)
+  push("Behoefte pacht/verhuur (1–7)", fd.q15a_pacht)
+  push("Behoefte risicospreiding (1–7)", fd.q15a_risicospreiding)
+  push("Behoefte verbreding inkomsten (1–7)", fd.q15a_verbreding)
   push("Ervaren mogelijkheden om inkomsten te verbreden of risico's te spreiden", fd.q15b)
   if (fd.q15b_toelichting) push("Toelichting mogelijkheden verbreding / risicospreiding", fd.q15b_toelichting)
-  if (q16.length) push("Wat betekent rendabel ondernemen", q16)
-  if (q16.includes("Anders, namelijk:") && fd.q16_anders) push("Rendabel ondernemen anders", fd.q16_anders)
+  push("Rendabel: voldoende marge (1–7)", fd.q16_marge)
+  push("Rendabel: lage schuldenlast (1–7)", fd.q16_schuldenlast)
+  push("Rendabel: continuïteit volgende generatie (1–7)", fd.q16_continuïteit)
+  push("Rendabel: stabiliteit (1–7)", fd.q16_stabiliteit)
+  push("Rendabel: bedrijf voortzetten (1–7)", fd.q16_voortzetten)
+  push("Rendabel: waardebehoud (1–7)", fd.q16_waardebehoud)
+  if (fd.q16_anders) push("Rendabel ondernemen anders", fd.q16_anders)
 
   // Deel 7 – Afsluiting (geen PII opnemen)
   if (fd.q17) push("Vrije wens voor aanpassing in bedrijfsvoering", fd.q17)

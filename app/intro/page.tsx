@@ -33,20 +33,20 @@ export default function IntroPage() {
               toekomstbestendige en economisch gezonde bedrijfsvoering. We zijn ons ervan bewust dat
               veranderingen alleen haalbaar zijn als ze passen bij de praktijk en rendabel zijn voor de ondernemer.
               Daarom willen we van jullie informatie verkrijgen om te begrijpen wat er speelt. Met deze vragenlijst
-              willen wij inzicht krijgen hoe u uw bedrijf ervaart in de praktijk.
+              willen wij inzicht krijgen hoe je je bedrijf ervaart in de praktijk.
             </p>
             <p className="text-muted-foreground leading-relaxed mt-4">
               De vragenlijst bevat ongeveer 20 vragen en duurt ongeveer 10–15 minuten. Aan het einde van de vragenlijst is
-              ruimte voor aanvullende opmerkingen of toelichting. Deelname is vrijwillig en uw antwoorden
+              ruimte voor aanvullende opmerkingen of toelichting. Deelname is vrijwillig en je antwoorden
               worden volledig anoniem verwerkt en zijn niet te herleiden tot individuele bedrijven. Er zijn geen
-              goede of foute antwoorden – het gaat om uw werkelijkheid. Uw input helpt ons om concrete
+              goede of foute antwoorden – het gaat om jouw werkelijkheid. Je input helpt ons om concrete
               ondersteuning te ontwikkelen die bijdraagt aan meer zekerheid, risicobeperking en praktische
               haalbaarheid op het erf.
             </p>
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Uw gegevens worden anoniem verwerkt; we vragen geen persoons- of bedrijfsgegevens. Meer hierover vindt u in ons{" "}
+            Je gegevens worden anoniem verwerkt; we vragen geen persoons- of bedrijfsgegevens. Meer hierover vind je in ons{" "}
             <a href="https://www.unive.nl/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">privacybeleid</a>.
           </p>
 

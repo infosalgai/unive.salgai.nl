@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { UniveLogo } from "@/components/unive-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -166,15 +165,8 @@ export default function VragenlijstPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 border-b border-border bg-card">
-        <div className="mx-auto flex h-14 max-w-[900px] items-center justify-between px-4">
-          <UniveLogo height={36} href="/intro" />
-          <Link
-            href="/intro"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Terug
-          </Link>
+        <div className="mx-auto flex h-16 max-w-[900px] items-center px-4">
+          <UniveLogo height={52} href="/intro" />
         </div>
       </header>
 
@@ -188,8 +180,8 @@ export default function VragenlijstPage() {
                   style={{ width: `${overallPercent}%` }}
                 />
               </div>
-              <span className="min-w-[6rem] text-right text-sm font-medium text-muted-foreground tabular-nums">
-                Vraag {currentScreenIndex + 1}/{totalScreens} ({overallPercent}%)
+              <span className="min-w-[4rem] text-right text-sm font-medium text-muted-foreground tabular-nums">
+                {overallPercent}%
               </span>
             </div>
           </div>

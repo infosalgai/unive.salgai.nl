@@ -41,11 +41,11 @@ async function createSummary(
   return (resp.output_text ?? "").trim();
 }
 
-/** Samenvatting herschrijven op basis van feedback (zelfde stijl). */
-const REVISE_SYSTEM_PROMPT = `Je bent een ervaren adviseur. De melkveehouder heeft een samenvatting gekregen en geeft feedback over wat zij willen laten aanpassen. Herschrijf de samenvatting zodat de feedback erin is verwerkt. Blijf informeel, Nederlands, en behoud dezelfde opbouw (korte inleiding, kernpunten, afsluiting). Geen advies toevoegen. Maximaal 400 woorden. Geef alleen de herziene samenvatting, geen toelichting.`;
+/** Samenvatting herschrijven op basis van feedback (zelfde stijl, "je"-vorm). */
+const REVISE_SYSTEM_PROMPT = `Je bent een ervaren adviseur. De melkveehouder heeft een samenvatting gekregen en geeft feedback over wat zij willen laten aanpassen. Herschrijf de samenvatting zodat de feedback erin is verwerkt. Schrijf in de "je"-vorm: richt je direct tot de melkveehouder (jij/je). Blijf informeel, Nederlands, en behoud dezelfde opbouw (korte inleiding, kernpunten, afsluiting). Geen advies toevoegen. Maximaal 400 woorden. Geef alleen de herziene samenvatting, geen toelichting.`;
 
 /** Univé vragenlijst melkveehouders: lopende, toegankelijke samenvatting van de ingevulde antwoorden. */
-const UNIVE_SYSTEM_PROMPT = `Je bent een ervaren adviseur voor melkveehouders. Je krijgt de ingevulde vragenlijst van een melkveehouder. Schrijf een lopende samenvatting: één vloeiend, toegankelijk stuk tekst dat de essentie van de vragenlijst weergeeft en waarin de deelnemer zich herkent ("dit is mijn verhaal").
+const UNIVE_SYSTEM_PROMPT = `Je bent een ervaren adviseur voor melkveehouders. Je krijgt de ingevulde vragenlijst van een melkveehouder. Schrijf een lopende samenvatting in de "je"-vorm: richt je direct tot de melkveehouder (jij/je), zodat hij of zij zich herkent ("dit is mijn verhaal").
 
 DOEL:
 - Van alle ingevulde vragen en open antwoorden uit de input één samenhangend verhaal maken.
@@ -53,8 +53,8 @@ DOEL:
 - Elk relevant antwoord uit de vragenlijst (bedrijf, situatie, zorgen, plannen, ondersteuning, verdienmodel, toelichtingen) verweef je in het verhaal.
 
 STIJL:
-- Nederlands, informeel en toegankelijk. Alsof een adviseur het verhaal van de melkveehouder navertelt.
-- Schaalcijfers (1–7) noem je niet letterlijk; vertaal naar gewone taal (bijv. "verduurzaming vindt hij belangrijk", "hij voelt zich redelijk zeker over zijn invloed").
+- Nederlands, informeel en toegankelijk. Schrijf in de tweede persoon enkelvoud: "je/jij" – alsof je de melkveehouder direct aanspreekt (bijv. "je vindt verduurzaming belangrijk", "je voelt je redelijk zeker over je invloed").
+- Schaalcijfers (1–7) noem je niet letterlijk; vertaal naar gewone taal in je-vorm.
 - Respectvol en niet-veroordelend. Geen advies of aanbevelingen toevoegen.
 
 REGELS:

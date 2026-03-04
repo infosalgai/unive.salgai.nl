@@ -54,6 +54,34 @@ function ScaleSlider({
   );
 }
 
+/** Eén rij: label + slider 1–7 (voor meerdere sliders op één scherm) */
+function SliderRow({
+  label,
+  value,
+  onValueChange,
+}: {
+  label: string;
+  value: number;
+  onValueChange: (v: number) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+      <Label className="min-w-[10rem] text-sm font-medium text-foreground">{label}</Label>
+      <div className="flex flex-1 items-center gap-2">
+        <Slider
+          value={[value]}
+          onValueChange={([v]) => onValueChange(v)}
+          min={1}
+          max={7}
+          step={1}
+          className="flex-1"
+        />
+        <span className="w-6 tabular-nums text-sm text-muted-foreground">{value}</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Opties (exacte Nederlandse formulering conform nieuwe vragenlijst) ──
 const Q1_OPTIONS = [
   { id: "Gangbaar", label: "Gangbaar" },
@@ -98,9 +126,10 @@ const Q4A_OPTIONS = [
 ];
 
 const Q8_OPTIONS = [
-  { id: "Ja, meerdere", label: "Ja, meerdere" },
-  { id: "Ja, beperkt", label: "Ja, beperkt" },
-  { id: "Nee", label: "Nee" },
+  { id: "Ja, meerdere", label: "Ja, meerdere grote of verschillende aanpassingen" },
+  { id: "Ja, beperkt", label: "Ja, beperkte of enkele aanpassingen" },
+  { id: "Nee", label: "Nee, nog geen aanpassingen gedaan" },
+  { id: "Weet ik niet", label: "Weet ik niet / moeilijk in te schatten" },
 ];
 
 const Q9_OPTIONS = [
@@ -169,12 +198,12 @@ export interface UniveScreen {
 export function buildUniveScreens(): UniveScreen[] {
   const screens: UniveScreen[] = [];
 
-  // Deel 1 – Uw bedrijf
+  // Deel 1 – Je bedrijf
   screens.push({
     id: "q1",
-    group: "Deel 1 – Uw bedrijf",
+    group: "Deel 1 – Je bedrijf",
     questionNumber: 1,
-    title: "Wat typeert uw bedrijf het beste?",
+    title: "Wat typeert je bedrijf het beste?",
     choiceField: "q1",
     render: (fd, update, _, setPiiBlocked) => (
       <>
@@ -208,9 +237,9 @@ export function buildUniveScreens(): UniveScreen[] {
 
   screens.push({
     id: "q2",
-    group: "Deel 1 – Uw bedrijf",
+    group: "Deel 1 – Je bedrijf",
     questionNumber: 2,
-    title: "Hoe groot is uw bedrijf?",
+    title: "Hoe groot is je bedrijf?",
     subtitle: "Geef aantallen (gehele getallen).",
     render: (fd, update) => (
       <div className="space-y-4">
@@ -248,9 +277,9 @@ export function buildUniveScreens(): UniveScreen[] {
 
   screens.push({
     id: "q3",
-    group: "Deel 1 – Uw bedrijf",
+    group: "Deel 1 – Je bedrijf",
     questionNumber: 3,
-    title: "In welke fase bevindt uw bedrijf zich?",
+    title: "In welke fase bevindt je bedrijf zich?",
     choiceField: "q3",
     render: (fd, update) => (
       <RadioGroup value={fd.q3 ?? ""} onValueChange={(v) => update({ q3: v })} className="space-y-2">
@@ -269,7 +298,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q4",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 4,
-    title: "Welke ontwikkelingen hebben de meeste invloed op uw bedrijfsvoering?",
+    title: "Welke ontwikkelingen hebben de meeste invloed op je bedrijfsvoering?",
     subtitle: "Kies maximaal 3.",
     multiChoiceField: "q4",
     maxChoices: 3,
@@ -319,7 +348,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 4,
     title: "Welke regelgeving speelt vooral?",
-    subtitle: "Deze vraag is relevant als regelgeving een belangrijke ontwikkeling is.",
+    subtitle: "Deze vraag is relevant als u problemen ervaart met de huidige regelgeving. U kunt meerdere antwoorden kiezen.",
     multiChoiceField: "q4a",
     maxChoices: undefined,
     render: (fd, update, toggleMulti) => {
@@ -335,6 +364,7 @@ export function buildUniveScreens(): UniveScreen[] {
       }
       return (
         <div className="space-y-3">
+          <p className={HELPER_TEXT_CLASS}>Meerdere antwoorden mogelijk.</p>
           <div className="flex flex-wrap gap-2">
             {Q4A_OPTIONS.map((opt) => (
               <button
@@ -369,7 +399,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q5",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 5,
-    title: "In hoeverre is verduurzaming volgens u van belang voor de continuïteit van uw bedrijf?",
+    title: "In hoeverre is verduurzaming volgens jou van belang voor de continuïteit van je bedrijf?",
     render: (fd, update) => (
       <ScaleSlider
         value={fd.q5a ?? 4}
@@ -384,7 +414,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q5b",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 5,
-    title: "In hoeverre verwacht u dat CO₂-reductie invloed zal hebben in de komende 10 jaar?",
+    title: "In hoeverre verwacht u dat CO₂-reductie invloed zal hebben op uw bedrijf in de komende 10 jaar?",
     render: (fd, update) => (
       <ScaleSlider
         value={fd.q5b ?? 4}
@@ -409,14 +439,17 @@ export function buildUniveScreens(): UniveScreen[] {
           labelLeft="Nauwelijks relevant"
           labelRight="Zeer relevant"
         />
-        <PiiTextarea
-          value={fd.q5_toelichting ?? ""}
-          onChange={(v) => update({ q5_toelichting: v })}
-          onPiiChange={setPiiBlocked}
-          placeholder="Kunt u kort toelichten hoe u naar verduurzaming, CO₂-reductie en biodiversiteit kijkt?"
-          rows={4}
-          maxLength={800}
-        />
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <Label className="mb-2 block text-sm font-medium text-foreground">Optioneel: toelichting</Label>
+          <PiiTextarea
+            value={fd.q5_toelichting ?? ""}
+            onChange={(v) => update({ q5_toelichting: v })}
+            onPiiChange={setPiiBlocked}
+            placeholder="Licht je antwoord toe indien gewenst"
+            rows={3}
+            maxLength={800}
+          />
+        </div>
       </div>
     ),
   });
@@ -425,14 +458,15 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q6",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 6,
-    title: "Wat zijn op dit moment uw grootste zorgen voor de komende 5–10 jaar?",
+    title: "Wat zijn op dit moment de grootste zorgen voor uw bedrijf voor de komende 5–10 jaar?",
+    subtitle: "Het gaat hier om uw bedrijf: wat houdt u als ondernemer het meest bezig?",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <PiiTextarea
         value={fd.q6 ?? ""}
         onChange={(v) => update({ q6: v })}
         onPiiChange={setPiiBlocked}
-        placeholder="Uw antwoord"
+        placeholder="Bijvoorbeeld: regelgeving, rendement, opvolging, klimaat..."
         rows={4}
         maxLength={1000}
       />
@@ -443,7 +477,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q7",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 7,
-    title: "In hoeverre heeft u het gevoel zelf invloed te hebben op de toekomst van uw bedrijf?",
+    title: "Gelet op alle regelgeving: in hoeverre heeft u het gevoel zelf invloed te hebben op de toekomst van uw bedrijf?",
     render: (fd, update) => (
       <ScaleSlider
         value={fd.q7 ?? 4}
@@ -475,7 +509,7 @@ export function buildUniveScreens(): UniveScreen[] {
         {(fd.q8 === "Ja, meerdere" || fd.q8 === "Ja, beperkt") && (
           <>
             <div>
-              <Label className={QUESTION_LABEL_CLASS}>Kunt u kort aangeven welke aanpassingen dit waren?</Label>
+              <Label className={QUESTION_LABEL_CLASS}>Kunt u kort aangeven welke aanpassingen dit waren? (bijv. stalbouw, voer, grondgebruik)</Label>
               <PiiTextarea
                 value={fd.q8a ?? ""}
                 onChange={(v) => update({ q8a: v })}
@@ -495,8 +529,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q9",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 9,
-    title: "Wat waren de belangrijkste aanleidingen?",
-    subtitle: "Kies maximaal 2. Deze vraag is alleen van toepassing als u eerder 'ja' heeft geantwoord.",
+    title: "Wat waren de belangrijkste oorzaken van de aanpassingen in uw bedrijfsvoering?",
+    subtitle: "Sluit aan op uw eerdere antwoord. Kies maximaal 2 aanleidingen.",
     multiChoiceField: "q9",
     maxChoices: 2,
     hasPiiField: true,
@@ -573,9 +607,17 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 10,
     title: "Wat zou voor u een duidelijke aanleiding zijn om (opnieuw) aanpassingen te doen?",
+    subtitle: "Bijvoorbeeld: zekerheid over vergoedingen, duidelijkheid in regelgeving, beschikbare kennis of begeleiding, financiële ondersteuning.",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
-      <PiiTextarea value={fd.q10 ?? ""} onChange={(v) => update({ q10: v })} onPiiChange={setPiiBlocked} rows={4} maxLength={1000} />
+      <PiiTextarea
+        value={fd.q10 ?? ""}
+        onChange={(v) => update({ q10: v })}
+        onPiiChange={setPiiBlocked}
+        placeholder="Beschrijf wat u zou helpen om de stap te zetten..."
+        rows={4}
+        maxLength={1000}
+      />
     ),
   });
 
@@ -584,8 +626,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q11",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 11,
-    title: "Wat houdt u het meest tegen?",
-    subtitle: "Kies maximaal 2.",
+    title: "Wat houdt u tegen om aanpassingen in uw bedrijfsvoering te doen?",
+    subtitle: "Sluit aan op de vorige vragen. Kies maximaal 2.",
     multiChoiceField: "q11",
     maxChoices: 2,
     hasPiiField: true,
@@ -627,7 +669,7 @@ export function buildUniveScreens(): UniveScreen[] {
             </div>
           )}
           <div>
-            <Label className={QUESTION_LABEL_CLASS}>Optioneel: Kunt u dit kort toelichten?</Label>
+            <Label className={QUESTION_LABEL_CLASS}>Optioneel: Kun je dit kort toelichten?</Label>
             <PiiTextarea
               value={fd.q11_toelichting ?? ""}
               onChange={(v) => update({ q11_toelichting: v })}
@@ -642,38 +684,71 @@ export function buildUniveScreens(): UniveScreen[] {
   });
 
   // Deel 4 – Welke ondersteuning zou helpen?
+  const Q12_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
+    { key: "q12_financieel", label: "Financiële ondersteuning" },
+    { key: "q12_pacht", label: "Pacht" },
+    { key: "q12_co2", label: "Vergoeding CO₂-opvang" },
+    { key: "q12_premiekorting", label: "Premiekorting" },
+    { key: "q12_klimaatadaptie", label: "Klimaatadaptie" },
+    { key: "q12_biodiversiteit", label: "Biodiversiteit" },
+  ];
   screens.push({
     id: "q12",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     questionNumber: 12,
-    title: "In hoeverre staat u open voor ondersteuning van Univé?",
-    subtitle:
-      "Bijv. financiële ondersteuning, pacht, vergoeding CO₂-opvang, premiekorting, klimaatadaptatie of biodiversiteitsherstel.",
+    title: "In hoeverre staat u open voor ondersteuning van Univé per type?",
+    subtitle: "1 = niet open, 7 = zeer open. Sleep de schuif per onderwerp.",
     render: (fd, update) => (
-      <ScaleSlider
-        value={fd.q12 ?? 4}
-        onValueChange={(v) => update({ q12: v })}
-        labelLeft="Niet open voor ondersteuning"
-        labelRight="Zeer open voor ondersteuning"
-      />
+      <div className="space-y-5">
+        {Q12_SLIDER_OPTIONS.map(({ key, label }) => (
+          <SliderRow
+            key={key}
+            label={label}
+            value={(fd[key] as number) ?? 4}
+            onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
+          />
+        ))}
+      </div>
     ),
   });
 
+  const Q13_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
+    { key: "q13_financieel", label: "Financiële ondersteuning" },
+    { key: "q13_pacht", label: "Pacht" },
+    { key: "q13_co2", label: "Vergoeding CO₂-opvang" },
+    { key: "q13_premiekorting", label: "Premiekorting" },
+    { key: "q13_klimaatadaptie", label: "Klimaatadaptie" },
+    { key: "q13_biodiversiteit", label: "Biodiversiteit" },
+  ];
   screens.push({
     id: "q13",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     questionNumber: 13,
-    title: "Welke vormen van ondersteuning zouden voor u het meest waardevol zijn?",
+    title: "Welke vormen van ondersteuning zijn voor u het meest waardevol?",
+    subtitle: "Geef per type aan hoe waardevol (1 = weinig, 7 = zeer waardevol).",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
-      <PiiTextarea
-        value={fd.q13 ?? ""}
-        onChange={(v) => update({ q13: v })}
-        onPiiChange={setPiiBlocked}
-        placeholder="Bijvoorbeeld: investeringssteun, langjarige afspraken, begeleiding op het erf..."
-        rows={4}
-        maxLength={800}
-      />
+      <div className="space-y-5">
+        {Q13_SLIDER_OPTIONS.map(({ key, label }) => (
+          <SliderRow
+            key={key}
+            label={label}
+            value={(fd[key] as number) ?? 4}
+            onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
+          />
+        ))}
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <Label className="mb-2 block text-sm font-medium text-foreground">Optioneel: aanvulling</Label>
+          <PiiTextarea
+            value={fd.q13 ?? ""}
+            onChange={(v) => update({ q13: v })}
+            onPiiChange={setPiiBlocked}
+            placeholder="Bijvoorbeeld: investeringssteun, langjarige afspraken, begeleiding op het erf..."
+            rows={2}
+            maxLength={800}
+          />
+        </div>
+      </div>
     ),
   });
 
@@ -681,8 +756,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q14",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     questionNumber: 14,
-    title: "Welke andere modellen of verduurzamingsopties zou u overwegen?",
-    subtitle: "Meerdere antwoorden mogelijk.",
+    title: "Zou u andere modellen of verduurzamingsopties overwegen?",
+    subtitle: "Onderzoekend: meerdere antwoorden mogelijk. Geen verplichting.",
     multiChoiceField: "q14",
     render: (fd, update, toggleMulti) => {
       const q14 = Array.isArray(fd.q14) ? fd.q14 : [];
@@ -718,18 +793,29 @@ export function buildUniveScreens(): UniveScreen[] {
   });
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
+  const Q15A_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
+    { key: "q15a_nevenactiviteiten", label: "Aanvullende inkomsten uit nevenactiviteiten" },
+    { key: "q15a_pacht", label: "Pacht of verhuur van grond" },
+    { key: "q15a_risicospreiding", label: "Risicospreiding (bijv. via verzekering)" },
+    { key: "q15a_verbreding", label: "Verbreding (meerdere inkomensbronnen)" },
+  ];
   screens.push({
     id: "q15a",
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     questionNumber: 15,
-    title: "In hoeverre heeft u behoefte aan aanvullende inkomsten of meer risicospreiding?",
+    title: "In hoeverre heeft u behoefte aan aanvullende inkomsten of risicospreiding?",
+    subtitle: "Geef per optie aan (1 = geen behoefte, 7 = sterke behoefte).",
     render: (fd, update) => (
-      <ScaleSlider
-        value={fd.q15a ?? 4}
-        onValueChange={(v) => update({ q15a: v })}
-        labelLeft="Geen behoefte"
-        labelRight="Sterke behoefte"
-      />
+      <div className="space-y-5">
+        {Q15A_SLIDER_OPTIONS.map(({ key, label }) => (
+          <SliderRow
+            key={key}
+            label={label}
+            value={(fd[key] as number) ?? 4}
+            onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
+          />
+        ))}
+      </div>
     ),
   });
 
@@ -737,6 +823,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q15b",
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     questionNumber: 16,
+    subtitle: "Denk aan nevenactiviteiten, pacht, verzekering, andere teelten of inkomensbronnen naast de melkveehouderij.",
     title: "Ziet u mogelijkheden om uw inkomsten te verbreden of risico’s te spreiden?",
     hasPiiField: true,
     choiceField: "q15b",
@@ -752,56 +839,56 @@ export function buildUniveScreens(): UniveScreen[] {
             </div>
           ))}
         </RadioGroup>
-        <PiiTextarea
-          value={fd.q15b_toelichting ?? ""}
-          onChange={(v) => update({ q15b_toelichting: v })}
-          onPiiChange={setPiiBlocked}
-          placeholder="Kunt u kort toelichten welke mogelijkheden u ziet of waarom u weinig mogelijkheden ervaart?"
-          rows={3}
-          maxLength={600}
-        />
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <Label className="mb-2 block text-sm font-medium text-foreground">Optioneel: toelichting</Label>
+          <PiiTextarea
+            value={fd.q15b_toelichting ?? ""}
+            onChange={(v) => update({ q15b_toelichting: v })}
+            onPiiChange={setPiiBlocked}
+            placeholder="Welke mogelijkheden ziet u, of waarom weinig?"
+            rows={3}
+            maxLength={600}
+          />
+        </div>
       </div>
     ),
   });
 
+  const Q16_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
+    { key: "q16_marge", label: "Voldoende marge per jaar" },
+    { key: "q16_schuldenlast", label: "Lage schuldenlast" },
+    { key: "q16_continuïteit", label: "Continuïteit voor volgende generatie" },
+    { key: "q16_stabiliteit", label: "Stabiliteit / weinig schommelingen" },
+    { key: "q16_voortzetten", label: "Bedrijf in huidige vorm kunnen voortzetten" },
+    { key: "q16_waardebehoud", label: "Waardebehoud van grond en bedrijf" },
+  ];
   screens.push({
     id: "q16",
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     questionNumber: 16,
-    title: "Wat betekent rendabel ondernemen voor u persoonlijk?",
-    subtitle: "Meerdere antwoorden mogelijk.",
-    multiChoiceField: "q16",
-    render: (fd, update, toggleMulti) => {
-      const q16 = Array.isArray(fd.q16) ? fd.q16 : [];
-      return (
-      <div className="space-y-3">
-        <div className="flex flex-wrap gap-2">
-          {Q16_OPTIONS.map((opt) => (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => toggleMulti("q16", opt)}
-              className={`rounded-full border px-4 py-2 text-sm ${
-                q16.includes(opt) ? "border-primary bg-primary/10" : "border-border"
-              }`}
-            >
-              {opt}
-            </button>
-          ))}
+    title: "Wat betekent rendabel ondernemen voor u?",
+    subtitle: "Geef per aspect aan hoe belangrijk (1 = weinig, 7 = zeer belangrijk).",
+    render: (fd, update) => (
+      <div className="space-y-5">
+        {Q16_SLIDER_OPTIONS.map(({ key, label }) => (
+          <SliderRow
+            key={key}
+            label={label}
+            value={(fd[key] as number) ?? 4}
+            onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
+          />
+        ))}
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <Label className="mb-2 block text-sm font-medium text-foreground">Anders, namelijk:</Label>
+          <Input
+            value={fd.q16_anders ?? ""}
+            onChange={(e) => update({ q16_anders: e.target.value })}
+            placeholder="Kort toelichten indien gewenst"
+            maxLength={200}
+          />
         </div>
-        {q16.includes("Anders, namelijk:") && (
-          <div className="mt-3">
-            <Input
-              value={fd.q16_anders ?? ""}
-              onChange={(e) => update({ q16_anders: e.target.value })}
-              placeholder="Anders, namelijk"
-              maxLength={200}
-            />
-          </div>
-        )}
       </div>
-    );
-    },
+    ),
   });
 
   // Deel 7 – Afsluiting
@@ -809,8 +896,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q17",
     group: "Deel 7 – Afsluiting",
     questionNumber: 17,
-    title:
-      "Wat zou u, als u volledig vrij kon kiezen, het liefst aanpassen aan uw huidige bedrijfsvoering?",
+    title: "Wat zou u idealiter het liefst aanpassen aan uw huidige bedrijfsvoering?",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <PiiTextarea
@@ -828,7 +914,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q18",
     group: "Deel 7 – Afsluiting",
     questionNumber: 18,
-    title: "Wat moeten partijen zoals verzekeraars beter begrijpen van de praktijk op uw erf?",
+    title: "Wat moeten partijen zoals verzekeraars beter begrijpen van de praktijk op je erf?",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <PiiTextarea
@@ -846,7 +932,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q19",
     group: "Deel 7 – Afsluiting",
     questionNumber: 19,
-    title: "Staat u ervoor open dat er contact met u wordt opgenomen?",
+    title: "Sta je ervoor open dat er contact met je wordt opgenomen?",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => {
       const toestemming = fd.q19_toestemming_contact ?? "";
@@ -878,7 +964,7 @@ export function buildUniveScreens(): UniveScreen[] {
                 <Input
                   value={fd.q19_naam ?? ""}
                   onChange={(e) => update({ q19_naam: e.target.value })}
-                  placeholder="Uw naam"
+                  placeholder="Je naam"
                   maxLength={200}
                 />
               </div>
