@@ -87,7 +87,7 @@ export default function IntroPage() {
 
           {/* Praktische info – icoonkaartjes met lichte animatie */}
           <p className={`text-sm text-muted-foreground ${fadeIn}`} style={stagger(3)}>
-            Je gegevens worden anoniem verwerkt. Je bent <strong className="text-foreground">niet verplicht</strong> om persoons- of bedrijfsgegevens achter te laten; we vragen ze ook niet. Meer hierover vind je in ons{" "}
+            Je gegevens worden anoniem verwerkt. Je bent <strong className="text-foreground">niet verplicht</strong> om contactgegevens (naam, e-mail, telefoon) achter te laten: we vragen ze alleen als je aan het eind aangeeft dat Univé contact met je mag opnemen. Meer hierover vind je in ons{" "}
             <a href="https://www.unive.nl/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded">privacybeleid</a>.
           </p>
 
@@ -101,7 +101,7 @@ export default function IntroPage() {
             </div>
             <div className="flex items-center gap-2 text-sm text-foreground">
               <Shield className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-              <span>Niet verplicht: persoons- of bedrijfsgegevens</span>
+              <span>Contactgegevens alleen als je toestemming geeft</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-foreground">
               <Clock className="h-5 w-5 shrink-0 text-primary" aria-hidden />

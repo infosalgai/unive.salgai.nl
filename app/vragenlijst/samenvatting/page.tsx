@@ -146,7 +146,7 @@ export default function SamenvattingPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="mx-auto flex h-16 max-w-[900px] items-center px-4">
-          <UniveLogo height={80} href="/intro" />
+          <UniveLogo height={56} href="/intro" />
         </div>
       </header>
 
@@ -179,7 +179,7 @@ export default function SamenvattingPage() {
                 <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
                   Samenvatting
                 </p>
-                <h2 className="mb-1 text-xl font-semibold text-foreground">Samenvatting voor het gesprek</h2>
+                <h2 className="mb-1 text-xl font-semibold text-foreground">Jouw samenvatting</h2>
                 <p className="text-sm text-muted-foreground">Lees rustig. Jij bepaalt of dit klopt.</p>
               </div>
 
@@ -201,14 +201,6 @@ export default function SamenvattingPage() {
                 </CardContent>
               </Card>
 
-              <Card className="mb-6 rounded-2xl border-primary/20 bg-primary/5">
-                <CardContent className="p-4">
-                  <p className="text-center text-sm font-medium text-foreground">
-                    Is deze samenvatting juist en volledig genoeg voor het gesprek?
-                  </p>
-                </CardContent>
-              </Card>
-
               {/* Wat gebeurt er als je doorstuurt – vertrouwen */}
               <Card className="mb-6 rounded-2xl border border-primary/20 bg-primary/5">
                 <CardContent className="p-5 sm:p-6">
@@ -222,7 +214,7 @@ export default function SamenvattingPage() {
                   <ul className="space-y-2.5 text-sm text-muted-foreground leading-relaxed" role="list">
                     <li className="flex gap-2">
                       <FileCheck className="h-4 w-4 shrink-0 text-primary mt-0.5" aria-hidden />
-                      <span><strong className="text-foreground">Wat we versturen:</strong> je samenvatting en de antwoorden uit de vragenlijst. Die worden gebruikt om je gesprek of ondersteuning goed voor te bereiden.</span>
+                      <span><strong className="text-foreground">Wat we versturen:</strong> je samenvatting en de antwoorden uit de vragenlijst. Die worden gebruikt voor het doel van deze vragenlijst.</span>
                     </li>
                     <li className="flex gap-2">
                       <Lock className="h-4 w-4 shrink-0 text-primary mt-0.5" aria-hidden />
@@ -301,7 +293,7 @@ export default function SamenvattingPage() {
               <p>Deze samenvatting is gebaseerd op je antwoorden.</p>
               <p className="font-medium text-foreground">Klopt dit verhaal zoals jij het bedoelt?</p>
               <p className="text-sm">
-                Als je op &quot;Ja, versturen&quot; klikt, worden je samenvatting en antwoorden veilig naar Univé gestuurd en vertrouwelijk verwerkt voor het voorbereiden van je gesprek of ondersteuning.
+                Als je op &quot;Ja, versturen&quot; klikt, worden je samenvatting en antwoorden veilig naar Univé gestuurd en vertrouwelijk verwerkt voor het doel van deze vragenlijst.
               </p>
             </DialogDescription>
           </DialogHeader>

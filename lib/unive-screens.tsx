@@ -38,7 +38,7 @@ const OPTION_ROW_CLASS =
   "flex items-center space-x-3 rounded-lg border border-border p-3 transition-all hover:border-primary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5";
 const HELPER_TEXT_CLASS = "text-xs text-muted-foreground";
 
-/** Schaal 1–7: eerst de balk, daaronder de uitleg (links/rechts) en de cijfers 1–7 */
+/** Likert-schaal 1–7: balk met schuifje van links (1) naar rechts (7), daaronder labels en cijfers */
 function ScaleSlider({
   value,
   onValueChange,
@@ -51,31 +51,37 @@ function ScaleSlider({
   labelRight: string;
 }) {
   return (
-    <div className="space-y-3">
-      <Slider
-        value={[value]}
-        onValueChange={([v]) => onValueChange(v)}
-        min={1}
-        max={7}
-        step={1}
-        className="w-full"
-      />
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm text-muted-foreground">
-        <span className="whitespace-nowrap pr-1">{labelLeft}</span>
-        <div className="grid grid-cols-7 text-xs">
-          {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-            <span key={n} className="tabular-nums text-center">
-              {n}
-            </span>
-          ))}
-        </div>
-        <span className="whitespace-nowrap pl-1 text-right">{labelRight}</span>
+    <div className="space-y-3" role="group" aria-label="Schaal 1 tot 7">
+      {/* Eerst labels links/rechts boven de balk voor duidelijke Likert-weergave */}
+      <div className="flex justify-between text-sm text-muted-foreground">
+        <span className="whitespace-nowrap">{labelLeft}</span>
+        <span className="whitespace-nowrap">{labelRight}</span>
+      </div>
+      {/* Balk met schuifje: dikke track, duidelijke thumb om te slepen */}
+      <div className="px-0.5 [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-thumb]]:size-6 [&_[data-slot=slider-thumb]]:shadow-md [&_[data-slot=slider-thumb]]:cursor-grab [&_[data-slot=slider-thumb]]:active:cursor-grabbing">
+        <Slider
+          value={[value]}
+          onValueChange={([v]) => onValueChange(v)}
+          min={1}
+          max={7}
+          step={1}
+          className="w-full"
+          aria-label="Kies een waarde van 1 tot 7"
+        />
+      </div>
+      {/* Cijfers 1–7 onder de balk, uitgelijnd met de schaal */}
+      <div className="grid grid-cols-7 gap-0 text-xs text-muted-foreground">
+        {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+          <span key={n} className="tabular-nums text-center" aria-hidden>
+            {n}
+          </span>
+        ))}
       </div>
     </div>
   );
 }
 
-/** Eén rij: label, dan balk 1–7, daaronder cijfers 1–7 (voor meerdere sliders op één scherm) */
+/** Eén rij: label, dan Likert-balk 1–7 met schuifje, daaronder cijfers (voor meerdere sliders op één scherm) */
 function SliderRow({
   label,
   value,
@@ -86,25 +92,23 @@ function SliderRow({
   onValueChange: (v: number) => void;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" role="group">
       <Label className="text-sm font-medium text-foreground">{label}</Label>
       <div className="space-y-2">
-        <div className="flex items-center gap-3">
+        <div className="px-0.5 [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-thumb]]:size-6 [&_[data-slot=slider-thumb]]:shadow-md [&_[data-slot=slider-thumb]]:cursor-grab [&_[data-slot=slider-thumb]]:active:cursor-grabbing">
           <Slider
             value={[value]}
             onValueChange={([v]) => onValueChange(v)}
             min={1}
             max={7}
             step={1}
-            className="flex-1"
+            className="w-full"
+            aria-label={`${label}, waarde ${value} van 7`}
           />
-          <span className="w-6 shrink-0 tabular-nums text-sm text-muted-foreground" aria-hidden>
-            {value}
-          </span>
         </div>
-        <div className="grid grid-cols-7 text-xs text-muted-foreground">
+        <div className="grid grid-cols-7 gap-0 text-xs text-muted-foreground">
           {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-            <span key={n} className="tabular-nums text-center">
+            <span key={n} className="tabular-nums text-center" aria-hidden>
               {n}
             </span>
           ))}

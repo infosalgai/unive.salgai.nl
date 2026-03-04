@@ -37,7 +37,7 @@ export default function ReviewPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="mx-auto flex h-16 max-w-[900px] items-center px-4">
-          <UniveLogo height={80} href="/intro" />
+          <UniveLogo height={56} href="/intro" />
         </div>
       </header>
 
