@@ -400,31 +400,24 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 5,
     title: "In hoeverre ziet u biodiversiteit als relevant voor uw bedrijfsvoering?",
-    render: (fd, update) => (
-      <ScaleSlider
-        value={fd.q5c ?? 4}
-        onValueChange={(v) => update({ q5c: v })}
-        labelLeft="Nauwelijks relevant"
-        labelRight="Zeer relevant"
-      />
-    ),
-  });
-
-  screens.push({
-    id: "q5_toelichting",
-    group: "Deel 2 – Huidige situatie en toekomstbeeld",
-    questionNumber: 5,
-    title: "Toelichting (optioneel)",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
-      <PiiTextarea
-        value={fd.q5_toelichting ?? ""}
-        onChange={(v) => update({ q5_toelichting: v })}
-        onPiiChange={setPiiBlocked}
-        placeholder="Kunt u kort toelichten hoe u naar verduurzaming, CO₂-reductie en biodiversiteit kijkt?"
-        rows={4}
-        maxLength={800}
-      />
+      <div className="space-y-4">
+        <ScaleSlider
+          value={fd.q5c ?? 4}
+          onValueChange={(v) => update({ q5c: v })}
+          labelLeft="Nauwelijks relevant"
+          labelRight="Zeer relevant"
+        />
+        <PiiTextarea
+          value={fd.q5_toelichting ?? ""}
+          onChange={(v) => update({ q5_toelichting: v })}
+          onPiiChange={setPiiBlocked}
+          placeholder="Kunt u kort toelichten hoe u naar verduurzaming, CO₂-reductie en biodiversiteit kijkt?"
+          rows={4}
+          maxLength={800}
+        />
+      </div>
     ),
   });
 
@@ -745,36 +738,29 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     questionNumber: 16,
     title: "Ziet u mogelijkheden om uw inkomsten te verbreden of risico’s te spreiden?",
-    choiceField: "q15b",
-    render: (fd, update) => (
-      <RadioGroup value={fd.q15b ?? ""} onValueChange={(v) => update({ q15b: v })} className="space-y-2">
-        {Q15B_OPTIONS.map((opt) => (
-          <div key={opt.id} className={OPTION_ROW_CLASS}>
-            <RadioGroupItem value={opt.id} id={`q15b-${opt.id}`} />
-            <Label htmlFor={`q15b-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">
-              {opt.label}
-            </Label>
-          </div>
-        ))}
-      </RadioGroup>
-    ),
-  });
-
-  screens.push({
-    id: "q15b_toelichting",
-    group: "Deel 5 – Verdienmodel en kwetsbaarheden",
-    questionNumber: 16,
-    title: "Optional: toelichting",
     hasPiiField: true,
+    choiceField: "q15b",
     render: (fd, update, _, setPiiBlocked) => (
-      <PiiTextarea
-        value={fd.q15b_toelichting ?? ""}
-        onChange={(v) => update({ q15b_toelichting: v })}
-        onPiiChange={setPiiBlocked}
-        placeholder="Kunt u kort toelichten welke mogelijkheden u ziet of waarom u weinig mogelijkheden ervaart?"
-        rows={3}
-        maxLength={600}
-      />
+      <div className="space-y-4">
+        <RadioGroup value={fd.q15b ?? ""} onValueChange={(v) => update({ q15b: v })} className="space-y-2">
+          {Q15B_OPTIONS.map((opt) => (
+            <div key={opt.id} className={OPTION_ROW_CLASS}>
+              <RadioGroupItem value={opt.id} id={`q15b-${opt.id}`} />
+              <Label htmlFor={`q15b-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">
+                {opt.label}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+        <PiiTextarea
+          value={fd.q15b_toelichting ?? ""}
+          onChange={(v) => update({ q15b_toelichting: v })}
+          onPiiChange={setPiiBlocked}
+          placeholder="Kunt u kort toelichten welke mogelijkheden u ziet of waarom u weinig mogelijkheden ervaart?"
+          rows={3}
+          maxLength={600}
+        />
+      </div>
     ),
   });
 

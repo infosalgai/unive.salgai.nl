@@ -20,22 +20,35 @@ export default function IntroPage() {
             <h2 className="text-2xl font-semibold text-foreground">
               Welkom bij de vragenlijst
             </h2>
-            <p className="mt-3 text-muted-foreground leading-relaxed">
-              Deze vragenlijst is bedoeld voor melkveehouders. We willen graag inzicht in hoe u
-              naar de toekomst van uw bedrijf kijkt, welke risico’s en kansen u ziet, en welke
-              ondersteuning voor u waardevol zou zijn. Uw antwoorden helpen om het gesprek over
-              uw bedrijf en verduurzaming beter te laten aansluiten op uw situatie.
+            <p className="mt-4 text-muted-foreground leading-relaxed">
+              Als coöperatieve verzekeraar zien wij dat klimaatverandering, strengere milieueisen en
+              biodiversiteitsvraagstukken steeds meer invloed hebben op bedrijfsrisico's én op de
+              toekomstbestendigheid van agrarische ondernemingen. Daarom hebben wij als organisatie de
+              ambitie om actief bij te dragen aan klimaatmitigatie (CO₂-reductie), klimaatadaptatie en het
+              versterken van biodiversiteit. Niet vanuit beleid alleen, maar ook omdat deze ontwikkelingen direct
+              samenhangen met risico's, verzekerbaarheid en de economische continuïteit van bedrijven.
+            </p>
+            <p className="text-muted-foreground leading-relaxed mt-4">
+              Als Univé willen wij verkennen hoe we melkveehouders kunnen ondersteunen bij een
+              toekomstbestendige en economisch gezonde bedrijfsvoering. We zijn ons ervan bewust dat
+              veranderingen alleen haalbaar zijn als ze passen bij de praktijk en rendabel zijn voor de ondernemer.
+              Daarom willen we van jullie informatie verkrijgen om te begrijpen wat er speelt. Met deze vragenlijst
+              willen wij inzicht krijgen hoe u uw bedrijf ervaart in de praktijk.
+            </p>
+            <p className="text-muted-foreground leading-relaxed mt-4">
+              De vragenlijst bevat ongeveer 20 vragen en duurt ongeveer 10–15 minuten. Aan het einde van de vragenlijst is
+              ruimte voor aanvullende opmerkingen of toelichting. Deelname is vrijwillig en uw antwoorden
+              worden volledig anoniem verwerkt en zijn niet te herleiden tot individuele bedrijven. Er zijn geen
+              goede of foute antwoorden – het gaat om uw werkelijkheid. Uw input helpt ons om concrete
+              ondersteuning te ontwikkelen die bijdraagt aan meer zekerheid, risicobeperking en praktische
+              haalbaarheid op het erf.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <h3 className="font-semibold text-foreground mb-3">Privacy</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• De vragenlijst is <strong className="text-foreground">anoniem</strong>.</li>
-              <li>• We vragen <strong className="text-foreground">geen persoons- of bedrijfsgegevens</strong> (geen namen, e-mail, adres of KvK).</li>
-              <li>• Invullen duurt ongeveer <strong className="text-foreground">10 tot 15 minuten</strong>.</li>
-            </ul>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Uw gegevens worden anoniem verwerkt; we vragen geen persoons- of bedrijfsgegevens. Meer hierover vindt u in ons{" "}
+            <a href="https://www.unive.nl/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">privacybeleid</a>.
+          </p>
 
           <div className="flex flex-wrap gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-5">
             <div className="flex items-center gap-2 text-sm text-foreground">

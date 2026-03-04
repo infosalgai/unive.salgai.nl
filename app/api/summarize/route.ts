@@ -125,9 +125,22 @@ export async function POST(req: Request) {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("summarize error:", message);
+
+    // 429 = quota/rate limit (OpenAI APIError heeft vaak .status)
+    const status = typeof (err as { status?: number }).status === "number"
+      ? (err as { status: number }).status
+      : message.includes("429") || message.includes("quota")
+        ? 429
+        : 500;
+
+    const isQuotaError = status === 429 || message.toLowerCase().includes("quota") || message.includes("429");
+    const userMessage = isQuotaError
+      ? "Het quotum voor de AI-samenvatting is overschreden. Controleer je OpenAI-abonnement en facturatie, of probeer het later opnieuw."
+      : "Samenvatting kon niet worden gegenereerd.";
+
     return NextResponse.json(
-      { error: "Samenvatting kon niet worden gegenereerd.", detail: message },
-      { status: 500 }
+      { error: userMessage, detail: isQuotaError ? undefined : message },
+      { status }
     );
   }
 }

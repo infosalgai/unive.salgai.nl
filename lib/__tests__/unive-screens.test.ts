@@ -3,9 +3,9 @@ import {
   buildUniveScreens,
   isUniveStepValid,
   isStepConditionallyHidden,
-} from "./unive-screens";
-import { normalizeFormData, UNIVE_INITIAL_FORM_DATA } from "./unive-questionnaire";
-import type { UniveFormData } from "./unive-questionnaire";
+} from "../unive-screens";
+import { normalizeFormData, UNIVE_INITIAL_FORM_DATA } from "../unive-questionnaire";
+import type { UniveFormData } from "../unive-questionnaire";
 
 describe("buildUniveScreens", () => {
   it("returns screens with expected ids including q6", () => {

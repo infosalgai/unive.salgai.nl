@@ -31,9 +31,6 @@ export function PiiTextarea({
 
   return (
     <div className={cn("space-y-1", className)}>
-      <p className="text-xs text-amber-600 dark:text-amber-500 font-medium">
-        {PII_WARNING_TEXT}
-      </p>
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

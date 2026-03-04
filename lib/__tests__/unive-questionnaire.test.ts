@@ -2,8 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   normalizeFormData,
   UNIVE_INITIAL_FORM_DATA,
-  type UniveFormData,
-} from "./unive-questionnaire";
+} from "../unive-questionnaire";
 
 describe("normalizeFormData", () => {
   it("returns full initial data when given null or undefined", () => {
