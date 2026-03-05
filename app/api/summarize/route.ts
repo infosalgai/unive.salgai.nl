@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { normalizeFormData, buildUniveSummaryInput } from "@/lib/unive-questionnaire";
+import { normalizeFormData, buildUniveSummaryInput, type UniveFormData } from "@/lib/unive-questionnaire";
+import { detectPii } from "@/lib/pii-guard";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,39 @@ type SummarizeRequestBody = {
   currentSummary?: string;
   feedback?: string;
 };
+
+function ensureNoPiiInFormData(formData: UniveFormData): void {
+  const piiFields: string[] = [];
+
+  for (const [key, value] of Object.entries(formData)) {
+    if (typeof value === "string") {
+      const res = detectPii(value);
+      if (res.hasPII) {
+        piiFields.push(key);
+      }
+    } else if (Array.isArray(value)) {
+      for (const v of value) {
+        if (typeof v !== "string") continue;
+        const res = detectPii(v);
+        if (res.hasPII) {
+          piiFields.push(key);
+          break;
+        }
+      }
+    }
+  }
+
+  if (piiFields.length > 0) {
+    const uniqueFields = Array.from(new Set(piiFields)).sort();
+    const fieldsLabel = uniqueFields.join(", ");
+    const message =
+      "Je antwoorden lijken nog herleidbare gegevens te bevatten (zoals e‑mailadres, telefoonnummer, adres of website). " +
+      "Pas deze gegevens in de vragenlijst aan voordat je een samenvatting laat maken. " +
+      `(Velden met mogelijke PII: ${fieldsLabel}).`;
+    // Throwing een fout zodat de algemene error-afhandeling een nette JSON-respons geeft.
+    throw new Error(message);
+  }
+}
 
 function getClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -118,6 +152,7 @@ export async function POST(req: Request) {
       );
     }
     const formData = normalizeFormData(rawFormData);
+    ensureNoPiiInFormData(formData);
     const userPrompt = buildUniveSummaryInput(formData);
     const summary = await createSummary(client, model, UNIVE_SYSTEM_PROMPT, userPrompt);
     return NextResponse.json({ summary });
@@ -134,13 +169,14 @@ export async function POST(req: Request) {
           : 500;
     const isQuotaError =
       status === 429 || message.toLowerCase().includes("quota") || message.includes("429");
+    const isValidationError = status === 400;
+
     const userMessage = isQuotaError
       ? "Het quotum voor de AI-samenvatting is overschreden. Controleer je OpenAI-abonnement en facturatie, of probeer het later opnieuw."
-      : "Samenvatting kon niet worden gegenereerd.";
+      : isValidationError
+        ? message
+        : "Samenvatting kon niet worden gegenereerd.";
 
-    return NextResponse.json(
-      { error: userMessage, ...(isQuotaError ? {} : { detail: message }) },
-      { status }
-    );
+    return NextResponse.json({ error: userMessage }, { status });
   }
 }

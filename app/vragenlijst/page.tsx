@@ -1,42 +1,22 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useEffect, useRef, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { UniveLogo } from "@/components/unive-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { type UniveFormData, UNIVE_INITIAL_FORM_DATA, normalizeFormData } from "@/lib/unive-questionnaire";
 import { buildUniveScreens, isUniveStepValid, isStepConditionallyHidden } from "@/lib/unive-screens";
-
-const FORM_STORAGE_KEY = "univeFormV2";
+import { useUniveFormState } from "@/lib/use-unive-form-state";
 
 export default function VragenlijstPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [formData, setFormData] = useState<UniveFormData>(UNIVE_INITIAL_FORM_DATA);
+  const { formData, update, toggleMulti } = useUniveFormState();
   const [stepError, setStepError] = useState<string | null>(null);
   const [currentStepPiiBlocked, setCurrentStepPiiBlocked] = useState(false);
   const stepErrorRef = useRef<HTMLParagraphElement>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(FORM_STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as unknown;
-        setFormData(normalizeFormData(parsed));
-      } catch {
-        // bij parsefout: blijf bij initiële data
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(formData));
-  }, [formData]);
 
   const allScreens = useMemo(() => buildUniveScreens(), []);
   const stepFromUrl = searchParams.get("stap") || allScreens[0]?.id;
@@ -49,21 +29,6 @@ export default function VragenlijstPage() {
   const currentScreen = allScreens[currentScreenIndex];
   const totalScreens = allScreens.length;
   const overallPercent = Math.round(((currentScreenIndex + 1) / totalScreens) * 100);
-
-  const update = useCallback((partial: Partial<UniveFormData>) => {
-    setFormData((prev) => ({ ...prev, ...partial }));
-  }, []);
-
-  const toggleMulti = useCallback((field: keyof UniveFormData, value: string, max?: number) => {
-    setFormData((prev) => {
-      const current = (prev[field] as string[]) ?? [];
-      if (current.includes(value)) {
-        return { ...prev, [field]: current.filter((v) => v !== value) };
-      }
-      if (max && current.length >= max) return prev;
-      return { ...prev, [field]: [...current, value] };
-    });
-  }, []);
 
   useEffect(() => {
     setCurrentStepPiiBlocked(false);

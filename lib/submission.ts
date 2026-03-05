@@ -48,14 +48,26 @@ export type DeliveryResult =
  * Handig voor debugging en om in de toekomst naar een log-aggregator te sturen.
  */
 function logSubmission(payload: UniveSubmissionPayload): void {
+  const { submissionId, submittedAt, version, summary, answers } = payload;
+  const {
+    q19_toestemming_contact,
+    q19_naam,
+    q19_email,
+    q19_telefoon,
+  } = answers;
+
   const logLine = {
     event: "unive_submission",
-    submissionId: payload.submissionId,
-    submittedAt: payload.submittedAt,
-    version: payload.version,
-    summaryLength: payload.summary.length,
-    // Volledige payload voor opslag/analyse; in productie eventueel alleen metadata loggen
-    payload,
+    submissionId,
+    submittedAt,
+    version,
+    summaryLength: summary.length,
+    contact: {
+      toestemming_contact: q19_toestemming_contact,
+      hasNaam: Boolean(q19_naam && q19_naam.trim()),
+      hasEmail: Boolean(q19_email && q19_email.trim()),
+      hasTelefoon: Boolean(q19_telefoon && q19_telefoon.trim()),
+    },
   };
   console.info("[unive-submit]", JSON.stringify(logLine));
 }
