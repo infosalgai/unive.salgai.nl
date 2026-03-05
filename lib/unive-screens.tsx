@@ -57,8 +57,8 @@ function ScaleSlider({
         <span className="whitespace-nowrap">{labelLeft}</span>
         <span className="whitespace-nowrap">{labelRight}</span>
       </div>
-      {/* Balk met schuifje: dikke track, duidelijke thumb om te slepen */}
-      <div className="px-0.5 [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-thumb]]:size-6 [&_[data-slot=slider-thumb]]:shadow-md [&_[data-slot=slider-thumb]]:cursor-grab [&_[data-slot=slider-thumb]]:active:cursor-grabbing">
+      {/* Balk met schuifje: zelfde breedte als de 1–7-cijfers eronder */}
+      <div className="w-full [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-thumb]]:size-6 [&_[data-slot=slider-thumb]]:shadow-md [&_[data-slot=slider-thumb]]:cursor-grab [&_[data-slot=slider-thumb]]:active:cursor-grabbing">
         <Slider
           value={[value]}
           onValueChange={([v]) => onValueChange(v)}
@@ -69,8 +69,8 @@ function ScaleSlider({
           aria-label="Kies een waarde van 1 tot 7"
         />
       </div>
-      {/* Cijfers 1–7 onder de balk, uitgelijnd met de schaal */}
-      <div className="grid grid-cols-7 gap-0 text-xs text-muted-foreground">
+      {/* Cijfers 1–7 onder de balk, exact uitgelijnd met de schaal */}
+      <div className="grid w-full grid-cols-7 gap-0 text-xs text-muted-foreground">
         {[1, 2, 3, 4, 5, 6, 7].map((n) => (
           <span key={n} className="tabular-nums text-center" aria-hidden>
             {n}
@@ -118,7 +118,7 @@ function SliderRow({
         </span>
       </Label>
       <div className="space-y-2">
-        <div className="px-0.5 [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-thumb]]:size-6 [&_[data-slot=slider-thumb]]:shadow-md [&_[data-slot=slider-thumb]]:cursor-grab [&_[data-slot=slider-thumb]]:active:cursor-grabbing">
+        <div className="w-full [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-thumb]]:size-6 [&_[data-slot=slider-thumb]]:shadow-md [&_[data-slot=slider-thumb]]:cursor-grab [&_[data-slot=slider-thumb]]:active:cursor-grabbing">
           <Slider
             value={[value]}
             onValueChange={([v]) => onValueChange(v)}
@@ -129,7 +129,7 @@ function SliderRow({
             aria-label={`${label}, waarde ${value} van 7`}
           />
         </div>
-        <div className="grid grid-cols-7 gap-0 text-xs text-muted-foreground">
+        <div className="grid w-full grid-cols-7 gap-0 text-xs text-muted-foreground">
           {[1, 2, 3, 4, 5, 6, 7].map((n) => (
             <span key={n} className="tabular-nums text-center" aria-hidden>
               {n}
@@ -169,6 +169,7 @@ const Q4_OPTIONS = [
   "Opvolging",
   "Werkplezier",
   "Gebiedsgerichte aanpak / uitkoopregelingen",
+  "Weet ik niet",
   "Anders, namelijk:",
 ];
 
@@ -181,6 +182,7 @@ const Q4A_OPTIONS = [
   "Klimaat- en broeikasgasbeleid",
   "Dierwelzijns- en stalregelgeving",
   "Waterkwaliteitseisen (KRW)",
+  "Weet ik niet",
   "Anders, namelijk:",
 ];
 
@@ -195,6 +197,7 @@ const Q9_OPTIONS = [
   "Financiële noodzaak",
   "Nieuwe regelgeving",
   "Persoonlijke overtuiging",
+  "Weet ik niet",
   "Anders, namelijk:",
 ];
 
@@ -205,6 +208,7 @@ const Q11_OPTIONS = [
   "Onzeker beleid",
   "Onvoldoende steun van bank",
   "Twijfel over praktische haalbaarheid",
+  "Weet ik niet",
   "Anders, namelijk:",
 ];
 
@@ -214,6 +218,7 @@ const Q14_OPTIONS = [
   "Teelten als hennep",
   "Productief kruidenrijk grasland",
   "Biobased bouwen",
+  "Weet ik niet",
   "Anders, namelijk:",
 ];
 
@@ -536,12 +541,11 @@ export function buildUniveScreens(): UniveScreen[] {
           labelRight="Zeer relevant"
         />
         <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">Optioneel: toelichting</Label>
           <PiiTextarea
             value={fd.q5_toelichting ?? ""}
             onChange={(v) => update({ q5_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Licht je antwoord toe indien gewenst"
+            placeholder="Optioneel: licht je antwoord kort toe (maximaal 3–4 regels)."
             rows={3}
             maxLength={800}
           />
@@ -766,12 +770,12 @@ export function buildUniveScreens(): UniveScreen[] {
               />
             </div>
           )}
-          <div>
-            <Label className={QUESTION_LABEL_CLASS}>Optioneel: Kun je dit kort toelichten?</Label>
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
             <PiiTextarea
               value={fd.q11_toelichting ?? ""}
               onChange={(v) => update({ q11_toelichting: v })}
               onPiiChange={setPiiBlocked}
+              placeholder="Optioneel: licht kort toe wat je vooral tegenhoudt (maximaal 3–4 regels)."
               rows={3}
               maxLength={500}
             />
@@ -873,31 +877,17 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     questionNumber: 13,
     title: "Welke vormen van ondersteuning zijn voor jou het meest waardevol?",
-    subtitle: "Geef per type aan hoe waardevol (1 = weinig, 7 = zeer waardevol).",
+    subtitle: "Beschrijf in je eigen woorden welke ondersteuning jij het belangrijkst vindt voor jouw melkveebedrijf.",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
-      <div className="space-y-5">
-        {Q13_SLIDER_OPTIONS.map(({ key, label, tooltip }) => (
-          <SliderRow
-            key={key}
-            label={label}
-            value={(fd[key] as number) ?? 4}
-            tooltip={tooltip}
-            onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
-          />
-        ))}
-        <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">Optioneel: aanvulling</Label>
-          <PiiTextarea
-            value={fd.q13 ?? ""}
-            onChange={(v) => update({ q13: v })}
-            onPiiChange={setPiiBlocked}
-            placeholder="Bijvoorbeeld: investeringssteun, langjarige afspraken, begeleiding op het erf..."
-            rows={2}
-            maxLength={800}
-          />
-        </div>
-      </div>
+      <PiiTextarea
+        value={fd.q13 ?? ""}
+        onChange={(v) => update({ q13: v })}
+        onPiiChange={setPiiBlocked}
+        placeholder="Bijvoorbeeld: financiële steun, langjarige afspraken, begeleiding op het erf, hulp bij CO₂‑reductie..."
+        rows={4}
+        maxLength={800}
+      />
     ),
   });
 
@@ -1025,12 +1015,11 @@ export function buildUniveScreens(): UniveScreen[] {
           ))}
         </RadioGroup>
         <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">Optioneel: toelichting</Label>
           <PiiTextarea
             value={fd.q15b_toelichting ?? ""}
             onChange={(v) => update({ q15b_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Welke mogelijkheden zie je, of waarom weinig?"
+            placeholder="Optioneel: beschrijf kort welke mogelijkheden je ziet, of waarom je weinig mogelijkheden verwacht."
             rows={3}
             maxLength={600}
           />
@@ -1204,12 +1193,12 @@ export function buildUniveScreens(): UniveScreen[] {
             </div>
           )}
 
-          <div>
-            <Label className={QUESTION_LABEL_CLASS}>Aanvullende opmerkingen (optioneel)</Label>
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
             <PiiTextarea
               value={fd.q19_opmerkingen ?? ""}
               onChange={(v) => update({ q19_opmerkingen: v })}
               onPiiChange={setPiiBlocked}
+              placeholder="Optioneel: vul hier aanvullende opmerkingen in die je nog wilt meegeven."
               rows={3}
               maxLength={600}
             />
@@ -1237,6 +1226,14 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
     const hectares = Number(fd.q2_hectares);
     return (Number.isFinite(cows) && cows > 0) || (Number.isFinite(hectares) && hectares > 0);
   }
+  if (screen.id === "q1") {
+    const keuze = typeof fd.q1 === "string" ? fd.q1.trim() : "";
+    if (!keuze) return false;
+    if (keuze === "Anders") {
+      const anders = typeof fd.q1_anders === "string" ? fd.q1_anders.trim() : "";
+      if (!anders) return false;
+    }
+  }
   if (screen.id === "q8") {
     const q8 = typeof fd.q8 === "string" ? fd.q8.trim() : "";
     if (!q8) return false;
@@ -1252,6 +1249,16 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
     if (!show) return true;
     const q9 = Array.isArray(fd.q9) ? fd.q9 : [];
     if (q9.length === 0) return false;
+    // Als "Nieuwe regelgeving" is gekozen, is een toelichting verplicht
+    if (q9.includes("Nieuwe regelgeving")) {
+      const toelichting = typeof fd.q9_regelgeving === "string" ? fd.q9_regelgeving.trim() : "";
+      if (!toelichting) return false;
+    }
+    // Als "Anders, namelijk:" is gekozen, is de invulregel ook verplicht
+    if (q9.includes("Anders, namelijk:")) {
+      const anders = typeof fd.q9_anders === "string" ? fd.q9_anders.trim() : "";
+      if (!anders) return false;
+    }
     return true;
   }
   if (screen.id === "q19") {
@@ -1271,6 +1278,10 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
     const words = countWords(fd.q10);
     return words >= 5;
   }
+  if (screen.id === "q13") {
+    const words = countWords(fd.q13);
+    return words >= 5;
+  }
   if (screen.id === "q17") {
     const words = countWords(fd.q17);
     return words >= 5;
@@ -1278,6 +1289,34 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
   if (screen.id === "q18") {
     const words = countWords(fd.q18);
     return words >= 5;
+  }
+  if (screen.id === "q4") {
+    const q4 = Array.isArray(fd.q4) ? fd.q4 : [];
+    if (q4.includes("Anders, namelijk:")) {
+      const anders = typeof fd.q4_anders === "string" ? fd.q4_anders.trim() : "";
+      if (!anders) return false;
+    }
+  }
+  if (screen.id === "q4a") {
+    const q4a = Array.isArray(fd.q4a) ? fd.q4a : [];
+    if (q4a.includes("Anders, namelijk:")) {
+      const anders = typeof fd.q4a_anders === "string" ? fd.q4a_anders.trim() : "";
+      if (!anders) return false;
+    }
+  }
+  if (screen.id === "q11") {
+    const q11 = Array.isArray(fd.q11) ? fd.q11 : [];
+    if (q11.includes("Anders, namelijk:")) {
+      const anders = typeof fd.q11_anders === "string" ? fd.q11_anders.trim() : "";
+      if (!anders) return false;
+    }
+  }
+  if (screen.id === "q14") {
+    const q14 = Array.isArray(fd.q14) ? fd.q14 : [];
+    if (q14.includes("Anders, namelijk:")) {
+      const anders = typeof fd.q14_anders === "string" ? fd.q14_anders.trim() : "";
+      if (!anders) return false;
+    }
   }
   if (screen.choiceField) {
     const val = fd[screen.choiceField];
