@@ -86,14 +86,37 @@ function SliderRow({
   label,
   value,
   onValueChange,
+  tooltip,
 }: {
   label: string;
   value: number;
   onValueChange: (v: number) => void;
+  tooltip?: string;
 }) {
   return (
     <div className="space-y-2" role="group">
-      <Label className="text-sm font-medium text-foreground">{label}</Label>
+      <Label className="text-sm font-medium text-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <span>{label}</span>
+          {tooltip && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex shrink-0 rounded-full text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label={`Uitleg: ${label}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Info className="h-3.5 w-3.5" aria-hidden />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[260px]">
+                <p className="text-left">{tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </span>
+      </Label>
       <div className="space-y-2">
         <div className="px-0.5 [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-thumb]]:size-6 [&_[data-slot=slider-thumb]]:shadow-md [&_[data-slot=slider-thumb]]:cursor-grab [&_[data-slot=slider-thumb]]:active:cursor-grabbing">
           <Slider
@@ -759,27 +782,53 @@ export function buildUniveScreens(): UniveScreen[] {
   });
 
   // Deel 4 – Welke ondersteuning zou helpen?
-  const Q12_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
-    { key: "q12_financieel", label: "Financiële ondersteuning" },
-    { key: "q12_pacht", label: "Pacht" },
-    { key: "q12_co2", label: "Vergoeding CO₂-opvang" },
-    { key: "q12_premiekorting", label: "Premiekorting" },
-    { key: "q12_klimaatadaptie", label: "Klimaatadaptie" },
-    { key: "q12_biodiversiteit", label: "Biodiversiteit" },
+  const Q12_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string; tooltip: string }[] = [
+    {
+      key: "q12_financieel",
+      label: "Financiële ondersteuning",
+      tooltip: "Bijvoorbeeld korting op premie, bijdrage in investeringen of regelingen die financieel helpen bij verduurzamen.",
+    },
+    {
+      key: "q12_pacht",
+      label: "Pacht",
+      tooltip: "Ondersteuning rondom pachtgrond, zoals afspraken over duur, voorwaarden of combinatie met duurzaam beheer.",
+    },
+    {
+      key: "q12_co2",
+      label: "Vergoeding CO₂-opvang",
+      tooltip: "Vergoeding voor maatregelen waarmee je CO₂ vastlegt of uitstoot vermindert, bijvoorbeeld via bodem of bomen.",
+    },
+    {
+      key: "q12_premiekorting",
+      label: "Premiekorting",
+      tooltip: "Korting op verzekeringspremie als je maatregelen neemt die risico’s of schades beperken.",
+    },
+    {
+      key: "q12_klimaatadaptie",
+      label: "Klimaatadaptie",
+      tooltip: "Ondersteuning bij het aanpassen aan extremen als droogte, natte periodes of hitte op je bedrijf.",
+    },
+    {
+      key: "q12_biodiversiteit",
+      label: "Biodiversiteit",
+      tooltip: "Ondersteuning rond meer natuur op en rond je bedrijf, zoals kruidenrijk grasland of landschapselementen.",
+    },
   ];
   screens.push({
     id: "q12",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     questionNumber: 12,
     title: "In hoeverre sta je open voor ondersteuning van Univé per type?",
-    subtitle: "Geef per onderwerp aan hoe open je ervoor staat (1 = niet open, 7 = zeer open). Het gaat om ondersteuning voor jouw melkveebedrijf.",
+    subtitle:
+      "Op elke regel kies je een cijfer van 1 tot en met 7: 1 = helemaal niet open voor dit type ondersteuning, 7 = zeer open. Het gaat om ondersteuning voor jouw melkveebedrijf.",
     render: (fd, update) => (
       <div className="space-y-5">
-        {Q12_SLIDER_OPTIONS.map(({ key, label }) => (
+        {Q12_SLIDER_OPTIONS.map(({ key, label, tooltip }) => (
           <SliderRow
             key={key}
             label={label}
             value={(fd[key] as number) ?? 4}
+            tooltip={tooltip}
             onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
           />
         ))}
@@ -787,13 +836,37 @@ export function buildUniveScreens(): UniveScreen[] {
     ),
   });
 
-  const Q13_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
-    { key: "q13_financieel", label: "Financiële ondersteuning" },
-    { key: "q13_pacht", label: "Pacht" },
-    { key: "q13_co2", label: "Vergoeding CO₂-opvang" },
-    { key: "q13_premiekorting", label: "Premiekorting" },
-    { key: "q13_klimaatadaptie", label: "Klimaatadaptie" },
-    { key: "q13_biodiversiteit", label: "Biodiversiteit" },
+  const Q13_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string; tooltip: string }[] = [
+    {
+      key: "q13_financieel",
+      label: "Financiële ondersteuning",
+      tooltip: "Hoe waardevol vind je het als Univé financieel bijdraagt aan investeringen of risico’s?",
+    },
+    {
+      key: "q13_pacht",
+      label: "Pacht",
+      tooltip: "Hoe waardevol zijn oplossingen rondom pachtgrond voor jouw bedrijfsvoering en plannen?",
+    },
+    {
+      key: "q13_co2",
+      label: "Vergoeding CO₂-opvang",
+      tooltip: "Hoe belangrijk is een goede vergoeding voor CO₂-opvang of -reductie voor jouw bedrijf?",
+    },
+    {
+      key: "q13_premiekorting",
+      label: "Premiekorting",
+      tooltip: "Hoeveel waarde hecht je aan premiekorting als beloning voor maatregelen die risico’s beperken?",
+    },
+    {
+      key: "q13_klimaatadaptie",
+      label: "Klimaatadaptie",
+      tooltip: "Hoe waardevol is ondersteuning bij het omgaan met droogte, wateroverlast of hitte?",
+    },
+    {
+      key: "q13_biodiversiteit",
+      label: "Biodiversiteit",
+      tooltip: "Hoe belangrijk is ondersteuning rond maatregelen voor meer biodiversiteit op en rond je bedrijf?",
+    },
   ];
   screens.push({
     id: "q13",
@@ -804,11 +877,12 @@ export function buildUniveScreens(): UniveScreen[] {
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <div className="space-y-5">
-        {Q13_SLIDER_OPTIONS.map(({ key, label }) => (
+        {Q13_SLIDER_OPTIONS.map(({ key, label, tooltip }) => (
           <SliderRow
             key={key}
             label={label}
             value={(fd[key] as number) ?? 4}
+            tooltip={tooltip}
             onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
           />
         ))}
@@ -887,11 +961,27 @@ export function buildUniveScreens(): UniveScreen[] {
   });
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
-  const Q15A_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
-    { key: "q15a_nevenactiviteiten", label: "Aanvullende inkomsten uit nevenactiviteiten" },
-    { key: "q15a_pacht", label: "Pacht of verhuur van grond" },
-    { key: "q15a_risicospreiding", label: "Risicospreiding (bijv. via verzekering)" },
-    { key: "q15a_verbreding", label: "Verbreding (meerdere inkomensbronnen)" },
+  const Q15A_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string; tooltip: string }[] = [
+    {
+      key: "q15a_nevenactiviteiten",
+      label: "Aanvullende inkomsten uit nevenactiviteiten",
+      tooltip: "Bijvoorbeeld boerderijwinkel, camping, zorgboerderij of andere activiteiten naast de melkveehouderij.",
+    },
+    {
+      key: "q15a_pacht",
+      label: "Pacht of verhuur van grond",
+      tooltip: "Inkomen uit het verpachten of verhuren van (een deel van) je grond.",
+    },
+    {
+      key: "q15a_risicospreiding",
+      label: "Risicospreiding (bijv. via verzekering)",
+      tooltip: "Minder afhankelijk zijn van één inkomstenbron of risico, bijvoorbeeld via verzekeringen of contracten.",
+    },
+    {
+      key: "q15a_verbreding",
+      label: "Verbreding (meerdere inkomensbronnen)",
+      tooltip: "Naast melk nog andere stabiele inkomstenstromen ontwikkelen om je bedrijf weerbaarder te maken.",
+    },
   ];
   screens.push({
     id: "q15a",
@@ -901,11 +991,12 @@ export function buildUniveScreens(): UniveScreen[] {
     subtitle: "Denk aan inkomsten of zekerheid naast de melkproductie. Geef per optie aan (1 = geen behoefte, 7 = sterke behoefte).",
     render: (fd, update) => (
       <div className="space-y-5">
-        {Q15A_SLIDER_OPTIONS.map(({ key, label }) => (
+        {Q15A_SLIDER_OPTIONS.map(({ key, label, tooltip }) => (
           <SliderRow
             key={key}
             label={label}
             value={(fd[key] as number) ?? 4}
+            tooltip={tooltip}
             onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
           />
         ))}
@@ -948,13 +1039,37 @@ export function buildUniveScreens(): UniveScreen[] {
     ),
   });
 
-  const Q16_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
-    { key: "q16_marge", label: "Voldoende marge per jaar" },
-    { key: "q16_schuldenlast", label: "Lage schuldenlast" },
-    { key: "q16_continuïteit", label: "Continuïteit voor volgende generatie" },
-    { key: "q16_stabiliteit", label: "Stabiliteit / weinig schommelingen" },
-    { key: "q16_voortzetten", label: "Bedrijf in huidige vorm kunnen voortzetten" },
-    { key: "q16_waardebehoud", label: "Waardebehoud van grond en bedrijf" },
+  const Q16_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string; tooltip: string }[] = [
+    {
+      key: "q16_marge",
+      label: "Voldoende marge per jaar",
+      tooltip: "Na kosten en aflossingen genoeg overhouden om te kunnen ondernemen en tegenvallers op te vangen.",
+    },
+    {
+      key: "q16_schuldenlast",
+      label: "Lage schuldenlast",
+      tooltip: "Een schuldniveau dat past bij jouw bedrijf en waarbij je je comfortabel voelt.",
+    },
+    {
+      key: "q16_continuïteit",
+      label: "Continuïteit voor volgende generatie",
+      tooltip: "Het bedrijf in zo’n staat achterlaten dat een volgende generatie goed kan doorgaan.",
+    },
+    {
+      key: "q16_stabiliteit",
+      label: "Stabiliteit / weinig schommelingen",
+      tooltip: "Zo min mogelijk grote schommelingen in opbrengsten, kosten of inkomsten door het jaar heen.",
+    },
+    {
+      key: "q16_voortzetten",
+      label: "Bedrijf in huidige vorm kunnen voortzetten",
+      tooltip: "Je bedrijf grotendeels kunnen blijven runnen zoals nu, binnen de regels en met voldoende inkomen.",
+    },
+    {
+      key: "q16_waardebehoud",
+      label: "Waardebehoud van grond en bedrijf",
+      tooltip: "Dat je grond, gebouwen en bedrijf hun waarde behouden of op termijn niet sterk dalen.",
+    },
   ];
   screens.push({
     id: "q16",
@@ -964,11 +1079,12 @@ export function buildUniveScreens(): UniveScreen[] {
     subtitle: "Geef per aspect aan hoe belangrijk dit voor jouw bedrijf is (1 = weinig, 7 = zeer belangrijk).",
     render: (fd, update) => (
       <div className="space-y-5">
-        {Q16_SLIDER_OPTIONS.map(({ key, label }) => (
+        {Q16_SLIDER_OPTIONS.map(({ key, label, tooltip }) => (
           <SliderRow
             key={key}
             label={label}
             value={(fd[key] as number) ?? 4}
+            tooltip={tooltip}
             onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
           />
         ))}
@@ -1107,6 +1223,13 @@ export function buildUniveScreens(): UniveScreen[] {
 }
 
 export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBlocked: boolean): boolean {
+  const countWords = (value: unknown): number => {
+    if (typeof value !== "string") return 0;
+    const trimmed = value.trim();
+    if (!trimmed) return 0;
+    return trimmed.split(/\s+/).filter(Boolean).length;
+  };
+
   if (piiBlocked && screen.hasPiiField) return false;
   if (screen.required === false) return true;
   if (screen.id === "q2") {
@@ -1117,6 +1240,10 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
   if (screen.id === "q8") {
     const q8 = typeof fd.q8 === "string" ? fd.q8.trim() : "";
     if (!q8) return false;
+    if (q8 === "Ja, meerdere" || q8 === "Ja, beperkt") {
+      const words = countWords(fd.q8a);
+      return words >= 5;
+    }
     return true;
   }
   if (screen.id === "q9") {
@@ -1135,6 +1262,22 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
       if (!email || !email.includes("@")) return false;
     }
     return true;
+  }
+  if (screen.id === "q6") {
+    const words = countWords(fd.q6);
+    return words >= 5;
+  }
+  if (screen.id === "q10") {
+    const words = countWords(fd.q10);
+    return words >= 5;
+  }
+  if (screen.id === "q17") {
+    const words = countWords(fd.q17);
+    return words >= 5;
+  }
+  if (screen.id === "q18") {
+    const words = countWords(fd.q18);
+    return words >= 5;
   }
   if (screen.choiceField) {
     const val = fd[screen.choiceField];
