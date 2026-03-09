@@ -21,7 +21,7 @@ const stagger = (i: number) => ({ animationDelay: `${i * 100}ms` } as React.CSSP
 export default function IntroPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="border-b border-border bg-card px-4 py-4">
+      <header className="border-b border-border bg-background px-4 py-4">
         <div className="mx-auto max-w-[900px]">
           <UniveLogo height={72} />
         </div>
