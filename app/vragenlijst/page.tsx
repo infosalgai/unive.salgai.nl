@@ -42,25 +42,31 @@ export default function VragenlijstPage() {
   useEffect(() => {
     if (!currentScreen) return;
     if (!isStepConditionallyHidden(currentScreen.id, formData)) return;
+    if (currentScreen.id === "q4a") {
+      router.replace("/vragenlijst?stap=q4");
+      return;
+    }
     let targetId: string | null = null;
     for (let i = currentScreenIndex + 1; i < allScreens.length; i++) {
       const c = allScreens[i];
-      if (c.id === "q4a" && !(Array.isArray(formData.q4) && formData.q4.includes("Regelgeving"))) continue;
+      if (c.id === "q4a") continue;
       if (c.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") continue;
+      if (c.id === "q11b" && isStepConditionallyHidden("q11b", formData)) continue;
       targetId = c.id;
       break;
     }
     if (!targetId) {
       for (let i = currentScreenIndex - 1; i >= 0; i--) {
         const c = allScreens[i];
-        if (c.id === "q4a" && !(Array.isArray(formData.q4) && formData.q4.includes("Regelgeving"))) continue;
+        if (c.id === "q4a") continue;
         if (c.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") continue;
+        if (c.id === "q11b" && isStepConditionallyHidden("q11b", formData)) continue;
         targetId = c.id;
         break;
       }
     }
     if (targetId) router.replace(`/vragenlijst?stap=${targetId}`);
-  }, [currentScreen?.id, currentScreenIndex, formData.q4, formData.q8, allScreens, router]);
+  }, [currentScreen?.id, currentScreenIndex, formData, allScreens, router]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -68,13 +74,18 @@ export default function VragenlijstPage() {
     let idx = currentScreenIndex + 1;
     while (idx < allScreens.length) {
       const candidate = allScreens[idx];
-      // q4a alleen tonen als bij q4 "Regelgeving" is aangevinkt
-      if (candidate.id === "q4a" && !(Array.isArray(formData.q4) && formData.q4.includes("Regelgeving"))) {
+      // q4a overgeslagen: regelgeving-doorvraag staat inlined op q4
+      if (candidate.id === "q4a") {
         idx++;
         continue;
       }
       // q9 (aanleidingen) alleen tonen als bij q8 "Ja" is gekozen
       if (candidate.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") {
+        idx++;
+        continue;
+      }
+      // q11b alleen tonen bij minimaal 1 Ja bij vraag 11 (matrix)
+      if (candidate.id === "q11b" && isStepConditionallyHidden("q11b", formData)) {
         idx++;
         continue;
       }
@@ -87,11 +98,15 @@ export default function VragenlijstPage() {
     let idx = currentScreenIndex - 1;
     while (idx >= 0) {
       const candidate = allScreens[idx];
-      if (candidate.id === "q4a" && !(Array.isArray(formData.q4) && formData.q4.includes("Regelgeving"))) {
+      if (candidate.id === "q4a") {
         idx--;
         continue;
       }
       if (candidate.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") {
+        idx--;
+        continue;
+      }
+      if (candidate.id === "q11b" && isStepConditionallyHidden("q11b", formData)) {
         idx--;
         continue;
       }
@@ -156,7 +171,11 @@ export default function VragenlijstPage() {
               {currentScreen && (
                 <>
                   <div className="mb-4">
-                    <h2 className="mb-1 text-xl font-semibold text-foreground">{currentScreen.title}</h2>
+                    <h2 className="mb-1 text-xl font-semibold text-foreground">
+                      {currentScreen.id === "q19a_19b"
+                        ? currentScreen.title
+                        : `${currentScreen.questionLabel ?? currentScreen.questionNumber}. ${currentScreen.title}`}
+                    </h2>
                     {currentScreen.subtitle && (
                       <p className="text-sm text-muted-foreground">{currentScreen.subtitle}</p>
                     )}
