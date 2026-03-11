@@ -19,20 +19,41 @@ export default function VragenlijstPage() {
   const stepErrorRef = useRef<HTMLParagraphElement>(null);
 
   const allScreens = useMemo(() => buildUniveScreens(), []);
-  const stepFromUrl = searchParams.get("stap") || allScreens[0]?.id;
-  const currentScreenIndex = Math.max(
-    0,
-    allScreens.findIndex((s) => s.id === stepFromUrl) === -1
-      ? 0
-      : allScreens.findIndex((s) => s.id === stepFromUrl)
-  );
-  const currentScreen = allScreens[currentScreenIndex];
+
+  const getStepSlug = (screen: (typeof allScreens)[number]) =>
+    `q${screen.questionLabel ?? screen.questionNumber}`;
+
+  const currentScreenIndex = useMemo(() => {
+    if (!allScreens.length) return 0;
+    const stepParam = searchParams.get("stap");
+    if (!stepParam) return 0;
+
+    // 1) Nieuwe URLs: stap gebaseerd op vraagnummer/-label (bijv. q13, q11b)
+    //    Prefer screens die niet voorwaardelijk verborgen zijn (zoals q4a),
+    //    zodat q8 naar de zichtbare vraag 8 gaat i.p.v. naar een hulpscherm.
+    let slugIndex = allScreens.findIndex(
+      (s) => getStepSlug(s) === stepParam && !isStepConditionallyHidden(s.id, formData)
+    );
+    if (slugIndex !== -1) return slugIndex;
+
+    //    Fallback: eerste match ongeacht verborgenheid (backwards compatibility).
+    slugIndex = allScreens.findIndex((s) => getStepSlug(s) === stepParam);
+    if (slugIndex !== -1) return slugIndex;
+
+    // 2) Backwards compatible: oude URLs op basis van interne id (bijv. q11)
+    const idIndex = allScreens.findIndex((s) => s.id === stepParam);
+    if (idIndex !== -1) return idIndex;
+
+    return 0;
+  }, [allScreens, searchParams, formData]);
+
+  const currentScreen = allScreens[currentScreenIndex] ?? allScreens[0];
   const totalScreens = allScreens.length;
   const overallPercent = Math.round(((currentScreenIndex + 1) / totalScreens) * 100);
 
   useEffect(() => {
     setCurrentStepPiiBlocked(false);
-  }, [stepFromUrl, currentScreenIndex]);
+  }, [currentScreenIndex]);
 
   useEffect(() => {
     if (currentScreen && isUniveStepValid(currentScreen, formData, currentStepPiiBlocked)) setStepError(null);
@@ -43,34 +64,37 @@ export default function VragenlijstPage() {
     if (!currentScreen) return;
     if (!isStepConditionallyHidden(currentScreen.id, formData)) return;
     if (currentScreen.id === "q4a") {
-      router.replace("/vragenlijst?stap=q4");
+      const q4Screen = allScreens.find((s) => s.id === "q4");
+      if (q4Screen) {
+        router.replace(`/vragenlijst?stap=${getStepSlug(q4Screen)}`);
+      }
       return;
     }
-    let targetId: string | null = null;
+    let targetScreen: (typeof allScreens)[number] | null = null;
     for (let i = currentScreenIndex + 1; i < allScreens.length; i++) {
       const c = allScreens[i];
       if (c.id === "q4a") continue;
       if (c.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") continue;
       if (c.id === "q11b" && isStepConditionallyHidden("q11b", formData)) continue;
-      targetId = c.id;
+      targetScreen = c;
       break;
     }
-    if (!targetId) {
+    if (!targetScreen) {
       for (let i = currentScreenIndex - 1; i >= 0; i--) {
         const c = allScreens[i];
         if (c.id === "q4a") continue;
         if (c.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") continue;
         if (c.id === "q11b" && isStepConditionallyHidden("q11b", formData)) continue;
-        targetId = c.id;
+        targetScreen = c;
         break;
       }
     }
-    if (targetId) router.replace(`/vragenlijst?stap=${targetId}`);
+    if (targetScreen) router.replace(`/vragenlijst?stap=${getStepSlug(targetScreen)}`);
   }, [currentScreen?.id, currentScreenIndex, formData, allScreens, router]);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-  const findNextStepId = () => {
+  const findNextScreen = () => {
     let idx = currentScreenIndex + 1;
     while (idx < allScreens.length) {
       const candidate = allScreens[idx];
@@ -89,12 +113,12 @@ export default function VragenlijstPage() {
         idx++;
         continue;
       }
-      return candidate.id;
+      return candidate;
     }
     return null;
   };
 
-  const findPrevStepId = () => {
+  const findPrevScreen = () => {
     let idx = currentScreenIndex - 1;
     while (idx >= 0) {
       const candidate = allScreens[idx];
@@ -110,7 +134,7 @@ export default function VragenlijstPage() {
         idx--;
         continue;
       }
-      return candidate.id;
+      return candidate;
     }
     return null;
   };
@@ -123,9 +147,9 @@ export default function VragenlijstPage() {
     }
     setStepError(null);
 
-    const nextId = findNextStepId();
-    if (nextId) {
-      router.push(`/vragenlijst?stap=${nextId}`);
+    const nextScreen = findNextScreen();
+    if (nextScreen) {
+      router.push(`/vragenlijst?stap=${getStepSlug(nextScreen)}`);
       scrollToTop();
     } else {
       router.push("/vragenlijst/review");
@@ -135,9 +159,9 @@ export default function VragenlijstPage() {
 
   const handleBack = () => {
     setStepError(null);
-    const prevId = findPrevStepId();
-    if (prevId) {
-      router.push(`/vragenlijst?stap=${prevId}`);
+    const prevScreen = findPrevScreen();
+    if (prevScreen) {
+      router.push(`/vragenlijst?stap=${getStepSlug(prevScreen)}`);
       scrollToTop();
     }
   };
@@ -172,9 +196,7 @@ export default function VragenlijstPage() {
                 <>
                   <div className="mb-4">
                     <h2 className="mb-1 text-xl font-semibold text-foreground">
-                      {currentScreen.id === "q19a_19b"
-                        ? currentScreen.title
-                        : `${currentScreen.questionLabel ?? currentScreen.questionNumber}. ${currentScreen.title}`}
+                      {currentScreen.title}
                     </h2>
                     {currentScreen.subtitle && (
                       <p className="text-sm text-muted-foreground">{currentScreen.subtitle}</p>

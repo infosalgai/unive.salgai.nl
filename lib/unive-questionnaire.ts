@@ -35,8 +35,8 @@ export interface UniveFormData {
   q10_samenwerking: number // invloed op samenwerking met andere partijen (1–7)
   q10_afzet: number // invloed op afzet van producten (1–7)
   q10_verbreding: number // invloed op verbreding (1–7)
-  q10_anders_score: number // invloed op andere onderdelen (1–7)
-  q10_anders: string // omschrijving andere onderdelen
+  q10_anders_score: number // invloed op andere onderdelen (1–7) – niet meer in UI gebruikt
+  q10_anders: string // omschrijving andere onderdelen – niet meer in UI gebruikt
   q10_toelichting: string // toelichting ervaren invloed
 
   // Deel 3 – Veranderingen in bedrijfsvoering
@@ -185,7 +185,7 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q10_samenwerking: 4,
   q10_afzet: 4,
   q10_verbreding: 4,
-   q10_anders_score: 4,
+  q10_anders_score: 4,
   q10_anders: "",
   q10_toelichting: "",
 
@@ -403,8 +403,6 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   push("Invloed op samenwerking met andere partijen komende jaren (1–7)", fd.q10_samenwerking)
   push("Invloed op afzet van producten komende jaren (1–7)", fd.q10_afzet)
   push("Invloed op verbreding / nieuwe activiteiten komende jaren (1–7)", fd.q10_verbreding)
-  push("Invloed op andere onderdelen komende jaren (1–7)", fd.q10_anders_score)
-  if (fd.q10_anders) push("Andere onderdelen waarop ondernemer invloed ervaart", fd.q10_anders)
   if (fd.q10_toelichting) push("Toelichting ervaren invloed op onderdelen", fd.q10_toelichting)
 
   // Deel 3 – Veranderingen in bedrijfsvoering
@@ -420,8 +418,6 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   if (fd.q11_verdienmodel === "Ja" && fd.q11_verdienmodel_toelichting) push("Toelichting verdienmodel", fd.q11_verdienmodel_toelichting)
   if (fd.q11_investeringen) push("Aanpassingen investeringen gebouwen/stal/techniek", fd.q11_investeringen)
   if (fd.q11_investeringen === "Ja" && fd.q11_investeringen_toelichting) push("Toelichting investeringen", fd.q11_investeringen_toelichting)
-  if (fd.q11_anders_rij === "Ja" && fd.q11_anders_naamelijk)
-    push("Aanpassingen anders", fd.q11_anders_naamelijk)
   const q11b = Array.isArray(fd.q11b_aanleidingen) ? fd.q11b_aanleidingen : [];
   if (q11b.length) push("Belangrijkste aanleidingen voor aanpassingen (vraag 11b)", q11b)
   if (q11b.includes("Nieuwe regelgeving") && fd.q11b_regelgeving) push("Welke regelgeving bij aanpassingen", fd.q11b_regelgeving)
@@ -443,8 +439,6 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   push("Open pachtconstructies (1–7)", fd.q14_open_pacht)
   push("Open vergoedingen CO₂-vastlegging (1–7)", fd.q14_open_co2)
   push("Open premiekorting CO₂/klimaat/biodiversiteit (1–7)", fd.q14_open_premiekorting)
-  if (fd.q14_open_andere === "Ja" && fd.q14_open_andere_naamelijk)
-    push("Open andere ondersteuning", fd.q14_open_andere_naamelijk + (fd.q14_open_andere_score ? ` (${fd.q14_open_andere_score}/7)` : ""))
   if (fd.q14_open_toelichting) push("Toelichting openheid ondersteuning vraag 14", fd.q14_open_toelichting)
   const q15w = Array.isArray(fd.q15_waardevol) ? fd.q15_waardevol : []
   if (q15w.length) push("Waardevolle vormen ondersteuning (max 2)", q15w)
@@ -461,7 +455,6 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   push("Mogelijkheden nieuwe teelten (1–7)", fd.q17b_nieuwe_teelten)
   push("Mogelijkheden vergoeding CO₂-vastlegging (1–7)", fd.q17b_co2)
   push("Mogelijkheden natuur- en biodiversiteitsbeheer (1–7)", fd.q17b_natuur_biodiversiteit)
-  if (fd.q17b_anders) push("Mogelijkheden anders (vraag 17b)", fd.q17b_anders + (fd.q17b_anders_score ? ` (${fd.q17b_anders_score}/7)` : ""))
   if (fd.q17_toelichting) push("Toelichting vraag 17", fd.q17_toelichting)
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
@@ -471,7 +464,6 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   push("Rendabel: stabiliteit (1–7)", fd.q16_stabiliteit)
   push("Rendabel: bedrijf voortzetten (1–7)", fd.q16_voortzetten)
   push("Rendabel: waardebehoud (1–7)", fd.q16_waardebehoud)
-  if (fd.q16_anders) push("Rendabel ondernemen anders", fd.q16_anders + (fd.q16_anders_score ? ` (${fd.q16_anders_score}/7)` : ""))
   if (fd.q16_toelichting) push("Toelichting rendabel ondernemen (vraag 18)", fd.q16_toelichting)
 
   // Deel 6 – Afsluiting (geen PII opnemen)

@@ -358,6 +358,15 @@ const Q16A_OPTIONS = [
   "Anders, namelijk:",
 ];
 
+function getQ16OptionLabelAndTooltip(option: string): { term: string; tooltip?: string } {
+  const match = option.match(/^(.*)\s*\((bijv\.[^)]+)\)$/);
+  if (!match) {
+    return { term: option };
+  }
+  const [, term, tooltip] = match;
+  return { term: term.trim(), tooltip: tooltip.trim() };
+}
+
 const Q14_OPTIONS = [
   "Landschapselementen als houtwallen",
   "Agroforestry",
@@ -646,7 +655,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 7,
     title: "Welke ontwikkelingen hebben momenteel de meeste invloed op jouw bedrijfsvoering?",
-    subtitle: "Denk aan wat op jouw melkveebedrijf het zwaarst weegt. Kies maximaal 3 en geef aan welke het belangrijkst is.",
+    subtitle: "Denk aan wat op jouw melkveebedrijf het zwaarst weegt.",
     multiChoiceField: "q4",
     maxChoices: 3,
     required: true,
@@ -773,18 +782,30 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 8,
     title: "Hoe belangrijk zijn verduurzaming, CO₂-reductie en biodiversiteit voor jouw bedrijf?",
-    subtitle:
-      "Op elke regel kies je een cijfer van 1 tot en met 7. 1 = nauwelijks, 7 = heel veel. Het gaat om jouw melkveebedrijf.",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-6">
         <div className="space-y-2">
           <Label className={QUESTION_LABEL_CLASS}>
-            8a. In hoeverre is verduurzaming volgens jou van belang voor de continuïteit van je bedrijf?
+            8a. In hoeverre is verduurzaming volgens jou van belang voor de continuïteit van je bedrijf?{" "}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex shrink-0 rounded-full text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="Uitleg verduurzaming"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[260px]">
+                <p className="text-left">
+                  Verduurzaming: bijvoorbeeld minder uitstoot, kringlooplandbouw, meer biodiversiteit of aanpassing aan
+                  klimaatverandering.
+                </p>
+              </TooltipContent>
+            </Tooltip>
           </Label>
-          <p className={HELPER_TEXT_CLASS}>
-            Verduurzaming: bijvoorbeeld minder uitstoot, kringlooplandbouw, meer biodiversiteit of aanpassing aan klimaatverandering.
-          </p>
           <ScaleSlider
             value={fd.q5a ?? 4}
             onValueChange={(v) => update({ q5a: v })}
@@ -795,11 +816,25 @@ export function buildUniveScreens(): UniveScreen[] {
 
         <div className="space-y-2">
           <Label className={QUESTION_LABEL_CLASS}>
-            8b. In hoeverre verwacht je dat CO₂-reductie invloed zal hebben op je bedrijf in de komende 10 jaar?
+            8b. In hoeverre verwacht je dat CO₂-reductie invloed zal hebben op je bedrijf in de komende 10 jaar?{" "}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex shrink-0 rounded-full text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="Uitleg CO₂-reductie"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[260px]">
+                <p className="text-left">
+                  CO₂-reductie: maatregelen of eisen om de uitstoot van broeikasgassen (methaan, CO₂ en lachgas) te
+                  verminderen.
+                </p>
+              </TooltipContent>
+            </Tooltip>
           </Label>
-          <p className={HELPER_TEXT_CLASS}>
-            CO₂-reductie: maatregelen of eisen om de uitstoot van broeikasgassen (methaan, CO₂ en lachgas) te verminderen.
-          </p>
           <ScaleSlider
             value={fd.q5b ?? 4}
             onValueChange={(v) => update({ q5b: v })}
@@ -810,11 +845,25 @@ export function buildUniveScreens(): UniveScreen[] {
 
         <div className="space-y-2">
           <Label className={QUESTION_LABEL_CLASS}>
-            8c. In hoeverre is biodiversiteit volgens jou relevant voor je bedrijfsvoering?
+            8c. In hoeverre is biodiversiteit volgens jou relevant voor je bedrijfsvoering?{" "}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex shrink-0 rounded-full text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label="Uitleg biodiversiteit"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[260px]">
+                <p className="text-left">
+                  Biodiversiteit: variatie in planten en dieren op en rond je bedrijf, zoals kruidenrijk grasland,
+                  landschapselementen of natuurbeheer.
+                </p>
+              </TooltipContent>
+            </Tooltip>
           </Label>
-          <p className={HELPER_TEXT_CLASS}>
-            Biodiversiteit: variatie in planten en dieren op en rond je bedrijf, zoals kruidenrijk grasland, landschapselementen of natuurbeheer.
-          </p>
           <ScaleSlider
             value={fd.q5c ?? 4}
             onValueChange={(v) => update({ q5c: v })}
@@ -824,14 +873,12 @@ export function buildUniveScreens(): UniveScreen[] {
         </div>
 
         <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">
-            Toelichting vraag 8: kun je de gekozen antwoorden kort toelichten?
-          </Label>
+          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
           <PiiTextarea
             value={fd.q5_toelichting ?? ""}
             onChange={(v) => update({ q5_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Optioneel: licht je antwoorden kort toe (maximaal 3–4 regels)."
+            placeholder="Deze toelichting is optioneel."
             rows={3}
             maxLength={800}
           />
@@ -846,7 +893,7 @@ export function buildUniveScreens(): UniveScreen[] {
     questionNumber: 9,
     title: "Als je 5–10 jaar vooruitkijkt: waar maak jij je dan het meeste zorgen over voor de toekomst van jouw bedrijf?",
     subtitle:
-      "Denk bijvoorbeeld aan inkomen, beleid of regelgeving, klimaatverandering of opvolging. Het gaat om jouw melkveebedrijf.",
+      "Denk bijvoorbeeld aan inkomen, beleid of regelgeving, klimaatverandering of opvolging.",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <PiiTextarea
@@ -865,8 +912,6 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 10,
     title: "In hoeverre heb je zelf invloed op de volgende onderdelen van jouw bedrijf in de komende jaren?",
-    subtitle:
-      "Geef per onderdeel aan in hoeverre je hier invloed op hebt (1 = nauwelijks invloed, 7 = veel invloed). Het gaat om jouw melkveebedrijf.",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-6">
@@ -879,66 +924,50 @@ export function buildUniveScreens(): UniveScreen[] {
 
         <div className="space-y-4">
           <SliderRow
-            label="Kostenstructuur (bijv. voer, energie, mest)"
+            label="Kostenstructuur"
+            tooltip="bijv. voer, energie, mest"
             value={fd.q10_kostenstructuur ?? 4}
             onValueChange={(v) => update({ q10_kostenstructuur: v })}
           />
           <SliderRow
-            label="Omvang van het bedrijf (bijv. aantal melkkoeien, hectares)"
+            label="Omvang van het bedrijf"
+            tooltip="bijv. aantal melkkoeien, hectares"
             value={fd.q10_omvang ?? 4}
             onValueChange={(v) => update({ q10_omvang: v })}
           />
           <SliderRow
-            label="Grondgebruik (bijv. beweiding, gewassen, natuurmaatregelen)"
+            label="Grondgebruik"
+            tooltip="bijv. beweiding, gewassen, natuurmaatregelen"
             value={fd.q10_grondgebruik ?? 4}
             onValueChange={(v) => update({ q10_grondgebruik: v })}
           />
           <SliderRow
-            label="Samenwerking met andere partijen (bijv. keten, buren, coöperaties)"
+            label="Samenwerking met andere partijen"
+            tooltip="bijv. keten, buren, coöperaties"
             value={fd.q10_samenwerking ?? 4}
             onValueChange={(v) => update({ q10_samenwerking: v })}
           />
           <SliderRow
-            label="Afzet van producten (bijv. zuivelverwerker, directe verkoop)"
+            label="Afzet van producten"
+            tooltip="bijv. zuivelverwerker, directe verkoop"
             value={fd.q10_afzet ?? 4}
             onValueChange={(v) => update({ q10_afzet: v })}
           />
           <SliderRow
-            label="Verbreding (bijv. energieopwekking, recreatie, nieuwe producten)"
+            label="Verbreding"
+            tooltip="bijv. energieopwekking, recreatie, nieuwe producten"
             value={fd.q10_verbreding ?? 4}
             onValueChange={(v) => update({ q10_verbreding: v })}
           />
         </div>
 
         <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">Anders, namelijk:</Label>
-          <Input
-            value={fd.q10_anders ?? ""}
-            onChange={(e) => update({ q10_anders: e.target.value })}
-            placeholder="Vul in als er andere onderdelen zijn waarop je (geen) invloed ervaart."
-            maxLength={200}
-          />
-          {(fd.q10_anders ?? "").trim() !== "" && (
-            <div className="mt-4">
-              <ScaleSlider
-                value={fd.q10_anders_score ?? 4}
-                onValueChange={(v) => update({ q10_anders_score: v })}
-                labelLeft=""
-                labelRight=""
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">
-            Optionele toelichting vraag 10: kun je kort toelichten waarom je wel of geen invloed ervaart op deze onderdelen?
-          </Label>
+          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
           <PiiTextarea
             value={fd.q10_toelichting ?? ""}
             onChange={(v) => update({ q10_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Optioneel: licht je antwoorden kort toe (maximaal 3–4 regels)."
+            placeholder="Deze toelichting is optioneel."
             rows={3}
             maxLength={800}
           />
@@ -996,46 +1025,6 @@ export function buildUniveScreens(): UniveScreen[] {
             </div>
           );
         })}
-        {/* Anders – eerst Ja/Nee; bij 'Ja' verschijnt verplicht veld 'Namelijk:' */}
-        <div className="space-y-3 rounded-lg border border-border p-4">
-          <Label className="text-sm font-medium text-foreground">Anders</Label>
-          <div className="flex flex-wrap items-center gap-4">
-            <RadioGroup
-              value={fd.q11_anders_rij ?? ""}
-              onValueChange={(v) =>
-                update({
-                  q11_anders_rij: v,
-                  q11_anders_naamelijk: v === "Nee" ? "" : fd.q11_anders_naamelijk ?? "",
-                })
-              }
-              className="flex flex-row gap-6"
-            >
-              <div className={OPTION_ROW_CLASS}>
-                <RadioGroupItem value="Ja" id="q11_anders_rij-ja" />
-                <Label htmlFor="q11_anders_rij-ja" className="cursor-pointer text-sm font-medium">
-                  Ja
-                </Label>
-              </div>
-              <div className={OPTION_ROW_CLASS}>
-                <RadioGroupItem value="Nee" id="q11_anders_rij-nee" />
-                <Label htmlFor="q11_anders_rij-nee" className="cursor-pointer text-sm font-medium">
-                  Nee
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-          {fd.q11_anders_rij === "Ja" && (
-            <div className="mt-2 space-y-1">
-              <Label className="block text-xs font-medium text-muted-foreground">Namelijk: (verplicht)</Label>
-              <Input
-                value={fd.q11_anders_naamelijk ?? ""}
-                onChange={(e) => update({ q11_anders_naamelijk: e.target.value })}
-                placeholder="Vul in wat van toepassing is"
-                maxLength={200}
-              />
-            </div>
-          )}
-        </div>
       </div>
     ),
   });
@@ -1104,12 +1093,12 @@ export function buildUniveScreens(): UniveScreen[] {
             </div>
           )}
           <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <Label className="mb-2 block text-sm font-medium text-foreground">Optionele toelichting vraag 11b: kun je dit kort toelichten?</Label>
+            <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
             <PiiTextarea
               value={fd.q11b_toelichting ?? ""}
               onChange={(v) => update({ q11b_toelichting: v })}
               onPiiChange={setPiiBlocked}
-              placeholder="Optioneel: licht je antwoorden kort toe."
+              placeholder="Deze toelichting is optioneel."
               rows={3}
               maxLength={500}
             />
@@ -1145,7 +1134,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 13,
     title: "Wat houd je het meest tegen om aanpassingen te doen?",
-    subtitle: "Denk aan wat je tegenhoudt om te verduurzamen of te investeren. Kies maximaal 2 en geef aan welke het belangrijkst is.",
+    subtitle: "Denk aan wat je tegenhoudt om te verduurzamen of te investeren.",
     multiChoiceField: "q11",
     maxChoices: 2,
     required: true,
@@ -1188,12 +1177,12 @@ export function buildUniveScreens(): UniveScreen[] {
             </div>
           )}
           <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <Label className="mb-2 block text-sm font-medium text-foreground">Toelichting vraag 13: kun je dit kort toelichten?</Label>
+            <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
             <PiiTextarea
               value={fd.q11_toelichting ?? ""}
               onChange={(v) => update({ q11_toelichting: v })}
               onPiiChange={setPiiBlocked}
-              placeholder="Optioneel: licht kort toe wat je vooral tegenhoudt (maximaal 3–4 regels)."
+              placeholder="Deze toelichting is optioneel."
               rows={3}
               maxLength={500}
             />
@@ -1223,7 +1212,7 @@ export function buildUniveScreens(): UniveScreen[] {
     title:
       "In hoeverre sta je open voor de volgende vormen van ondersteuning vanuit Univé bij het ontwikkelen van een rendabel en duurzaam bedrijfsmodel?",
     subtitle:
-      "Vanwege wet- en regelgeving wordt er aan verzekeraars gevraagd om de transitie naar duurzaamheid mogelijk te maken. Denk bijvoorbeeld aan ondersteuning zoals:",
+      "Vanwege wet- en regelgeving wordt er aan verzekeraars gevraagd om de transitie naar duurzaamheid mogelijk te maken.",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-6">
@@ -1241,60 +1230,13 @@ export function buildUniveScreens(): UniveScreen[] {
             />
           ))}
         </div>
-        <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
-          <Label className="text-sm font-medium text-foreground">Andere ondersteuning</Label>
-          <RadioGroup
-            value={fd.q14_open_andere ?? ""}
-            onValueChange={(v) =>
-              update({
-                q14_open_andere: v,
-                q14_open_andere_naamelijk: v === "Nee" ? "" : fd.q14_open_andere_naamelijk ?? "",
-              })
-            }
-            className="flex flex-row gap-6"
-          >
-            <div className={OPTION_ROW_CLASS}>
-              <RadioGroupItem value="Ja" id="q14_open_andere-ja" />
-              <Label htmlFor="q14_open_andere-ja" className="cursor-pointer text-sm font-medium">
-                Ja
-              </Label>
-            </div>
-            <div className={OPTION_ROW_CLASS}>
-              <RadioGroupItem value="Nee" id="q14_open_andere-nee" />
-              <Label htmlFor="q14_open_andere-nee" className="cursor-pointer text-sm font-medium">
-                Nee
-              </Label>
-            </div>
-          </RadioGroup>
-          {fd.q14_open_andere === "Ja" && (
-            <div className="mt-2 space-y-2">
-              <Label className="block text-xs font-medium text-muted-foreground">
-                Namelijk: (verplicht)
-              </Label>
-              <Input
-                value={fd.q14_open_andere_naamelijk ?? ""}
-                onChange={(e) => update({ q14_open_andere_naamelijk: e.target.value })}
-                placeholder="Vul in wat van toepassing is"
-                maxLength={200}
-              />
-              <ScaleSlider
-                value={fd.q14_open_andere_score ?? 4}
-                onValueChange={(v) => update({ q14_open_andere_score: v })}
-                labelLeft="Sta ik niet voor open"
-                labelRight="Sta ik zeer voor open"
-              />
-            </div>
-          )}
-        </div>
         <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">
-            Toelichting vraag 14: kun je dit kort toelichten?
-          </Label>
+          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
           <PiiTextarea
             value={fd.q14_open_toelichting ?? ""}
             onChange={(v) => update({ q14_open_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Optioneel: licht je antwoorden kort toe."
+            placeholder="Deze toelichting is optioneel."
             rows={3}
             maxLength={500}
           />
@@ -1318,7 +1260,6 @@ export function buildUniveScreens(): UniveScreen[] {
     questionNumber: 15,
     title:
       "Naast financiële ondersteuning, welke vormen van ondersteuning zouden voor jou het meest waardevol zijn bij aanpassingen in jouw bedrijfsvoering?",
-    subtitle: "Kies minimaal 1, maximaal 2.",
     multiChoiceField: "q15_waardevol",
     maxChoices: 2,
     required: true,
@@ -1363,14 +1304,12 @@ export function buildUniveScreens(): UniveScreen[] {
             </div>
           )}
           <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <Label className="mb-2 block text-sm font-medium text-foreground">
-              Optionele toelichting vraag 15: kun je dit kort toelichten?
-            </Label>
+            <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
             <PiiTextarea
               value={fd.q15_waardevol_toelichting ?? ""}
               onChange={(v) => update({ q15_waardevol_toelichting: v })}
               onPiiChange={setPiiBlocked}
-              placeholder="Optioneel: licht je antwoorden kort toe."
+              placeholder="Deze toelichting is optioneel."
               rows={3}
               maxLength={500}
             />
@@ -1437,7 +1376,7 @@ export function buildUniveScreens(): UniveScreen[] {
     questionLabel: "16b",
     title: "Welke opties zou je dan het liefst toepassen op jouw bedrijf?",
     subtitle:
-      "Stel dat deze activiteiten financieel rendabel zijn. Klik in volgorde van voorkeur: je eerste keuze als eerste, daarna je tweede, dan je derde. (Geef een top 3 – verplicht)",
+      "Stel dat deze activiteiten financieel rendabel zijn. Geef een top 3 door in volgorde van voorkeur te klikken: eerst je eerste keuze, daarna je tweede en je derde keuze.",
     multiChoiceField: "q16b",
     maxChoices: 3,
     required: true,
@@ -1445,9 +1384,7 @@ export function buildUniveScreens(): UniveScreen[] {
       const selected = Array.isArray(fd.q16b) ? fd.q16b : [];
       return (
         <div className="space-y-4">
-          <p className={HELPER_TEXT_CLASS}>
-            {selected.length}/3 gekozen. Volgorde van klikken = jouw 1e, 2e en 3e keuze.
-          </p>
+          <p className={HELPER_TEXT_CLASS}>{selected.length}/3 gekozen.</p>
           <div className="flex flex-wrap gap-2">
             {Q16A_OPTIONS.map((opt) => {
               const isSelected = selected.includes(opt);
@@ -1506,7 +1443,7 @@ export function buildUniveScreens(): UniveScreen[] {
     render: (fd, update) => (
       <div className="space-y-4">
         <p className={HELPER_TEXT_CLASS}>
-          Links <span className="font-semibold text-foreground">geen behoefte</span>, rechts{" "}
+          Schaal 1–7: links <span className="font-semibold text-foreground">geen behoefte</span>, rechts{" "}
           <span className="font-semibold text-foreground">sterke behoefte</span>.
         </p>
         <ScaleSlider
@@ -1547,7 +1484,7 @@ export function buildUniveScreens(): UniveScreen[] {
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-6">
         <p className={HELPER_TEXT_CLASS}>
-          Links <span className="font-semibold text-foreground">geen mogelijkheden</span>, rechts{" "}
+          Schaal 1–7: links <span className="font-semibold text-foreground">geen mogelijkheden</span>, rechts{" "}
           <span className="font-semibold text-foreground">veel mogelijkheden</span>.
         </p>
         <div className="space-y-4">
@@ -1561,33 +1498,12 @@ export function buildUniveScreens(): UniveScreen[] {
           ))}
         </div>
         <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">Anders, namelijk:</Label>
-          <Input
-            value={fd.q17b_anders ?? ""}
-            onChange={(e) => update({ q17b_anders: e.target.value })}
-            placeholder="Vul in wat van toepassing is"
-            maxLength={200}
-          />
-          {(fd.q17b_anders ?? "").trim() !== "" && (
-            <div className="mt-4">
-              <ScaleSlider
-                value={fd.q17b_anders_score ?? 4}
-                onValueChange={(v) => update({ q17b_anders_score: v })}
-                labelLeft=""
-                labelRight=""
-              />
-            </div>
-          )}
-        </div>
-        <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">
-            Optioneel bij vraag 17: kun je dit kort toelichten?
-          </Label>
+          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
           <PiiTextarea
             value={fd.q17_toelichting ?? ""}
             onChange={(v) => update({ q17_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Optioneel: licht je antwoorden kort toe."
+            placeholder="Deze toelichting is optioneel."
             rows={3}
             maxLength={500}
           />
@@ -1636,10 +1552,13 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     questionNumber: 18,
     title: "Wat betekent rendabel ondernemen voor jou?",
-    subtitle: "Sliders per thema. Geef per aspect aan hoe belangrijk dit voor jouw bedrijf is (1 = weinig, 7 = zeer belangrijk).",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-5">
+        <p className={HELPER_TEXT_CLASS}>
+          Schaal 1–7: links <span className="font-semibold text-foreground">weinig belangrijk</span>, rechts{" "}
+          <span className="font-semibold text-foreground">zeer belangrijk</span>.
+        </p>
         {Q16_SLIDER_OPTIONS.map(({ key, label, tooltip }) => (
           <SliderRow
             key={key}
@@ -1650,33 +1569,12 @@ export function buildUniveScreens(): UniveScreen[] {
           />
         ))}
         <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">Anders, namelijk:</Label>
-          <Input
-            value={fd.q16_anders ?? ""}
-            onChange={(e) => update({ q16_anders: e.target.value })}
-            placeholder="Vul in wat van toepassing is"
-            maxLength={200}
-          />
-          {(fd.q16_anders ?? "").trim() !== "" && (
-            <div className="mt-4">
-              <ScaleSlider
-                value={fd.q16_anders_score ?? 4}
-                onValueChange={(v) => update({ q16_anders_score: v })}
-                labelLeft=""
-                labelRight=""
-              />
-            </div>
-          )}
-        </div>
-        <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">
-            Optioneel bij vraag 18: kun je dit kort toelichten?
-          </Label>
+          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
           <PiiTextarea
             value={fd.q16_toelichting ?? ""}
             onChange={(v) => update({ q16_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Optioneel: licht je antwoorden kort toe."
+            placeholder="Deze toelichting is optioneel."
             rows={3}
             maxLength={500}
           />
@@ -1692,47 +1590,42 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q19a_19b",
     group: "Deel 6 – Afsluiting",
     questionNumber: 25,
-    questionLabel: "19a & 19b",
-    title: "Vraag 19: Feedback voor Univé",
+    questionLabel: "19",
+    title: "Feedback voor Univé",
     hasPiiField: true,
     required: false,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-6">
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <Label className={QUESTION_LABEL_CLASS}>
-            Vraag 19a: Wat zou Univé volgens jou beter moeten begrijpen van de praktijk op een melkveebedrijf?
+            Heeft u nog opmerkingen of feedback voor Univé zelf?
           </Label>
-          <p className={HELPER_TEXT_CLASS}>(Open vraag)</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Optioneel: licht toe wat Univé volgens jou beter zou moeten begrijpen.
-          </p>
           <PiiTextarea
             value={fd.q19a ?? ""}
             onChange={(v) => update({ q19a: v })}
             onPiiChange={setPiiBlocked}
-            placeholder=""
+            placeholder="Deze toelichting is optioneel."
             rows={4}
             maxLength={1000}
             className="mt-2"
           />
         </div>
-        <div className="rounded-lg border border-border bg-muted/30 p-4">
-          <Label className={QUESTION_LABEL_CLASS}>
-            Vraag 19b: Heb je nog opmerkingen of ideeën die je wilt meegeven over de toekomst van de melkveehouderij of over deze vragenlijst?
-          </Label>
-          <p className={HELPER_TEXT_CLASS}>(Open vraag)</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Optioneel: deel je opmerkingen of ideeën.
-          </p>
-          <PiiTextarea
-            value={fd.q19b ?? ""}
-            onChange={(v) => update({ q19b: v })}
-            onPiiChange={setPiiBlocked}
-            placeholder=""
-            rows={4}
-            maxLength={1000}
-            className="mt-2"
-          />
+        <div className="space-y-2">
+          <h2 className="mb-1 text-xl font-semibold text-foreground">Feedback vragenlijst</h2>
+          <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <Label className={QUESTION_LABEL_CLASS}>
+              Heeft u nog opmerkingen of feedback over deze vragenlijst?
+            </Label>
+            <PiiTextarea
+              value={fd.q19b ?? ""}
+              onChange={(v) => update({ q19b: v })}
+              onPiiChange={setPiiBlocked}
+              placeholder="Deze toelichting is optioneel."
+              rows={4}
+              maxLength={1000}
+              className="mt-2"
+            />
+          </div>
         </div>
       </div>
     ),
@@ -1743,8 +1636,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q19",
     group: "Deel 6 – Afsluiting",
     questionNumber: 20,
-    title: "Sta je ervoor open dat er mogelijk contact met je wordt opgenomen naar aanleiding van de vragenlijst in het vervolg van Univé's onderzoek?",
-    subtitle: "Optioneel. Als je 'Ja' kiest, kunnen we je gegevens gebruiken om later contact op te nemen over deze vragenlijst of ondersteuning.",
+    title:
+      "Sta je ervoor open dat er mogelijk contact met je wordt opgenomen naar aanleiding van de vragenlijst in het vervolg van Univé's onderzoek?",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => {
       const toestemming = fd.q19_toestemming_contact ?? "";
@@ -1763,6 +1656,11 @@ export function buildUniveScreens(): UniveScreen[] {
             </div>
             {toestemming === "Ja" && (
               <div className="space-y-4 pl-9">
+                <p className={HELPER_TEXT_CLASS}>
+                  Let op: als je deze optie kiest, is je deelname <span className="font-semibold underline">niet meer anoniem</span>. We koppelen je naam en
+                  contactgegevens aan jouw antwoorden zodat we je later kunnen benaderen over deze vragenlijst
+                  of ondersteuning.
+                </p>
                 <div>
                   <Label className={QUESTION_LABEL_CLASS}>Naam</Label>
                   <Input
@@ -1884,7 +1782,10 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
   if (screen.id === "q2") {
     const cows = Number(fd.q2_cows);
     const hectares = Number(fd.q2_hectares);
-    return (Number.isFinite(cows) && cows > 0) || (Number.isFinite(hectares) && hectares > 0);
+    // Beide velden verplicht: minimaal > 0 ingevuld
+    const validCows = Number.isFinite(cows) && cows > 0;
+    const validHectares = Number.isFinite(hectares) && hectares > 0;
+    return validCows && validHectares;
   }
   if (screen.id === "q1") {
     const keuze = typeof fd.q1 === "string" ? fd.q1.trim() : "";
@@ -1919,13 +1820,6 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
         const toelichting = (fd[keyToelichting] as string) ?? "";
         if (countWords(toelichting) < 2) return false;
       }
-    }
-    // Rij 'Anders': Ja/Nee verplicht, en bij 'Ja' moet veld 'Namelijk:' ingevuld zijn (min. 1 woord)
-    const andersVal = (fd.q11_anders_rij as string) ?? "";
-    if (andersVal !== "Ja" && andersVal !== "Nee") return false;
-    if (andersVal === "Ja") {
-      const namely = (fd.q11_anders_naamelijk as string) ?? "";
-      if (countWords(namely) < 1) return false;
     }
     return true;
   }
@@ -2000,13 +1894,6 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
       if (!anders) return false;
     }
   }
-  if (screen.id === "q14_open") {
-    if (fd.q14_open_andere === "Ja") {
-      const namelijk = typeof fd.q14_open_andere_naamelijk === "string" ? fd.q14_open_andere_naamelijk.trim() : "";
-      if (!namelijk) return false;
-    }
-    return true;
-  }
   if (screen.id === "q15_waardevol") {
     const q15w = Array.isArray(fd.q15_waardevol) ? fd.q15_waardevol : [];
     if (q15w.length < 1) return false;
@@ -2052,8 +1939,7 @@ function hasAnyQ11Ja(fd: UniveFormData): boolean {
     fd.q11_bedrijfsschaal === "Ja" ||
     fd.q11_bedrijfsvoering === "Ja" ||
     fd.q11_verdienmodel === "Ja" ||
-    fd.q11_investeringen === "Ja" ||
-    fd.q11_anders_rij === "Ja"
+    fd.q11_investeringen === "Ja"
   );
 }
 
