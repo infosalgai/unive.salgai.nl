@@ -21,7 +21,7 @@ export default function VragenlijstPage() {
   const allScreens = useMemo(() => buildUniveScreens(), []);
 
   const getStepSlug = (screen: (typeof allScreens)[number]) =>
-    `q${screen.questionLabel ?? screen.questionNumber}`;
+    screen.questionLabel ? `q${screen.questionLabel}` : `q${screen.questionNumber}`;
 
   const currentScreenIndex = useMemo(() => {
     if (!allScreens.length) return 0;

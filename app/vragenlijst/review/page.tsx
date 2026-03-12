@@ -65,7 +65,7 @@ export default function ReviewPage() {
               <Sparkles className="mr-2 h-4 w-4" />
               Genereer samenvatting
             </Button>
-            <Link href="/vragenlijst?stap=q19">
+            <Link href="/vragenlijst?stap=q23">
               <Button variant="outline" className="w-full rounded-xl">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Antwoorden aanpassen

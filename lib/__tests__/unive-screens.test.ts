@@ -84,6 +84,20 @@ describe("isStepConditionallyHidden", () => {
     expect(isStepConditionallyHidden("q9", normalizeFormData({ q8: "Ja, beperkt" }))).toBe(false);
   });
 
+  it("q11b is hidden when no Ja in matrix (vraag 11); q11 (wat houdt tegen) is always visible", () => {
+    const noJa = normalizeFormData({
+      q11_duurzaamheid: "Nee",
+      q11_bedrijfsschaal: "Nee",
+      q11_bedrijfsvoering: "Nee",
+      q11_verdienmodel: "Nee",
+      q11_investeringen: "Nee",
+    });
+    expect(isStepConditionallyHidden("q11b", noJa)).toBe(true);
+    expect(isStepConditionallyHidden("q11", noJa)).toBe(false);
+    const oneJa = normalizeFormData({ ...noJa, q11_duurzaamheid: "Ja" });
+    expect(isStepConditionallyHidden("q11b", oneJa)).toBe(false);
+  });
+
   it("other steps are not conditionally hidden", () => {
     expect(isStepConditionallyHidden("q1", UNIVE_INITIAL_FORM_DATA)).toBe(false);
     expect(isStepConditionallyHidden("q6", UNIVE_INITIAL_FORM_DATA)).toBe(false);
