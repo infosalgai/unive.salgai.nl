@@ -154,12 +154,12 @@ export interface UniveFormData {
 }
 
 export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
-  // Eerste vraag – geslacht
+  // Vraag 1–3 – geslacht, leeftijd, gemeente (Algemeen)
   q0_geslacht: "",
   q0_leeftijd: "",
   q0_gemeente: "",
 
-  // Deel 1 – Je bedrijf
+  // Vraag 4–6 – Deel 1: Je bedrijf
   q1: "",
   q1_anders: "",
   q1_omschakeling: "",
@@ -168,7 +168,7 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q2_hectares: 0,
   q3: "",
 
-  // Deel 2 – Huidige situatie en toekomstbeeld
+  // Vraag 7–10 – Deel 2: Huidige situatie en toekomstbeeld
   q4: [],
   q4_anders: "",
   q4a: [],
@@ -189,7 +189,7 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q10_anders: "",
   q10_toelichting: "",
 
-  // Deel 3 – Veranderingen in bedrijfsvoering
+  // Vraag 11–13 – Deel 3: Veranderingen in bedrijfsvoering
   q8: "",
   q8a: "",
   q11_duurzaamheid: "",
@@ -217,7 +217,7 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q11_anders: "",
   q11_toelichting: "",
 
-  // Deel 4 – Welke ondersteuning zou helpen?
+  // Vraag 14–19 – Deel 4: Welke ondersteuning zou helpen?
   q14_open_eenmalig: 4,
   q14_open_structureel: 4,
   q14_open_pacht: 4,
@@ -242,6 +242,8 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q17b_anders: "",
   q17b_anders_score: 4,
   q17_toelichting: "",
+
+  // Legacy sliders rond ondersteuning (vraag 12–13 oud) en aanvullende opties
   q12: 4,
   q12_financieel: 4,
   q12_pacht: 4,
@@ -278,7 +280,7 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q16_anders_score: 4,
   q16_toelichting: "",
 
-  // Deel 6 – Afsluiting
+  // Deel 6 – Afsluiting (q19a/b, contact, verloting)
   q17: "",
   q18: "",
   q19_toestemming_contact: "",

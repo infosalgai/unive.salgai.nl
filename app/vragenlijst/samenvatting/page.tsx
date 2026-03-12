@@ -202,37 +202,7 @@ export default function SamenvattingPage() {
               </Card>
 
               {/* Wat gebeurt er als je doorstuurt – vertrouwen */}
-              <Card className="mb-6 rounded-2xl border border-primary/20 bg-primary/5">
-                <CardContent className="p-5 sm:p-6">
-                  <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-foreground">
-                    <Shield className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-                    Wat gebeurt er als je kiest om door te sturen?
-                  </h3>
-                  <p className="mb-4 text-sm text-muted-foreground leading-relaxed">
-                    Jij hebt de regie. Alleen als je op &quot;Ja, dit klopt&quot; klikt en daarna bevestigt, worden je gegevens verstuurd. Tot dat moment blijft alles alleen op dit apparaat.
-                  </p>
-                  <ul className="space-y-2.5 text-sm text-muted-foreground leading-relaxed" role="list">
-                    <li className="flex gap-2">
-                      <FileCheck className="h-4 w-4 shrink-0 text-primary mt-0.5" aria-hidden />
-                      <span><strong className="text-foreground">Wat we versturen:</strong> je samenvatting en de antwoorden uit de vragenlijst. Die worden gebruikt voor het doel van deze vragenlijst.</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <Lock className="h-4 w-4 shrink-0 text-primary mt-0.5" aria-hidden />
-                      <span><strong className="text-foreground">Veilig en vertrouwelijk:</strong> de gegevens worden versleuteld verzonden en alleen door Univé verwerkt volgens ons privacybeleid. We gebruiken ze voor het doel van deze vragenlijst.</span>
-                    </li>
-                    <li className="flex gap-2">
-                      <Shield className="h-4 w-4 shrink-0 text-primary mt-0.5" aria-hidden />
-                      <span><strong className="text-foreground">Geen verrassingen:</strong> je kunt altijd nog &quot;Nee, ik wil aanpassen&quot; kiezen of het venster sluiten. Versturen doe je alleen als jij dat wilt.</span>
-                    </li>
-                  </ul>
-                  <p className="mt-4 text-xs text-muted-foreground">
-                    Meer over hoe we omgaan met je gegevens:{" "}
-                    <a href="https://www.unive.nl/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded">
-                      privacybeleid Univé
-                    </a>
-                  </p>
-                </CardContent>
-              </Card>
+              {/* Informatie over wat er gebeurt bij het doorsturen staat nu op de vragenlijstpagina. */}
 
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Button variant="outline" onClick={() => setShowFeedbackField((v) => !v)} className="rounded-xl">

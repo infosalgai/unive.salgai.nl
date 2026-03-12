@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { normalizeFormData } from "@/lib/unive-questionnaire";
+import { normalizeUniveFormData, generateUniveSummaryFromFormData } from "@/lib/summary-service";
 import {
   buildSubmissionPayload,
   deliverSubmission,
@@ -23,14 +23,6 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as SubmitRequestBody;
     const rawFormData = body.formData ?? {};
-    const rawSummary = body.summary;
-
-    if (typeof rawSummary !== "string" || !rawSummary.trim()) {
-      return NextResponse.json(
-        { error: "Samenvatting ontbreekt." },
-        { status: 400 }
-      );
-    }
 
     if (!rawFormData || typeof rawFormData !== "object") {
       return NextResponse.json(
@@ -39,10 +31,15 @@ export async function POST(req: Request) {
       );
     }
 
-    const answers = normalizeFormData(rawFormData);
+    const answers = normalizeUniveFormData(rawFormData);
+    const rawSummary =
+      typeof body.summary === "string" && body.summary.trim()
+        ? body.summary.trim()
+        : await generateUniveSummaryFromFormData(answers);
+
     const payload: UniveSubmissionPayload = buildSubmissionPayload(
       answers,
-      rawSummary.trim()
+      rawSummary
     );
 
     const result = await deliverSubmission(payload);

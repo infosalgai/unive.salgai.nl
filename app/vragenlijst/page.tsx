@@ -6,7 +6,7 @@ import { UniveLogo } from "@/components/unive-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Shield, Lock, FileCheck } from "lucide-react";
 import { buildUniveScreens, isUniveStepValid, isStepConditionallyHidden } from "@/lib/unive-screens";
 import { useUniveFormState } from "@/lib/use-unive-form-state";
 
