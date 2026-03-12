@@ -11,11 +11,19 @@ describe("buildUniveScreens", () => {
   it("returns screens with expected ids including q6", () => {
     const screens = buildUniveScreens();
     const ids = screens.map((s) => s.id);
+    expect(ids[0]).toBe("q0_geslacht");
     expect(ids).toContain("q1");
     expect(ids).toContain("q6");
     expect(ids).toContain("q4a");
     expect(ids).toContain("q9");
     expect(ids).toContain("q19");
+  });
+
+  it("q0_geslacht is invalid when empty", () => {
+    const screens = buildUniveScreens();
+    const q0 = screens.find((s) => s.id === "q0_geslacht")!;
+    expect(isUniveStepValid(q0, UNIVE_INITIAL_FORM_DATA, false)).toBe(false);
+    expect(isUniveStepValid(q0, normalizeFormData({ q0_geslacht: "Man" }), false)).toBe(true);
   });
 
   it("every screen has render that accepts normalized formData without throwing", () => {
@@ -46,7 +54,7 @@ describe("isUniveStepValid", () => {
   it("q8 is invalid when empty", () => {
     const q8 = screens.find((s) => s.id === "q8")!;
     expect(isUniveStepValid(q8, UNIVE_INITIAL_FORM_DATA, false)).toBe(false);
-    expect(isUniveStepValid(q8, normalizeFormData({ q8: "Ja, meerdere" }), false)).toBe(true);
+    expect(isUniveStepValid(q8, normalizeFormData({ q8: "Ja, meerdere", q8a: "We hebben meerdere aanpassingen gedaan op ons bedrijf." }), false)).toBe(true);
   });
 
   it("q9 is valid when q8 is not Ja (step skipped)", () => {
@@ -64,10 +72,9 @@ describe("isUniveStepValid", () => {
 });
 
 describe("isStepConditionallyHidden", () => {
-  it("q4a is hidden when q4 does not include Regelgeving", () => {
+  it("q4a is always hidden (regelgeving-doorvraag is inlined on q4)", () => {
     expect(isStepConditionallyHidden("q4a", normalizeFormData({}))).toBe(true);
-    expect(isStepConditionallyHidden("q4a", normalizeFormData({ q4: ["Melkprijs"] }))).toBe(true);
-    expect(isStepConditionallyHidden("q4a", normalizeFormData({ q4: ["Regelgeving"] }))).toBe(false);
+    expect(isStepConditionallyHidden("q4a", normalizeFormData({ q4: ["Regelgeving"] }))).toBe(true);
   });
 
   it("q9 is hidden when q8 is not Ja, meerdere/beperkt", () => {
@@ -75,6 +82,20 @@ describe("isStepConditionallyHidden", () => {
     expect(isStepConditionallyHidden("q9", normalizeFormData({ q8: "Nee" }))).toBe(true);
     expect(isStepConditionallyHidden("q9", normalizeFormData({ q8: "Ja, meerdere" }))).toBe(false);
     expect(isStepConditionallyHidden("q9", normalizeFormData({ q8: "Ja, beperkt" }))).toBe(false);
+  });
+
+  it("q11b is hidden when no Ja in matrix (vraag 11); q11 (wat houdt tegen) is always visible", () => {
+    const noJa = normalizeFormData({
+      q11_duurzaamheid: "Nee",
+      q11_bedrijfsschaal: "Nee",
+      q11_bedrijfsvoering: "Nee",
+      q11_verdienmodel: "Nee",
+      q11_investeringen: "Nee",
+    });
+    expect(isStepConditionallyHidden("q11b", noJa)).toBe(true);
+    expect(isStepConditionallyHidden("q11", noJa)).toBe(false);
+    const oneJa = normalizeFormData({ ...noJa, q11_duurzaamheid: "Ja" });
+    expect(isStepConditionallyHidden("q11b", oneJa)).toBe(false);
   });
 
   it("other steps are not conditionally hidden", () => {

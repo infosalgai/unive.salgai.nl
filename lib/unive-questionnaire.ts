@@ -4,9 +4,16 @@
  */
 
 export interface UniveFormData {
+  // Eerste vraag – geslacht (na introductie)
+  q0_geslacht: string
+  q0_leeftijd: string
+  q0_gemeente: string
+
   // Deel 1 – Je bedrijf
   q1: string
   q1_anders: string
+  q1_omschakeling: string
+  q1_omschakeling_anders: string
   q2_cows: number
   q2_hectares: number
   q3: string
@@ -22,19 +29,61 @@ export interface UniveFormData {
   q5_toelichting: string
   q6: string // grootste zorgen komende 5–10 jaar
   q7: number // gevoel invloed op toekomst (1–7)
+  q10_kostenstructuur: number // invloed op kostenstructuur (1–7)
+  q10_omvang: number // invloed op omvang van het bedrijf (1–7)
+  q10_grondgebruik: number // invloed op grondgebruik (1–7)
+  q10_samenwerking: number // invloed op samenwerking met andere partijen (1–7)
+  q10_afzet: number // invloed op afzet van producten (1–7)
+  q10_verbreding: number // invloed op verbreding (1–7)
+  q10_anders_score: number // invloed op andere onderdelen (1–7) – niet meer in UI gebruikt
+  q10_anders: string // omschrijving andere onderdelen – niet meer in UI gebruikt
+  q10_toelichting: string // toelichting ervaren invloed
 
   // Deel 3 – Veranderingen in bedrijfsvoering
   q8: string
   q8a: string
-  q9: string[] // aanleidingen (max 2)
+  // Vraag 11 – matrix aanpassingen per thema (Ja/Nee + verplichte toelichting per Ja)
+  q11_duurzaamheid: string // "" | "Ja" | "Nee"
+  q11_duurzaamheid_toelichting: string
+  q11_bedrijfsschaal: string
+  q11_bedrijfsschaal_toelichting: string
+  q11_bedrijfsvoering: string
+  q11_bedrijfsvoering_toelichting: string
+  q11_verdienmodel: string
+  q11_verdienmodel_toelichting: string
+  q11_investeringen: string
+  q11_investeringen_toelichting: string
+  q11_anders_naamelijk: string
+  q11_anders_rij: string // Ja/Nee voor rij "Anders, namelijk" in matrix
+  q11_anders_toelichting: string
+  // Vraag 11b – aanleidingen (alleen bij ≥1 Ja bij vraag 11)
+  q11b_aanleidingen: string[] // max 2
+  q11b_regelgeving: string
+  q11b_anders: string
+  q11b_toelichting: string
+  q9: string[] // legacy
   q9_anders: string
   q9_regelgeving: string
-  q10: string
-  q11: string[] // wat houdt tegen (max 2)
+  q10: string // vraag 12 – onder welke omstandigheden (verplicht)
+  q11: string[] // vraag 13 – wat houdt tegen (max 2)
   q11_anders: string
   q11_toelichting: string
 
   // Deel 4 – Welke ondersteuning zou helpen?
+  // Vraag 14 – open voor vormen van ondersteuning (sliders 1–7 + Andere ondersteuning)
+  q14_open_eenmalig: number
+  q14_open_structureel: number
+  q14_open_pacht: number
+  q14_open_co2: number
+  q14_open_premiekorting: number
+  q14_open_andere: string // "" | "Ja" | "Nee"
+  q14_open_andere_naamelijk: string
+  q14_open_andere_score: number
+  q14_open_toelichting: string
+  // Vraag 15 – welke vormen ondersteuning waardevol (max 2)
+  q15_waardevol: string[]
+  q15_waardevol_anders: string
+  q15_waardevol_toelichting: string
   q12: number // legacy
   q12_financieel: number
   q12_pacht: number
@@ -49,8 +98,25 @@ export interface UniveFormData {
   q13_premiekorting: number
   q13_klimaatadaptie: number
   q13_biodiversiteit: number
+  // Vraag 16a – opties overwegen (meerdere, min 1)
+  q16a: string[]
+  q16a_anders: string
+  // Vraag 16b – top 3 toepassen (max 3)
+  q16b: string[]
+  q16b_anders: string
   q14: string[]
   q14_anders: string
+
+  // Vraag 17a – behoefte aanvullende inkomsten/risicospreiding (1 slider)
+  q17a: number
+  // Vraag 17b – mogelijkheden per richting (sliders 1–7 + Anders namelijk)
+  q17b_directe_verkoop: number
+  q17b_nieuwe_teelten: number
+  q17b_co2: number
+  q17b_natuur_biodiversiteit: number
+  q17b_anders: string
+  q17b_anders_score: number
+  q17_toelichting: string // optioneel bij vraag 17
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
   q15a: number // legacy
@@ -68,6 +134,8 @@ export interface UniveFormData {
   q16_voortzetten: number
   q16_waardebehoud: number
   q16_anders: string
+  q16_anders_score: number // 1–7 bij ingevulde "Anders, namelijk"
+  q16_toelichting: string // optioneel bij vraag 18
 
   // Deel 6 – Afsluiting
   q17: string
@@ -77,12 +145,25 @@ export interface UniveFormData {
   q19_email: string
   q19_telefoon: string
   q19_opmerkingen: string
+  q19a: string // optioneel: wat zou Univé beter moeten begrijpen van de praktijk
+  q19b: string // optioneel: opmerkingen over toekomst melkveehouderij of vragenlijst
+
+  // Vraag 21 – verloting boerenpakket (persoonsgegevens alleen voor winactie, niet gekoppeld aan antwoorden)
+  q21_verloting: string // "" | "Ja" | "Nee"
+  q21_email: string // e-mail voor contact bij winnen; alleen gebruikt voor de verloting
 }
 
 export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
+  // Eerste vraag – geslacht
+  q0_geslacht: "",
+  q0_leeftijd: "",
+  q0_gemeente: "",
+
   // Deel 1 – Je bedrijf
   q1: "",
   q1_anders: "",
+  q1_omschakeling: "",
+  q1_omschakeling_anders: "",
   q2_cows: 0,
   q2_hectares: 0,
   q3: "",
@@ -98,10 +179,36 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q5_toelichting: "",
   q6: "",
   q7: 4,
+  q10_kostenstructuur: 4,
+  q10_omvang: 4,
+  q10_grondgebruik: 4,
+  q10_samenwerking: 4,
+  q10_afzet: 4,
+  q10_verbreding: 4,
+  q10_anders_score: 4,
+  q10_anders: "",
+  q10_toelichting: "",
 
   // Deel 3 – Veranderingen in bedrijfsvoering
   q8: "",
   q8a: "",
+  q11_duurzaamheid: "",
+  q11_duurzaamheid_toelichting: "",
+  q11_bedrijfsschaal: "",
+  q11_bedrijfsschaal_toelichting: "",
+  q11_bedrijfsvoering: "",
+  q11_bedrijfsvoering_toelichting: "",
+  q11_verdienmodel: "",
+  q11_verdienmodel_toelichting: "",
+  q11_investeringen: "",
+  q11_investeringen_toelichting: "",
+  q11_anders_naamelijk: "",
+  q11_anders_rij: "",
+  q11_anders_toelichting: "",
+  q11b_aanleidingen: [],
+  q11b_regelgeving: "",
+  q11b_anders: "",
+  q11b_toelichting: "",
   q9: [],
   q9_anders: "",
   q9_regelgeving: "",
@@ -111,6 +218,30 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q11_toelichting: "",
 
   // Deel 4 – Welke ondersteuning zou helpen?
+  q14_open_eenmalig: 4,
+  q14_open_structureel: 4,
+  q14_open_pacht: 4,
+  q14_open_co2: 4,
+  q14_open_premiekorting: 4,
+  q14_open_andere: "",
+  q14_open_andere_naamelijk: "",
+  q14_open_andere_score: 4,
+  q14_open_toelichting: "",
+  q15_waardevol: [],
+  q15_waardevol_anders: "",
+  q15_waardevol_toelichting: "",
+  q16a: [],
+  q16a_anders: "",
+  q16b: [],
+  q16b_anders: "",
+  q17a: 4,
+  q17b_directe_verkoop: 4,
+  q17b_nieuwe_teelten: 4,
+  q17b_co2: 4,
+  q17b_natuur_biodiversiteit: 4,
+  q17b_anders: "",
+  q17b_anders_score: 4,
+  q17_toelichting: "",
   q12: 4,
   q12_financieel: 4,
   q12_pacht: 4,
@@ -144,6 +275,8 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q16_voortzetten: 4,
   q16_waardebehoud: 4,
   q16_anders: "",
+  q16_anders_score: 4,
+  q16_toelichting: "",
 
   // Deel 6 – Afsluiting
   q17: "",
@@ -153,22 +286,31 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q19_email: "",
   q19_telefoon: "",
   q19_opmerkingen: "",
+  q19a: "",
+  q19b: "",
+
+  q21_verloting: "",
+  q21_email: "",
 }
 
-const TOTAL_QUESTIONS = 19
+const TOTAL_QUESTIONS = 21
 
 export { TOTAL_QUESTIONS as UNIVE_TOTAL_QUESTIONS }
 
 /** Keys that must be string arrays (for localStorage/parsed JSON). */
-const ARRAY_KEYS: (keyof UniveFormData)[] = ["q4", "q4a", "q9", "q11", "q14", "q16"];
+const ARRAY_KEYS: (keyof UniveFormData)[] = ["q4", "q4a", "q9", "q11", "q11b_aanleidingen", "q14", "q15_waardevol", "q16a", "q16b", "q16"];
 
 /** Slider/scale fields 1–7. */
 const SCALE_KEYS: (keyof UniveFormData)[] = [
-  "q5a", "q5b", "q5c", "q7", "q12",
+  "q5a", "q5b", "q5c", "q7",
+  "q10_kostenstructuur", "q10_omvang", "q10_grondgebruik", "q10_samenwerking", "q10_afzet", "q10_verbreding", "q10_anders_score",
+  "q12",
+  "q14_open_eenmalig", "q14_open_structureel", "q14_open_pacht", "q14_open_co2", "q14_open_premiekorting", "q14_open_andere_score",
   "q12_financieel", "q12_pacht", "q12_co2", "q12_premiekorting", "q12_klimaatadaptie", "q12_biodiversiteit",
   "q13_financieel", "q13_pacht", "q13_co2", "q13_premiekorting", "q13_klimaatadaptie", "q13_biodiversiteit",
   "q15a", "q15a_nevenactiviteiten", "q15a_pacht", "q15a_risicospreiding", "q15a_verbreding",
-  "q16_marge", "q16_schuldenlast", "q16_continuïteit", "q16_stabiliteit", "q16_voortzetten", "q16_waardebehoud",
+  "q17a", "q17b_directe_verkoop", "q17b_nieuwe_teelten", "q17b_co2", "q17b_natuur_biodiversiteit", "q17b_anders_score",
+  "q16_marge", "q16_schuldenlast", "q16_continuïteit", "q16_stabiliteit", "q16_voortzetten", "q16_waardebehoud", "q16_anders_score",
 ];
 
 /**
@@ -226,8 +368,19 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
     if (s) lines.push(`${label}: ${s}`)
   }
 
+  // Eerste vraag – geslacht
+  push("Geslacht", fd.q0_geslacht)
+  push("Leeftijd", fd.q0_leeftijd)
+  push("Gemeente", fd.q0_gemeente)
+
   // Deel 1 – Je bedrijf
   push("Type bedrijf", fd.q1 === "Anders" && fd.q1_anders ? fd.q1_anders : fd.q1)
+  if (fd.q1 === "In omschakeling" && fd.q1_omschakeling) {
+    push("Waarnaar in omschakeling", fd.q1_omschakeling)
+    if (fd.q1_omschakeling === "Anders, namelijk:" && fd.q1_omschakeling_anders) {
+      push("Omschakeling anders", fd.q1_omschakeling_anders)
+    }
+  }
   if (fd.q2_cows > 0) push("Aantal melkkoeien", fd.q2_cows)
   if (fd.q2_hectares > 0) push("Aantal hectares landbouwgrond", fd.q2_hectares)
   push("Fase bedrijf", fd.q3)
@@ -237,65 +390,86 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   const q4a = Array.isArray(fd.q4a) ? fd.q4a : [];
   if (q4.length) push("Ontwikkelingen met meeste invloed", q4)
   if (q4.includes("Regelgeving") && q4a.length) push("Regelgeving met meeste invloed", q4a)
-  if (q4.includes("Regelgeving") && q4a.includes("Anders") && fd.q4a_anders)
+  if (q4.includes("Regelgeving") && q4a.includes("Anders, namelijk:") && fd.q4a_anders)
     push("Regelgeving anders", fd.q4a_anders)
   push("Belang verduurzaming voor continuïteit (1–7)", fd.q5a)
   push("Verwachte invloed CO₂-reductie komende 10 jaar (1–7)", fd.q5b)
   push("Relevantie biodiversiteit voor bedrijfsvoering (1–7)", fd.q5c)
   if (fd.q5_toelichting) push("Toelichting verduurzaming / CO₂ / biodiversiteit", fd.q5_toelichting)
   if (fd.q6) push("Grootste zorgen komende 5–10 jaar", fd.q6)
-  push("Gevoel eigen invloed op toekomst (1–7)", fd.q7)
+  push("Invloed op kostenstructuur komende jaren (1–7)", fd.q10_kostenstructuur)
+  push("Invloed op omvang van het bedrijf komende jaren (1–7)", fd.q10_omvang)
+  push("Invloed op grondgebruik komende jaren (1–7)", fd.q10_grondgebruik)
+  push("Invloed op samenwerking met andere partijen komende jaren (1–7)", fd.q10_samenwerking)
+  push("Invloed op afzet van producten komende jaren (1–7)", fd.q10_afzet)
+  push("Invloed op verbreding / nieuwe activiteiten komende jaren (1–7)", fd.q10_verbreding)
+  if (fd.q10_toelichting) push("Toelichting ervaren invloed op onderdelen", fd.q10_toelichting)
 
   // Deel 3 – Veranderingen in bedrijfsvoering
   push("Aanpassingen in bedrijfsvoering afgelopen 5 jaar", fd.q8)
   if (fd.q8a) push("Welke aanpassingen", fd.q8a)
+  if (fd.q11_duurzaamheid) push("Aanpassingen duurzaamheidsmaatregelen", fd.q11_duurzaamheid)
+  if (fd.q11_duurzaamheid === "Ja" && fd.q11_duurzaamheid_toelichting) push("Toelichting duurzaamheidsmaatregelen", fd.q11_duurzaamheid_toelichting)
+  if (fd.q11_bedrijfsschaal) push("Aanpassingen bedrijfsschaal", fd.q11_bedrijfsschaal)
+  if (fd.q11_bedrijfsschaal === "Ja" && fd.q11_bedrijfsschaal_toelichting) push("Toelichting bedrijfsschaal", fd.q11_bedrijfsschaal_toelichting)
+  if (fd.q11_bedrijfsvoering) push("Aanpassingen bedrijfsvoering", fd.q11_bedrijfsvoering)
+  if (fd.q11_bedrijfsvoering === "Ja" && fd.q11_bedrijfsvoering_toelichting) push("Toelichting bedrijfsvoering", fd.q11_bedrijfsvoering_toelichting)
+  if (fd.q11_verdienmodel) push("Aanpassingen verdienmodel/verbreding", fd.q11_verdienmodel)
+  if (fd.q11_verdienmodel === "Ja" && fd.q11_verdienmodel_toelichting) push("Toelichting verdienmodel", fd.q11_verdienmodel_toelichting)
+  if (fd.q11_investeringen) push("Aanpassingen investeringen gebouwen/stal/techniek", fd.q11_investeringen)
+  if (fd.q11_investeringen === "Ja" && fd.q11_investeringen_toelichting) push("Toelichting investeringen", fd.q11_investeringen_toelichting)
+  const q11b = Array.isArray(fd.q11b_aanleidingen) ? fd.q11b_aanleidingen : [];
+  if (q11b.length) push("Belangrijkste aanleidingen voor aanpassingen (vraag 11b)", q11b)
+  if (q11b.includes("Nieuwe regelgeving") && fd.q11b_regelgeving) push("Welke regelgeving bij aanpassingen", fd.q11b_regelgeving)
+  if (q11b.includes("Anders, namelijk:") && fd.q11b_anders) push("Aanleidingen anders", fd.q11b_anders)
+  if (fd.q11b_toelichting) push("Toelichting aanleidingen", fd.q11b_toelichting)
   const q9 = Array.isArray(fd.q9) ? fd.q9 : [];
   const q11 = Array.isArray(fd.q11) ? fd.q11 : [];
-  if (q9.length) push("Belangrijkste aanleidingen voor aanpassingen", q9)
-  if (q9.includes("Anders") && fd.q9_anders) push("Aanleidingen anders", fd.q9_anders)
+  if (q9.length) push("Belangrijkste aanleidingen voor aanpassingen (legacy)", q9)
+  if (q9.includes("Anders") && fd.q9_anders) push("Aanleidingen anders (legacy)", fd.q9_anders)
   if (q9.includes("Nieuwe regelgeving") && fd.q9_regelgeving) push("Welke regelgeving als aanleiding", fd.q9_regelgeving)
-  if (fd.q10) push("Aanleiding om (opnieuw) aanpassingen te doen", fd.q10)
+  if (fd.q10) push("Onder welke omstandigheden toekomstige aanpassingen", fd.q10)
   if (q11.length) push("Wat houdt het meest tegen", q11)
   if (q11.includes("Anders") && fd.q11_anders) push("Wat houdt tegen anders", fd.q11_anders)
   if (fd.q11_toelichting) push("Toelichting wat het meest tegenhoudt", fd.q11_toelichting)
 
   // Deel 4 – Welke ondersteuning zou helpen?
-  push("Openheid financiële ondersteuning (1–7)", fd.q12_financieel)
-  push("Openheid pacht (1–7)", fd.q12_pacht)
-  push("Openheid vergoeding CO₂-opvang (1–7)", fd.q12_co2)
-  push("Openheid premiekorting (1–7)", fd.q12_premiekorting)
-  push("Openheid klimaatadaptie (1–7)", fd.q12_klimaatadaptie)
-  push("Openheid biodiversiteit (1–7)", fd.q12_biodiversiteit)
-  push("Waardevol financiële ondersteuning (1–7)", fd.q13_financieel)
-  push("Waardevol pacht (1–7)", fd.q13_pacht)
-  push("Waardevol vergoeding CO₂-opvang (1–7)", fd.q13_co2)
-  push("Waardevol premiekorting (1–7)", fd.q13_premiekorting)
-  push("Waardevol klimaatadaptie (1–7)", fd.q13_klimaatadaptie)
-  push("Waardevol biodiversiteit (1–7)", fd.q13_biodiversiteit)
-  if (fd.q13) push("Toelichting ondersteuning", fd.q13)
-  const q14 = Array.isArray(fd.q14) ? fd.q14 : [];
-  if (q14.length) push("Andere modellen of verduurzamingsopties", q14)
-  if (q14.includes("Anders, namelijk:") && fd.q14_anders) push("Andere verduurzamingsopties anders", fd.q14_anders)
+  push("Open eenmalige financiële bijdrage (1–7)", fd.q14_open_eenmalig)
+  push("Open structurele financiële vergoeding (1–7)", fd.q14_open_structureel)
+  push("Open pachtconstructies (1–7)", fd.q14_open_pacht)
+  push("Open vergoedingen CO₂-vastlegging (1–7)", fd.q14_open_co2)
+  push("Open premiekorting CO₂/klimaat/biodiversiteit (1–7)", fd.q14_open_premiekorting)
+  if (fd.q14_open_toelichting) push("Toelichting openheid ondersteuning vraag 14", fd.q14_open_toelichting)
+  const q15w = Array.isArray(fd.q15_waardevol) ? fd.q15_waardevol : []
+  if (q15w.length) push("Waardevolle vormen ondersteuning (max 2)", q15w)
+  if (q15w.includes("Anders, namelijk:") && fd.q15_waardevol_anders) push("Waardevolle ondersteuning anders", fd.q15_waardevol_anders)
+  if (fd.q15_waardevol_toelichting) push("Toelichting waardevolle ondersteuning vraag 15", fd.q15_waardevol_toelichting)
+  const q16a = Array.isArray(fd.q16a) ? fd.q16a : []
+  if (q16a.length) push("Opties overwegen landgebruik/activiteiten (vraag 16a)", q16a)
+  if (q16a.includes("Anders, namelijk:") && fd.q16a_anders) push("16a anders", fd.q16a_anders)
+  const q16b = Array.isArray(fd.q16b) ? fd.q16b : []
+  if (q16b.length) push("Top 3 toepassen (vraag 16b)", q16b)
+  if (q16b.includes("Anders, namelijk:") && fd.q16b_anders) push("16b anders", fd.q16b_anders)
+  push("Behoefte aanvullende inkomsten of risicospreiding (1–7, vraag 17a)", fd.q17a)
+  push("Mogelijkheden directe verkoop (1–7)", fd.q17b_directe_verkoop)
+  push("Mogelijkheden nieuwe teelten (1–7)", fd.q17b_nieuwe_teelten)
+  push("Mogelijkheden vergoeding CO₂-vastlegging (1–7)", fd.q17b_co2)
+  push("Mogelijkheden natuur- en biodiversiteitsbeheer (1–7)", fd.q17b_natuur_biodiversiteit)
+  if (fd.q17_toelichting) push("Toelichting vraag 17", fd.q17_toelichting)
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
-  push("Behoefte nevenactiviteiten (1–7)", fd.q15a_nevenactiviteiten)
-  push("Behoefte pacht/verhuur (1–7)", fd.q15a_pacht)
-  push("Behoefte risicospreiding (1–7)", fd.q15a_risicospreiding)
-  push("Behoefte verbreding inkomsten (1–7)", fd.q15a_verbreding)
-  push("Ervaren mogelijkheden om inkomsten te verbreden of risico's te spreiden", fd.q15b)
-  if (fd.q15b_toelichting) push("Toelichting mogelijkheden verbreding / risicospreiding", fd.q15b_toelichting)
   push("Rendabel: voldoende marge (1–7)", fd.q16_marge)
   push("Rendabel: lage schuldenlast (1–7)", fd.q16_schuldenlast)
   push("Rendabel: continuïteit volgende generatie (1–7)", fd.q16_continuïteit)
   push("Rendabel: stabiliteit (1–7)", fd.q16_stabiliteit)
   push("Rendabel: bedrijf voortzetten (1–7)", fd.q16_voortzetten)
   push("Rendabel: waardebehoud (1–7)", fd.q16_waardebehoud)
-  if (fd.q16_anders) push("Rendabel ondernemen anders", fd.q16_anders)
+  if (fd.q16_toelichting) push("Toelichting rendabel ondernemen (vraag 18)", fd.q16_toelichting)
 
   // Deel 6 – Afsluiting (geen PII opnemen)
-  if (fd.q17) push("Vrije wens voor aanpassing in bedrijfsvoering", fd.q17)
-  if (fd.q18) push("Wat verzekeraars beter moeten begrijpen van de praktijk", fd.q18)
   if (fd.q19_opmerkingen) push("Aanvullende opmerkingen", fd.q19_opmerkingen)
+  if (fd.q19a) push("Wat Univé beter moet begrijpen (vraag 19a)", fd.q19a)
+  if (fd.q19b) push("Opmerkingen toekomst melkveehouderij / vragenlijst (vraag 19b)", fd.q19b)
 
   return lines.join("\n")
 }

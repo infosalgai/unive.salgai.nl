@@ -20,7 +20,7 @@ export function UniveLogo({ height = 40, href, subtitle, className = "" }: Unive
       alt="Univé"
       width={height * 2}
       height={height}
-      className={`object-contain object-left ${className}`}
+      className={`object-contain object-left mix-blend-multiply ${className}`}
       priority
     />
   );
