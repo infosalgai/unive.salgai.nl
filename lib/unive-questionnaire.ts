@@ -76,6 +76,7 @@ export interface UniveFormData {
   q14_open_pacht: number
   q14_open_co2: number
   q14_open_premiekorting: number
+  q14_open_teeltverzekering: number
   q14_open_andere: string // "" | "Ja" | "Nee"
   q14_open_andere_naamelijk: string
   q14_open_andere_score: number
@@ -133,6 +134,7 @@ export interface UniveFormData {
   q16_stabiliteit: number
   q16_voortzetten: number
   q16_waardebehoud: number
+  q16_werkplezier: number
   q16_anders: string
   q16_anders_score: number // 1–7 bij ingevulde "Anders, namelijk"
   q16_toelichting: string // optioneel bij vraag 18
@@ -223,6 +225,7 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q14_open_pacht: 4,
   q14_open_co2: 4,
   q14_open_premiekorting: 4,
+  q14_open_teeltverzekering: 4,
   q14_open_andere: "",
   q14_open_andere_naamelijk: "",
   q14_open_andere_score: 4,
@@ -276,6 +279,7 @@ export const UNIVE_INITIAL_FORM_DATA: UniveFormData = {
   q16_stabiliteit: 4,
   q16_voortzetten: 4,
   q16_waardebehoud: 4,
+  q16_werkplezier: 4,
   q16_anders: "",
   q16_anders_score: 4,
   q16_toelichting: "",
@@ -307,12 +311,12 @@ const SCALE_KEYS: (keyof UniveFormData)[] = [
   "q5a", "q5b", "q5c", "q7",
   "q10_kostenstructuur", "q10_omvang", "q10_grondgebruik", "q10_samenwerking", "q10_afzet", "q10_verbreding", "q10_anders_score",
   "q12",
-  "q14_open_eenmalig", "q14_open_structureel", "q14_open_pacht", "q14_open_co2", "q14_open_premiekorting", "q14_open_andere_score",
+  "q14_open_eenmalig", "q14_open_structureel", "q14_open_pacht", "q14_open_co2", "q14_open_premiekorting", "q14_open_teeltverzekering", "q14_open_andere_score",
   "q12_financieel", "q12_pacht", "q12_co2", "q12_premiekorting", "q12_klimaatadaptie", "q12_biodiversiteit",
   "q13_financieel", "q13_pacht", "q13_co2", "q13_premiekorting", "q13_klimaatadaptie", "q13_biodiversiteit",
   "q15a", "q15a_nevenactiviteiten", "q15a_pacht", "q15a_risicospreiding", "q15a_verbreding",
   "q17a", "q17b_directe_verkoop", "q17b_nieuwe_teelten", "q17b_co2", "q17b_natuur_biodiversiteit", "q17b_anders_score",
-  "q16_marge", "q16_schuldenlast", "q16_continuïteit", "q16_stabiliteit", "q16_voortzetten", "q16_waardebehoud", "q16_anders_score",
+  "q16_marge", "q16_schuldenlast", "q16_continuïteit", "q16_stabiliteit", "q16_voortzetten", "q16_waardebehoud", "q16_werkplezier", "q16_anders_score",
 ];
 
 /**
@@ -441,6 +445,9 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   push("Open pachtconstructies (1–7)", fd.q14_open_pacht)
   push("Open vergoedingen CO₂-vastlegging (1–7)", fd.q14_open_co2)
   push("Open premiekorting CO₂/klimaat/biodiversiteit (1–7)", fd.q14_open_premiekorting)
+  push("Open teeltverzekering (1–7)", fd.q14_open_teeltverzekering)
+  if (fd.q14_open_andere_naamelijk || fd.q14_open_andere_score !== 4) push("Open andere ondersteuning, namelijk (1–7)", fd.q14_open_andere_score)
+  if (fd.q14_open_andere_naamelijk) push("Andere ondersteuning namelijk", fd.q14_open_andere_naamelijk)
   if (fd.q14_open_toelichting) push("Toelichting openheid ondersteuning vraag 14", fd.q14_open_toelichting)
   const q15w = Array.isArray(fd.q15_waardevol) ? fd.q15_waardevol : []
   if (q15w.length) push("Waardevolle vormen ondersteuning (max 2)", q15w)
@@ -457,6 +464,7 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   push("Mogelijkheden nieuwe teelten (1–7)", fd.q17b_nieuwe_teelten)
   push("Mogelijkheden vergoeding CO₂-vastlegging (1–7)", fd.q17b_co2)
   push("Mogelijkheden natuur- en biodiversiteitsbeheer (1–7)", fd.q17b_natuur_biodiversiteit)
+  if (fd.q17b_anders) push("Mogelijkheden anders, namelijk", fd.q17b_anders)
   if (fd.q17_toelichting) push("Toelichting vraag 17", fd.q17_toelichting)
 
   // Deel 5 – Verdienmodel en kwetsbaarheden
@@ -466,12 +474,13 @@ export function buildUniveSummaryInput(fd: UniveFormData): string {
   push("Rendabel: stabiliteit (1–7)", fd.q16_stabiliteit)
   push("Rendabel: bedrijf voortzetten (1–7)", fd.q16_voortzetten)
   push("Rendabel: waardebehoud (1–7)", fd.q16_waardebehoud)
+  push("Rendabel: werkplezier en voldoening (1–7)", fd.q16_werkplezier)
+  if (fd.q16_anders) push("Rendabel: anders, namelijk", fd.q16_anders)
   if (fd.q16_toelichting) push("Toelichting rendabel ondernemen (vraag 18)", fd.q16_toelichting)
 
   // Deel 6 – Afsluiting (geen PII opnemen)
   if (fd.q19_opmerkingen) push("Aanvullende opmerkingen", fd.q19_opmerkingen)
-  if (fd.q19a) push("Wat Univé beter moet begrijpen (vraag 19a)", fd.q19a)
-  if (fd.q19b) push("Opmerkingen toekomst melkveehouderij / vragenlijst (vraag 19b)", fd.q19b)
+  if (fd.q19a) push("Nog iets meegeven (praktijk, toekomst sector, vragenlijst)", fd.q19a)
 
   return lines.join("\n")
 }
