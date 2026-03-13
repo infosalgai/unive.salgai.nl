@@ -413,6 +413,8 @@ export interface UniveScreen {
   group: string;
   title: string;
   subtitle?: string;
+  /** Opeenvolgend nummer voor URL (?stap=q1, q2, …) en webhook-payload (q1, q2, …). */
+  stepNumber: number;
   questionNumber: number;
   /** Optioneel label in de header (bijv. "11b"); anders wordt questionNumber getoond. */
   questionLabel?: string;
@@ -433,10 +435,11 @@ export interface UniveScreen {
 export function buildUniveScreens(): UniveScreen[] {
   const screens: UniveScreen[] = [];
 
-  // Tweede vraag – leeftijd
+  // Vraag 1 – leeftijd
   screens.push({
     id: "q0_leeftijd",
     group: "Algemeen",
+    stepNumber: 0,
     questionNumber: 2,
     title: "Wat is je leeftijd?",
     choiceField: "q0_leeftijd",
@@ -455,10 +458,11 @@ export function buildUniveScreens(): UniveScreen[] {
     ),
   });
 
-  // Derde vraag – gemeente
+  // Vraag 2 – gemeente
   screens.push({
     id: "q0_gemeente",
     group: "Algemeen",
+    stepNumber: 0,
     questionNumber: 3,
     title: "In welke gemeente ligt jouw melkveebedrijf?",
     required: true,
@@ -477,10 +481,11 @@ export function buildUniveScreens(): UniveScreen[] {
     ),
   });
 
-  // Deel 1 – Je bedrijf
+  // Vraag 3 – type bedrijf
   screens.push({
     id: "q1",
     group: "Deel 1 – Je bedrijf",
+    stepNumber: 0,
     questionNumber: 4,
     title: "Wat typeert je bedrijf het beste?",
     choiceField: "q1",
@@ -579,6 +584,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q2",
     group: "Deel 1 – Je bedrijf",
+    stepNumber: 0,
     questionNumber: 5,
     title: "Hoe groot is jouw bedrijf?",
     render: (fd, update) => (
@@ -623,6 +629,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q3",
     group: "Deel 1 – Je bedrijf",
+    stepNumber: 0,
     questionNumber: 6,
     title: "Hoe zie je de ontwikkeling van jouw bedrijf in de komende jaren?",
     choiceField: "q3",
@@ -648,6 +655,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q4",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    stepNumber: 0,
     questionNumber: 7,
     title: "Welke ontwikkelingen hebben nu het meest invloed op jouw bedrijf?",
     multiChoiceField: "q4",
@@ -763,6 +771,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q4a",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    stepNumber: 0,
     questionNumber: 8,
     questionLabel: "4a",
     title: "Welke regelgeving speelt vooral?",
@@ -775,6 +784,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q5",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    stepNumber: 0,
     questionNumber: 8,
     title: "In hoeverre ben je het eens met de volgende stellingen?",
     hasPiiField: true,
@@ -877,6 +887,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q6",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    stepNumber: 0,
     questionNumber: 9,
     title: "De komende 5–10 jaar maak ik me voor mijn bedrijf het meest zorgen over:",
     hasPiiField: true,
@@ -895,6 +906,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q10_invloed_onderdelen",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    stepNumber: 0,
     questionNumber: 10,
     title: "In hoeverre heb je zelf invloed op de volgende onderdelen van jouw bedrijf in de komende jaren?",
     hasPiiField: true,
@@ -966,6 +978,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q11_matrix",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    stepNumber: 0,
     questionNumber: 11,
     title: "Heb je de afgelopen 5 jaar aanpassingen gedaan op de volgende gebieden?",
     hasPiiField: true,
@@ -1040,6 +1053,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q11b",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    stepNumber: 0,
     questionNumber: 13,
     questionLabel: "11b",
     title: "Wat waren de belangrijkste aanleidingen voor deze aanpassingen?",
@@ -1120,6 +1134,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q10",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    stepNumber: 0,
     questionNumber: 12,
     title: "Onder welke omstandigheden zou je in de toekomst (opnieuw) aanpassingen in jouw bedrijfsvoering overwegen?",
     hasPiiField: true,
@@ -1139,6 +1154,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q11",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    stepNumber: 0,
     questionNumber: 13,
     title: "Wat houd je het meest tegen om aanpassingen te doen?",
     subtitle: "Denk aan wat je tegenhoudt om te verduurzamen of te investeren.",
@@ -1216,6 +1232,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q14_open",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
+    stepNumber: 0,
     questionNumber: 14,
     title:
       "In hoeverre sta je open voor de volgende vormen van ondersteuning vanuit Univé bij het ontwikkelen van een rendabel en duurzaam bedrijfsmodel?",
@@ -1276,6 +1293,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q15_waardevol",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
+    stepNumber: 0,
     questionNumber: 15,
     title:
       "Naast financiële ondersteuning, welke vormen van ondersteuning zouden voor jou het meest waardevol zijn bij aanpassingen in jouw bedrijfsvoering?",
@@ -1371,6 +1389,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q16a",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
+    stepNumber: 0,
     questionNumber: 16,
     questionLabel: "16",
     title: "Welke van de volgende opties zou je eventueel overwegen op jouw bedrijf?",
@@ -1558,6 +1577,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q17a",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
+    stepNumber: 0,
     questionNumber: 18,
     title: "In hoeverre heb je behoefte aan aanvullende inkomsten of meer risicospreiding?",
     render: (fd, update) => (
@@ -1597,6 +1617,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q17b",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
+    stepNumber: 0,
     questionNumber: 19,
     title:
       "In hoeverre zie je op jouw bedrijf mogelijkheden in de volgende richtingen om jouw inkomsten te verbreden of risico's te spreiden?",
@@ -1682,6 +1703,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q16",
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
+    stepNumber: 0,
     questionNumber: 20,
     title: "Wat betekent rendabel ondernemen voor jou?",
     hasPiiField: true,
@@ -1731,6 +1753,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q19a_19b",
     group: "Deel 6 – Afsluiting",
+    stepNumber: 0,
     questionNumber: 21,
     title: "Is er nog iets dat je ons wilt meegeven over de praktijk op een melkveebedrijf, de toekomst van de sector, of over deze vragenlijst?",
     hasPiiField: true,
@@ -1754,6 +1777,7 @@ export function buildUniveScreens(): UniveScreen[] {
   screens.push({
     id: "q19",
     group: "Deel 6 – Afsluiting",
+    stepNumber: 0,
     questionNumber: 22,
     title:
       "Sta je ervoor open dat er mogelijk contact met je wordt opgenomen naar aanleiding van de vragenlijst in het vervolg van Univé's onderzoek?",
@@ -1878,6 +1902,16 @@ export function buildUniveScreens(): UniveScreen[] {
       );
     },
   });
+
+  // Opeenvolgende stepNumber voor URL (?stap=q1, q2, …) en webhook-payload (q1, q2, …)
+  let step = 1;
+  for (let i = 0; i < screens.length; i++) {
+    if (screens[i].id === "q4a") {
+      screens[i].stepNumber = 6; //zelfde stap als q4 (doorvraag inlined)
+      continue;
+    }
+    screens[i].stepNumber = step++;
+  }
 
   return screens;
 }

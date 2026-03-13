@@ -77,16 +77,16 @@ export default function ReviewPage() {
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <CheckCircle className="h-8 w-8" />
               </div>
-              <h1 className="text-xl font-semibold text-foreground">Je antwoorden zijn verstuurd.</h1>
+              <h1 className="text-xl font-semibold text-foreground">Bedankt!</h1>
               <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                Op basis van je antwoorden is een samenvatting gemaakt en veilig doorgestuurd naar Univé voor het doel van deze vragenlijst.
+                Je hebt de vragenlijst afgerond. Je antwoorden zijn veilig ontvangen door Univé. Dank voor je medewerking.
               </p>
               <Button
                 className="mt-6 rounded-xl"
                 variant="outline"
-                onClick={() => router.push("/intro")}
+                onClick={() => (window.location.href = "https://www.unive.nl/")}
               >
-                Terug naar start
+                Afsluiten
               </Button>
             </div>
           ) : (
@@ -111,7 +111,7 @@ export default function ReviewPage() {
               >
                 {isSubmitting ? "Bezig met verzenden…" : "Antwoorden versturen"}
               </Button>
-              <Link href="/vragenlijst?stap=q22">
+              <Link href="/vragenlijst?stap=q21">
                 <Button variant="outline" className="w-full rounded-xl" disabled={isSubmitting}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Antwoorden aanpassen

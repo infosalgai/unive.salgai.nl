@@ -20,8 +20,8 @@ export default function VragenlijstPage() {
 
   const allScreens = useMemo(() => buildUniveScreens(), []);
 
-  const getStepSlug = (screen: (typeof allScreens)[number]) =>
-    screen.questionLabel ? `q${screen.questionLabel}` : `q${screen.questionNumber}`;
+  /** URL-slug: opeenvolgend q1, q2, … (zelfde nummering als webhook-payload). */
+  const getStepSlug = (screen: (typeof allScreens)[number]) => `q${screen.stepNumber}`;
 
   const currentScreenIndex = useMemo(() => {
     if (!allScreens.length) return 0;
@@ -40,7 +40,17 @@ export default function VragenlijstPage() {
     slugIndex = allScreens.findIndex((s) => getStepSlug(s) === stepParam);
     if (slugIndex !== -1) return slugIndex;
 
-    // 2) Backwards compatible: oude URLs op basis van interne id (bijv. q11)
+    // 2) Match op stepNumber (stap=q1, q2, …)
+    const stepNum = parseInt(stepParam.replace(/^q/, ""), 10);
+    if (Number.isFinite(stepNum)) {
+      const byStep = allScreens.findIndex(
+        (s) => s.stepNumber === stepNum && !isStepConditionallyHidden(s.id, formData)
+      );
+      if (byStep !== -1) return byStep;
+      const byStepAny = allScreens.findIndex((s) => s.stepNumber === stepNum);
+      if (byStepAny !== -1) return byStepAny;
+    }
+    // 3) Backwards compatible: oude URLs op basis van interne id (bijv. q11)
     const idIndex = allScreens.findIndex((s) => s.id === stepParam);
     if (idIndex !== -1) return idIndex;
 
@@ -54,6 +64,13 @@ export default function VragenlijstPage() {
   useEffect(() => {
     setCurrentStepPiiBlocked(false);
   }, [currentScreenIndex]);
+
+  // Zorg dat eerste stap in URL staat als /vragenlijst?stap=q1
+  useEffect(() => {
+    if (!searchParams.get("stap") && currentScreen && currentScreen.stepNumber === 1) {
+      router.replace(`/vragenlijst?stap=q${currentScreen.stepNumber}`);
+    }
+  }, [currentScreen, searchParams, router]);
 
   useEffect(() => {
     if (currentScreen && isUniveStepValid(currentScreen, formData, currentStepPiiBlocked)) setStepError(null);

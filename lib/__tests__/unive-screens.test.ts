@@ -8,22 +8,25 @@ import { normalizeFormData, UNIVE_INITIAL_FORM_DATA } from "../unive-questionnai
 import type { UniveFormData } from "../unive-questionnaire";
 
 describe("buildUniveScreens", () => {
-  it("returns screens with expected ids including q6", () => {
+  it("returns screens with expected ids and opeenvolgende stepNumber (q1, q2, …)", () => {
     const screens = buildUniveScreens();
     const ids = screens.map((s) => s.id);
-    expect(ids[0]).toBe("q0_geslacht");
+    expect(ids[0]).toBe("q0_leeftijd");
     expect(ids).toContain("q1");
     expect(ids).toContain("q6");
     expect(ids).toContain("q4a");
-    expect(ids).toContain("q9");
     expect(ids).toContain("q19");
+    const steps = screens.map((s) => s.stepNumber);
+    expect(steps[0]).toBe(1);
+    expect(steps).toContain(2);
+    expect(Math.max(...steps)).toBe(21);
   });
 
-  it("q0_geslacht is invalid when empty", () => {
+  it("q0_leeftijd is invalid when empty", () => {
     const screens = buildUniveScreens();
-    const q0 = screens.find((s) => s.id === "q0_geslacht")!;
+    const q0 = screens.find((s) => s.id === "q0_leeftijd")!;
     expect(isUniveStepValid(q0, UNIVE_INITIAL_FORM_DATA, false)).toBe(false);
-    expect(isUniveStepValid(q0, normalizeFormData({ q0_geslacht: "Man" }), false)).toBe(true);
+    expect(isUniveStepValid(q0, normalizeFormData({ q0_leeftijd: "Jonger dan 30" }), false)).toBe(true);
   });
 
   it("every screen has render that accepts normalized formData without throwing", () => {
@@ -44,30 +47,24 @@ describe("buildUniveScreens", () => {
 describe("isUniveStepValid", () => {
   const screens = buildUniveScreens();
 
-  it("q2 is invalid when both cows and hectares are 0", () => {
+  it("q2 is invalid when both cows and hectares are 0; both must be > 0", () => {
     const q2 = screens.find((s) => s.id === "q2")!;
     expect(isUniveStepValid(q2, UNIVE_INITIAL_FORM_DATA, false)).toBe(false);
-    expect(isUniveStepValid(q2, normalizeFormData({ q2_cows: 1 }), false)).toBe(true);
-    expect(isUniveStepValid(q2, normalizeFormData({ q2_hectares: 10 }), false)).toBe(true);
+    expect(isUniveStepValid(q2, normalizeFormData({ q2_cows: 1 }), false)).toBe(false);
+    expect(isUniveStepValid(q2, normalizeFormData({ q2_hectares: 10 }), false)).toBe(false);
+    expect(isUniveStepValid(q2, normalizeFormData({ q2_cows: 50, q2_hectares: 30 }), false)).toBe(true);
   });
 
-  it("q8 is invalid when empty", () => {
-    const q8 = screens.find((s) => s.id === "q8")!;
-    expect(isUniveStepValid(q8, UNIVE_INITIAL_FORM_DATA, false)).toBe(false);
-    expect(isUniveStepValid(q8, normalizeFormData({ q8: "Ja, meerdere", q8a: "We hebben meerdere aanpassingen gedaan op ons bedrijf." }), false)).toBe(true);
+  it("q4 is invalid when empty", () => {
+    const q4 = screens.find((s) => s.id === "q4")!;
+    expect(isUniveStepValid(q4, UNIVE_INITIAL_FORM_DATA, false)).toBe(false);
+    expect(isUniveStepValid(q4, normalizeFormData({ q4: ["Regelgeving"], q4a: ["Stikstof- en vergunningenproblematiek"] }), false)).toBe(true);
   });
 
-  it("q9 is valid when q8 is not Ja (step skipped)", () => {
-    const q9 = screens.find((s) => s.id === "q9")!;
-    expect(isUniveStepValid(q9, normalizeFormData({ q8: "Nee" }), false)).toBe(true);
-    expect(isUniveStepValid(q9, normalizeFormData({ q8: "Ja, meerdere", q9: [] }), false)).toBe(false);
-    expect(isUniveStepValid(q9, normalizeFormData({ q8: "Ja, beperkt", q9: ["Financiële noodzaak"] }), false)).toBe(true);
-  });
-
-  it("handles malformed fd safely (q8 not string)", () => {
-    const q8 = screens.find((s) => s.id === "q8")!;
-    const fd = normalizeFormData({ q8: 123 });
-    expect(isUniveStepValid(q8, fd, false)).toBe(false);
+  it("handles malformed fd safely (q4 not array)", () => {
+    const q4 = screens.find((s) => s.id === "q4")!;
+    const fd = normalizeFormData({ q4: "Regelgeving" });
+    expect(isUniveStepValid(q4, fd, false)).toBe(false);
   });
 });
 
