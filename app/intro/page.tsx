@@ -4,13 +4,8 @@ import Link from "next/link";
 import { UniveLogo } from "@/components/unive-logo";
 import { Button } from "@/components/ui/button";
 import {
-  Shield,
-  UserX,
   Clock,
   Target,
-  Leaf,
-  BarChart3,
-  MessageSquare,
   ChevronRight,
   Sparkles,
 } from "lucide-react";
@@ -31,16 +26,11 @@ export default function IntroPage() {
         <div className="mx-auto max-w-xl space-y-8">
           {/* Hero met duidelijk doel */}
           <div className={`space-y-4 ${fadeIn}`} style={stagger(0)}>
-            <div className="flex items-center gap-2 text-primary">
-              <Sparkles className="h-6 w-6" aria-hidden />
-              <span className="text-sm font-medium uppercase tracking-wide">Univé &amp; melkveehouderij</span>
-            </div>
             <h1 className="text-2xl font-semibold text-foreground leading-tight sm:text-3xl">
-              Toekomstbestendige melkveehouderij – jouw inzicht telt
+              Toekomstbestendige melkveehouderij: jouw mening telt
             </h1>
             <p className="text-muted-foreground leading-relaxed">
-              We willen begrijpen hoe jij je bedrijf ervaart en wat je nodig hebt. Met je antwoorden kunnen we
-              ondersteuning ontwikkelen die in de praktijk werkt en rendabel is.
+              Als Univé willen we beter begrijpen hoe melkveehouders hun bedrijf vandaag ervaren: financieel, in het dagelijkse werk en richting de toekomst.
             </p>
           </div>
 
@@ -50,62 +40,26 @@ export default function IntroPage() {
               <Target className="h-5 w-5 text-primary shrink-0" aria-hidden />
               Doel van deze vragenlijst
             </h2>
-            <ul className="space-y-3 text-muted-foreground leading-relaxed" role="list">
-              <li className="flex gap-3">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
-                <span><strong className="text-foreground">Inzicht in jouw praktijk</strong> – hoe jij je bedrijf ervaart, wat er speelt en waar je tegenaan loopt.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
-                <span><strong className="text-foreground">Betere ondersteuning</strong> – op basis van jouw input willen we concrete ondersteuning ontwikkelen: meer zekerheid, risicobeperking en haalbaarheid op het erf.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
-                <span><strong className="text-foreground">Geen goed of fout</strong> – het gaat om jouw werkelijkheid. Je antwoorden helpen ons om beter aan te sluiten bij wat melkveehouders nodig hebben.</span>
-              </li>
-            </ul>
-          </section>
-
-          {/* Waarom we dit doen – compact met iconen */}
-          <section className={`space-y-4 ${fadeIn}`} style={stagger(2)}>
-            <h2 className="text-lg font-semibold text-foreground">Waarom we dit doen</h2>
-            <ul className="space-y-3 text-muted-foreground leading-relaxed" role="list">
-              <li className="flex gap-3">
-                <Leaf className="h-5 w-5 shrink-0 text-primary mt-0.5" aria-hidden />
-                <span>Klimaatverandering, milieueisen en biodiversiteit hebben steeds meer invloed op bedrijfsrisico&apos;s en toekomstbestendigheid. Univé wil bijdragen aan klimaatmitigatie, -adaptatie en biodiversiteit.</span>
-              </li>
-              <li className="flex gap-3">
-                <BarChart3 className="h-5 w-5 shrink-0 text-primary mt-0.5" aria-hidden />
-                <span>Deze ontwikkelingen raken direct aan risico&apos;s, verzekerbaarheid en economische continuïteit. We willen melkveehouders ondersteunen bij een toekomstbestendige én rendabele bedrijfsvoering.</span>
-              </li>
-              <li className="flex gap-3">
-                <MessageSquare className="h-5 w-5 shrink-0 text-primary mt-0.5" aria-hidden />
-                <span>Verandering werkt alleen als het past bij de praktijk. Daarom willen we van je horen wat er speelt – via deze vragenlijst.</span>
-              </li>
-            </ul>
+            <div className="space-y-2 text-muted-foreground leading-relaxed">
+              <p>Door deze vragenlijst krijgen we een eerlijk en realistisch beeld van wat er op uw erf speelt.</p>
+              <p>Die inzichten gebruiken we om onze ondersteuning in de duurzaamheidstransitie beter te laten aansluiten bij de praktijk.</p>
+              <p>Er zijn geen goede of foute antwoorden; uw eigen ervaring staat centraal.</p>
+            </div>
           </section>
 
           {/* Praktische info – icoonkaartjes met lichte animatie */}
-          <p className={`text-sm text-muted-foreground ${fadeIn}`} style={stagger(3)}>
-            Je gegevens worden anoniem verwerkt. Je bent <strong className="text-foreground">niet verplicht</strong> om contactgegevens (naam, e-mail, telefoon) achter te laten: we vragen ze alleen als je aan het eind aangeeft dat Univé contact met je mag opnemen. Meer hierover vind je in ons{" "}
+          <p className={`text-sm text-muted-foreground ${fadeIn}`} style={stagger(2)}>
+            Je bent <strong className="text-foreground">niet verplicht</strong> om contactgegevens (naam, e-mail, telefoon) achter te laten: we vragen ze alleen als je aan het eind aangeeft dat Univé contact met je mag opnemen. Meer hierover vind je in ons{" "}
             <a href="https://www.unive.nl/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded">privacybeleid</a>.
           </p>
 
           <div
             className={`flex flex-wrap gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-5 transition-transform hover:border-primary/30 ${fadeIn}`}
-            style={stagger(4)}
+            style={stagger(3)}
           >
             <div className="flex items-center gap-2 text-sm text-foreground">
-              <UserX className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-              <span>Anoniem</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-foreground">
-              <Shield className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-              <span>Contactgegevens alleen als je toestemming geeft</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-foreground">
               <Clock className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-              <span>± 10–15 minuten</span>
+              <span>De vragenlijst zal 10–15 minuten in beslag nemen</span>
             </div>
           </div>
 

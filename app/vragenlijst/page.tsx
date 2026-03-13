@@ -195,7 +195,7 @@ export default function VragenlijstPage() {
               {currentScreen && (
                 <>
                   <div className="mb-4">
-                    {currentScreen.id === "q14_open" && currentScreen.subtitle ? (
+                    {(currentScreen.id === "q14_open" || currentScreen.id === "q16a") && currentScreen.subtitle ? (
                       <>
                         <p className="mb-3 text-base italic text-foreground/90">
                           {currentScreen.subtitle}
