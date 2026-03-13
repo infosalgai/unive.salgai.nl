@@ -5,6 +5,7 @@
  */
 
 import type { UniveFormData } from "@/lib/unive-questionnaire";
+import { buildSequentialPayload } from "@/lib/unive-questionnaire";
 
 /** Huidige versie van het payload-schema (bij wijzigingen verhogen voor compatibiliteit). */
 export const SUBMISSION_PAYLOAD_VERSION = "1.0";
@@ -16,8 +17,10 @@ export interface UniveSubmissionPayload {
   submittedAt: string;
   /** Unieke id voor deze indiening (voor logging en eventuele idempotency). */
   submissionId: string;
-  /** Alle ingevulde antwoorden van de vragenlijst. */
+  /** Alle ingevulde antwoorden van de vragenlijst (ruwe form keys). */
   answers: UniveFormData;
+  /** Antwoorden per vraag q1, q2, … met omschrijving (zelfde nummering als URL ?stap=q1, q2). Voor webhook. */
+  answersSequential: Record<string, string>;
   /** Gegenereerde samenvatting (lopende tekst). */
   summary: string;
 }
@@ -25,6 +28,7 @@ export interface UniveSubmissionPayload {
 /**
  * Bouwt het standaard payload-object voor een indiening.
  * Gebruik dit overal waar data naar een extern systeem moet (API, log, webhook).
+ * answersSequential bevat q1, q2, … met antwoordomschrijving (zelfde nummering als URL).
  */
 export function buildSubmissionPayload(
   answers: UniveFormData,
@@ -35,6 +39,7 @@ export function buildSubmissionPayload(
     submittedAt: new Date().toISOString(),
     submissionId: crypto.randomUUID(),
     answers,
+    answersSequential: buildSequentialPayload(answers),
     summary: summary.trim(),
   };
 }
