@@ -235,12 +235,13 @@ const Q1_OMSCHAKELING_OPTIONS = [
   "Anders, namelijk:",
 ];
 
-const Q3_OPTIONS = [
-  { id: "Groei / uitbreiding", label: "Groei / uitbreiding" },
-  { id: "Stabilisatie", label: "Stabilisatie" },
-  { id: "Afschalen / krimp", label: "Afschalen / krimp" },
-  { id: "Overdracht binnen 10 jaar", label: "Overdracht binnen 10 jaar" },
-  { id: "Onzeker / nog geen duidelijke richting", label: "Onzeker / nog geen duidelijke richting" },
+const Q3_OPTIONS: { id: string; label: string; tooltip?: string }[] = [
+  { id: "Uitbreiden", label: "Uitbreiden", tooltip: "Meer koeien per hectare of meer koeien op het bedrijf" },
+  { id: "Ongeveer gelijk blijven", label: "Ongeveer gelijk blijven" },
+  { id: "Extensiveren", label: "Extensiveren", tooltip: "Minder koeien per hectare" },
+  { id: "Stoppen zonder opvolger", label: "Stoppen zonder opvolger" },
+  { id: "Overdragen", label: "Overdragen" },
+  { id: "Nog geen duidelijke richting", label: "Nog geen duidelijke richting" },
 ];
 
 const Q4_OPTIONS = [
@@ -302,22 +303,22 @@ const Q11_THEMES: { key: keyof UniveFormData; keyToelichting: keyof UniveFormDat
   {
     key: "q11_duurzaamheid",
     keyToelichting: "q11_duurzaamheid_toelichting",
-    label: "Duurzaamheidsmaatregelen (bijv. biodiversiteit, emissiereductie, bodemverbetering, natuurbeheer)",
+    label: "Duurzaamheidsmaatregelen (Bijv. biodiversiteit, emissiereductie, bodemverbetering, natuurbeheer)",
   },
   {
     key: "q11_bedrijfsschaal",
     keyToelichting: "q11_bedrijfsschaal_toelichting",
-    label: "Bedrijfsschaal (bijv. uitbreiding of extensivering van veestapel of grondgebruik)",
+    label: "Bedrijfsschaal (Bijv. uitbreiding of extensivering van veestapel of grondgebruik)",
   },
   {
     key: "q11_bedrijfsvoering",
     keyToelichting: "q11_bedrijfsvoering_toelichting",
-    label: "Bedrijfsvoering (bijv. andere voersystemen, beweiding)",
+    label: "Bedrijfsvoering (Bijv. andere voersystemen, beweiding)",
   },
   {
     key: "q11_verdienmodel",
     keyToelichting: "q11_verdienmodel_toelichting",
-    label: "Verdienmodel / verbreding (bijv. verkoop eigen producten, energie, recreatie)",
+    label: "Verdienmodel / verbreding (Bijv. verkoop eigen producten, energie, recreatie)",
   },
   {
     key: "q11_investeringen",
@@ -354,11 +355,11 @@ const Q11_OPTIONS = [
 
 /** Vraag 16a en 16b – dezelfde opties (landgebruik/activiteiten) */
 const Q16A_OPTIONS = [
-  "Houtwallen aanleggen of herstellen (bijv. houtwallen, singels of heggen voor biodiversiteit, beschutting en herstel van landschapselementen)",
-  "Bomen combineren met melkvee (agroforestry) (bijv. noten- of fruitbomen combineren met grasland of beweiding)",
-  "Nieuwe teelten zoals hennep (bijv. vezelgewassen voor hernieuwbare biobased materialen)",
-  "Productief kruidenrijk grasland (grasland met kruiden voor biodiversiteit, bodemkwaliteit en minder kunstmest)",
-  "Biobased bouwen (bijv. gebruik van hout, vezelgewassen of andere hernieuwbare natuurlijke materialen bij stallen of schuren)",
+  "Houtwallen aanleggen of herstellen (Bijv. houtwallen, singels of heggen voor biodiversiteit, beschutting en herstel van landschapselementen)",
+  "Bomen combineren met melkvee (agroforestry) (Bijv. noten- of fruitbomen combineren met grasland of beweiding)",
+  "Nieuwe teelten zoals hennep (Bijv. vezelgewassen voor hernieuwbare biobased materialen)",
+  "Productief kruidenrijk grasland (Grasland met kruiden voor biodiversiteit, bodemkwaliteit en minder kunstmest)",
+  "Biobased bouwen (Bijv. gebruik van hout, vezelgewassen of andere hernieuwbare natuurlijke materialen bij stallen of schuren)",
   "Anders, namelijk:",
 ];
 
@@ -426,28 +427,6 @@ export interface UniveScreen {
 export function buildUniveScreens(): UniveScreen[] {
   const screens: UniveScreen[] = [];
 
-  // Eerste vraag – geslacht (na introductie)
-  screens.push({
-    id: "q0_geslacht",
-    group: "Algemeen",
-    questionNumber: 1,
-    title: "Wat is je geslacht?",
-    choiceField: "q0_geslacht",
-    required: true,
-    render: (fd, update) => (
-      <RadioGroup value={fd.q0_geslacht ?? ""} onValueChange={(v) => update({ q0_geslacht: v })} className="space-y-2">
-        {Q0_GESLACHT_OPTIONS.map((opt) => (
-          <div key={opt.id} className={OPTION_ROW_CLASS}>
-            <RadioGroupItem value={opt.id} id={`q0_geslacht-${opt.id}`} />
-            <Label htmlFor={`q0_geslacht-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">
-              {opt.label}
-            </Label>
-          </div>
-        ))}
-      </RadioGroup>
-    ),
-  });
-
   // Tweede vraag – leeftijd
   screens.push({
     id: "q0_leeftijd",
@@ -487,7 +466,6 @@ export function buildUniveScreens(): UniveScreen[] {
           type="text"
           value={fd.q0_gemeente ?? ""}
           onChange={(e) => update({ q0_gemeente: e.target.value })}
-          placeholder="Bijv. Westerveld"
           maxLength={100}
           className="w-full"
         />
@@ -501,14 +479,17 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 1 – Je bedrijf",
     questionNumber: 4,
     title: "Wat typeert je bedrijf het beste?",
-    subtitle: "Denk aan je manier van boeren: gangbaar, biologisch of natuurinclusief. Kies het type dat het best past.",
+    subtitle: "Kies het type dat het best past.",
     choiceField: "q1",
     render: (fd, update, toggleMulti, setPiiBlocked) => {
       const q1Tooltips: Record<string, string> = {
-        Gangbaar: "Conventionele melkveehouderij, niet gecertificeerd biologisch of natuurinclusief.",
-        Natuurinclusief: "Boeren met meer ruimte voor natuur op en rond het bedrijf (bijv. weidevogels, kruidenrijk grasland), zonder per se biologisch te zijn.",
-        Biologisch: "Gecertificeerd biologisch: o.a. biologisch voer, weidegang, beperkt gebruik van middelen.",
-        "In omschakeling": "Je bent bezig met de overstap naar bijvoorbeeld biologisch of natuurinclusief.",
+        Gangbaar:
+          "Een regulier melkveebedrijf dat niet biologisch gecertificeerd is en volgens de gangbare landbouwpraktijk werkt.",
+        Natuurinclusief:
+          "Een bedrijfsvoering waarbij actief rekening wordt gehouden met natuur, biodiversiteit, bodem en landschap, bijvoorbeeld door kruidenrijk grasland, landschapselementen of extensiever beheer.",
+        Biologisch: "Een bedrijf dat gecertificeerd biologisch produceert.",
+        "In omschakeling":
+          "Je bent momenteel bezig met de overgang naar een andere bedrijfsvoering.",
       };
       return (
         <>
@@ -547,7 +528,7 @@ export function buildUniveScreens(): UniveScreen[] {
               <Input
                 value={fd.q1_anders ?? ""}
                 onChange={(e) => update({ q1_anders: e.target.value })}
-                placeholder="Anders, namelijk"
+                placeholder="Licht je keuze kort toe"
                 maxLength={200}
               />
             </div>
@@ -580,7 +561,7 @@ export function buildUniveScreens(): UniveScreen[] {
                   <Input
                     value={fd.q1_omschakeling_anders ?? ""}
                     onChange={(e) => update({ q1_omschakeling_anders: e.target.value })}
-                    placeholder="Licht kort toe"
+                    placeholder="Licht je keuze kort toe"
                     maxLength={200}
                   />
                 </div>
@@ -597,7 +578,6 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 1 – Je bedrijf",
     questionNumber: 5,
     title: "Hoe groot is jouw bedrijf?",
-    subtitle: "Geef aantallen in gehele getallen.",
     render: (fd, update) => (
       <div className="space-y-4">
         <div>
@@ -641,15 +621,20 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q3",
     group: "Deel 1 – Je bedrijf",
     questionNumber: 6,
-    title: "In welke fase bevindt jouw bedrijf zich?",
-    subtitle: "Hoe zie je de ontwikkeling van jouw bedrijf in de komende jaren: groei, stabilisatie, overdracht of nog onzeker?",
+    title: "Hoe zie je de ontwikkeling van jouw bedrijf in de komende jaren?",
     choiceField: "q3",
     render: (fd, update) => (
       <RadioGroup value={fd.q3 ?? ""} onValueChange={(v) => update({ q3: v })} className="space-y-2">
         {Q3_OPTIONS.map((opt) => (
           <div key={opt.id} className={OPTION_ROW_CLASS}>
             <RadioGroupItem value={opt.id} id={`q3-${opt.id}`} />
-            <Label htmlFor={`q3-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">{opt.label}</Label>
+            <Label htmlFor={`q3-${opt.id}`} className="flex-1 cursor-pointer text-sm font-medium">
+              {opt.tooltip ? (
+                <TermWithTooltip term={opt.label} explanation={opt.tooltip} />
+              ) : (
+                opt.label
+              )}
+            </Label>
           </div>
         ))}
       </RadioGroup>
@@ -661,8 +646,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q4",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 7,
-    title: "Welke ontwikkelingen hebben momenteel de meeste invloed op jouw bedrijfsvoering?",
-    subtitle: "Denk aan wat op jouw melkveebedrijf het zwaarst weegt.",
+    title: "Welke ontwikkelingen hebben nu het meest invloed op jouw bedrijf?",
     multiChoiceField: "q4",
     maxChoices: 3,
     required: true,
@@ -705,7 +689,7 @@ export function buildUniveScreens(): UniveScreen[] {
               <Input
                 value={fd.q4_anders ?? ""}
                 onChange={(e) => update({ q4_anders: e.target.value })}
-                placeholder="Toelichting"
+                placeholder="Licht je keuze kort toe"
                 maxLength={200}
               />
             </div>
@@ -761,7 +745,7 @@ export function buildUniveScreens(): UniveScreen[] {
                   <Input
                     value={fd.q4a_anders ?? ""}
                     onChange={(e) => update({ q4a_anders: e.target.value })}
-                    placeholder="Toelichting"
+                    placeholder="Licht je keuze kort toe"
                     maxLength={200}
                   />
                 </div>
@@ -789,18 +773,18 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q5",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 8,
-    title: "Hoe belangrijk zijn verduurzaming, CO₂-reductie en biodiversiteit voor jouw bedrijf?",
+    title: "In hoeverre ben je het eens met de volgende stellingen?",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-6">
         <p className={SCALE_INTRO_CLASS}>
-          Schaal 1–7: links <span className="font-semibold text-foreground">nauwelijks</span>, rechts{" "}
-          <span className="font-semibold text-foreground">veel</span>.
+          Schaal 1–7: links <span className="font-semibold text-foreground">helemaal oneens</span>, rechts{" "}
+          <span className="font-semibold text-foreground">helemaal eens</span>.
         </p>
 
         <div className="space-y-2">
           <Label className={QUESTION_LABEL_CLASS}>
-            In hoeverre is verduurzaming volgens jou van belang voor de continuïteit van je bedrijf?{" "}
+            Verduurzaming is belangrijk voor de continuïteit van mijn bedrijf.{" "}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -824,7 +808,7 @@ export function buildUniveScreens(): UniveScreen[] {
 
         <div className="space-y-2">
           <Label className={QUESTION_LABEL_CLASS}>
-            In hoeverre verwacht je dat CO₂-reductie invloed zal hebben op je bedrijf in de komende 10 jaar?{" "}
+            CO₂-reductie is de komende 10 jaar belangrijk voor mijn bedrijf.{" "}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -848,7 +832,7 @@ export function buildUniveScreens(): UniveScreen[] {
 
         <div className="space-y-2">
           <Label className={QUESTION_LABEL_CLASS}>
-            In hoeverre is biodiversiteit volgens jou relevant voor je bedrijfsvoering?{" "}
+            Biodiversiteit is belangrijk voor mijn bedrijf.{" "}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -871,12 +855,14 @@ export function buildUniveScreens(): UniveScreen[] {
         </div>
 
         <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
+          <Label className="mb-2 block text-sm font-medium text-foreground">
+            Wil je je antwoorden kort toelichten?
+          </Label>
           <PiiTextarea
             value={fd.q5_toelichting ?? ""}
             onChange={(v) => update({ q5_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Deze toelichting is optioneel."
+            placeholder="Schrijf hier kort je toelichting"
             rows={3}
             maxLength={800}
           />
@@ -889,9 +875,7 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q6",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     questionNumber: 9,
-    title: "Als je 5–10 jaar vooruitkijkt: waar maak jij je dan het meeste zorgen over voor de toekomst van jouw bedrijf?",
-    subtitle:
-      "Denk bijvoorbeeld aan inkomen, beleid of regelgeving, klimaatverandering of opvolging.",
+    title: "De komende 5–10 jaar maak ik me voor mijn bedrijf het meest zorgen over:",
     hasPiiField: true,
     render: (fd, update, _, setPiiBlocked) => (
       <PiiTextarea
@@ -965,7 +949,7 @@ export function buildUniveScreens(): UniveScreen[] {
             value={fd.q10_toelichting ?? ""}
             onChange={(v) => update({ q10_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Deze toelichting is optioneel."
+            placeholder="Schrijf hier kort je toelichting"
             rows={3}
             maxLength={800}
           />
@@ -980,17 +964,39 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q11_matrix",
     group: "Deel 3 – Veranderingen in bedrijfsvoering",
     questionNumber: 11,
-    title: "Heb je de afgelopen 5 jaar aanpassingen gedaan in jouw bedrijfsvoering op één of meer van de volgende gebieden?",
-    subtitle: "Geef per onderwerp aan of je veranderingen hebt doorgevoerd. Bij elk gekozen 'Ja' is een korte toelichting verplicht.",
+    title: "Heb je de afgelopen 5 jaar aanpassingen gedaan op de volgende gebieden?",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-6">
         {Q11_THEMES.map(({ key, keyToelichting, label }) => {
           const value = (fd[key] as string) ?? "";
           const toelichting = (fd[keyToelichting] as string) ?? "";
+          const { label: displayLabel, tooltip } = splitQ16LabelAndTooltip(label);
           return (
             <div key={key} className="space-y-3 rounded-lg border border-border p-4">
-              <Label className="text-sm font-medium text-foreground">{label}</Label>
+              <Label className="text-sm font-medium text-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <span>{displayLabel}</span>
+                  {tooltip && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span
+                          className="inline-flex shrink-0 cursor-help text-muted-foreground hover:text-foreground"
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`Uitleg: ${displayLabel}`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Info className="h-3.5 w-3.5" aria-hidden />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[260px]">
+                        <p className="text-left text-sm">{tooltip}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </span>
+              </Label>
               <div className="flex flex-wrap items-center gap-4">
                 <RadioGroup
                   value={value}
@@ -1066,8 +1072,7 @@ export function buildUniveScreens(): UniveScreen[] {
           </div>
           {selected.includes("Nieuwe regelgeving") && (
             <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <Label className="mb-2 block text-sm font-semibold text-foreground">Doorvragen: Welke regelgeving speelde hierbij een rol?</Label>
-              <p className={HELPER_TEXT_CLASS}>Bijvoorbeeld stikstof, broeikasgassen, dierwelzijn, mest, etc.</p>
+              <Label className="mb-2 block text-sm font-semibold text-foreground">Welke regelgeving speelde een rol?</Label>
               <PiiTextarea
                 value={fd.q11b_regelgeving ?? ""}
                 onChange={(v) => update({ q11b_regelgeving: v })}
@@ -1085,22 +1090,24 @@ export function buildUniveScreens(): UniveScreen[] {
               <Input
                 value={fd.q11b_anders ?? ""}
                 onChange={(e) => update({ q11b_anders: e.target.value })}
-                placeholder="Toelichting"
+                placeholder="Licht je keuze kort toe"
                 maxLength={200}
               />
             </div>
           )}
-          <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
-            <PiiTextarea
-              value={fd.q11b_toelichting ?? ""}
-              onChange={(v) => update({ q11b_toelichting: v })}
-              onPiiChange={setPiiBlocked}
-              placeholder="Deze toelichting is optioneel."
-              rows={3}
-              maxLength={500}
-            />
-          </div>
+          {!selected.includes("Nieuwe regelgeving") && !selected.includes("Anders, namelijk:") && (
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
+              <PiiTextarea
+                value={fd.q11b_toelichting ?? ""}
+                onChange={(v) => update({ q11b_toelichting: v })}
+                onPiiChange={setPiiBlocked}
+                placeholder="Schrijf hier kort je toelichting"
+                rows={3}
+                maxLength={500}
+              />
+            </div>
+          )}
         </div>
       );
     },
@@ -1169,7 +1176,7 @@ export function buildUniveScreens(): UniveScreen[] {
               <Input
                 value={fd.q11_anders ?? ""}
                 onChange={(e) => update({ q11_anders: e.target.value })}
-                placeholder="Toelichting"
+                placeholder="Licht je keuze kort toe"
                 maxLength={200}
               />
             </div>
@@ -1180,7 +1187,7 @@ export function buildUniveScreens(): UniveScreen[] {
               value={fd.q11_toelichting ?? ""}
               onChange={(v) => update({ q11_toelichting: v })}
               onPiiChange={setPiiBlocked}
-              placeholder="Deze toelichting is optioneel."
+              placeholder="Schrijf hier kort je toelichting"
               rows={3}
               maxLength={500}
             />
@@ -1202,6 +1209,7 @@ export function buildUniveScreens(): UniveScreen[] {
       label:
         "Premiekorting op verzekeringen bij CO₂-reductie, klimaatadaptatie of biodiversiteit herstel",
     },
+    { key: "q14_open_teeltverzekering", label: "Teeltverzekering" },
   ];
   screens.push({
     id: "q14_open",
@@ -1210,7 +1218,7 @@ export function buildUniveScreens(): UniveScreen[] {
     title:
       "In hoeverre sta je open voor de volgende vormen van ondersteuning vanuit Univé bij het ontwikkelen van een rendabel en duurzaam bedrijfsmodel?",
     subtitle:
-      "Vanwege wet- en regelgeving wordt er aan verzekeraars gevraagd om de transitie naar duurzaamheid mogelijk te maken.",
+      "Vanuit wet- en regelgeving wordt van verzekeraars gevraagd om de transitie naar duurzaamheid te ondersteunen.",
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
       <div className="space-y-6">
@@ -1227,6 +1235,16 @@ export function buildUniveScreens(): UniveScreen[] {
               onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
             />
           ))}
+          <div className="space-y-2" role="group">
+            <Label className="text-sm font-medium text-foreground">Andere ondersteuning, namelijk</Label>
+            <Input
+              value={fd.q14_open_andere_naamelijk ?? ""}
+              onChange={(e) => update({ q14_open_andere_naamelijk: e.target.value })}
+              placeholder="Licht je keuze kort toe"
+              maxLength={200}
+              className="w-full"
+            />
+          </div>
         </div>
         <div className="rounded-lg border border-border bg-muted/30 p-3">
           <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
@@ -1234,7 +1252,7 @@ export function buildUniveScreens(): UniveScreen[] {
             value={fd.q14_open_toelichting ?? ""}
             onChange={(v) => update({ q14_open_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Deze toelichting is optioneel."
+            placeholder="Schrijf hier kort je toelichting"
             rows={3}
             maxLength={500}
           />
@@ -1243,7 +1261,7 @@ export function buildUniveScreens(): UniveScreen[] {
     ),
   });
 
-  // Vraag 15 – welke vormen ondersteuning waardevol (max 2, Anders namelijk verplicht)
+  // Vraag 15 – welke vormen ondersteuning waardevol (optioneel max 2, of Geen)
   const Q15_WAARDEVOL_OPTIONS = [
     "Praktische begeleiding bij uitvoering",
     "Kennis en advies",
@@ -1251,6 +1269,7 @@ export function buildUniveScreens(): UniveScreen[] {
     "Langjarige afspraken",
     "Ondersteuning bij samenwerking met andere partijen",
     "Anders, namelijk:",
+    "Geen",
   ];
   screens.push({
     id: "q15_waardevol",
@@ -1260,30 +1279,57 @@ export function buildUniveScreens(): UniveScreen[] {
       "Naast financiële ondersteuning, welke vormen van ondersteuning zouden voor jou het meest waardevol zijn bij aanpassingen in jouw bedrijfsvoering?",
     multiChoiceField: "q15_waardevol",
     maxChoices: 2,
-    required: true,
+    required: false,
     hasPiiField: true,
     render: (fd, update, toggleMulti, setPiiBlocked) => {
       const selected = Array.isArray(fd.q15_waardevol) ? fd.q15_waardevol : [];
+      const onlyGeen = selected.length === 1 && selected[0] === "Geen";
+      const hasGeen = selected.includes("Geen");
+      const onToggle = (opt: string) => {
+        if (opt === "Geen") {
+          update({ q15_waardevol: hasGeen ? [] : ["Geen"], q15_waardevol_anders: hasGeen ? fd.q15_waardevol_anders : "", q15_waardevol_toelichting: hasGeen ? fd.q15_waardevol_toelichting : "" });
+          return;
+        }
+        if (hasGeen) {
+          const rest = selected.filter((x) => x !== "Geen");
+          const next = rest.includes(opt) ? rest.filter((x) => x !== opt) : [...rest, opt].slice(0, 2);
+          update({ q15_waardevol: next });
+          return;
+        }
+        toggleMulti("q15_waardevol", opt, 2);
+      };
       return (
         <div className="space-y-4">
-          <p className={HELPER_TEXT_CLASS}>{selected.length}/2 gekozen</p>
+          <p className={HELPER_TEXT_CLASS}>
+            Kies maximaal 2 in volgorde van voorkeur, of Geen. ({selected.filter((x) => x !== "Geen").length}/2 gekozen)
+          </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {Q15_WAARDEVOL_OPTIONS.map((opt) => {
               const isSelected = selected.includes(opt);
-              const disabled = !isSelected && selected.length >= 2;
+              const rank = isSelected && opt !== "Geen" ? selected.filter((x) => x !== "Geen").indexOf(opt) + 1 : 0;
+              const disabled = opt !== "Geen" && hasGeen && !isSelected;
+              const disabledMax = opt !== "Geen" && !hasGeen && selected.length >= 2 && !isSelected;
               return (
                 <button
                   key={opt}
                   type="button"
-                  onClick={() => !disabled && toggleMulti("q15_waardevol", opt, 2)}
-                  disabled={disabled}
-                  className={`rounded-full border px-4 py-2 text-sm transition-all ${
+                  onClick={() => !disabled && !disabledMax && onToggle(opt)}
+                  disabled={disabled || disabledMax}
+                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-all ${
                     isSelected
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border bg-card hover:border-primary/50"
-                  } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                  } ${disabled || disabledMax ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  {opt}
+                  {isSelected && opt !== "Geen" && (
+                    <span
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
+                      aria-label={`${rank}e keuze`}
+                    >
+                      {rank}
+                    </span>
+                  )}
+                  <span>{opt}</span>
                 </button>
               );
             })}
@@ -1296,178 +1342,173 @@ export function buildUniveScreens(): UniveScreen[] {
               <Input
                 value={fd.q15_waardevol_anders ?? ""}
                 onChange={(e) => update({ q15_waardevol_anders: e.target.value })}
-                placeholder="Vul in wat van toepassing is"
+                placeholder="Licht je keuze kort toe"
                 maxLength={200}
               />
             </div>
           )}
-          <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
-            <PiiTextarea
-              value={fd.q15_waardevol_toelichting ?? ""}
-              onChange={(v) => update({ q15_waardevol_toelichting: v })}
-              onPiiChange={setPiiBlocked}
-              placeholder="Deze toelichting is optioneel."
-              rows={3}
-              maxLength={500}
-            />
-          </div>
+          {!onlyGeen && selected.length > 0 && (
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
+              <PiiTextarea
+                value={fd.q15_waardevol_toelichting ?? ""}
+                onChange={(v) => update({ q15_waardevol_toelichting: v })}
+                onPiiChange={setPiiBlocked}
+                placeholder="Schrijf hier kort je toelichting"
+                rows={3}
+                maxLength={500}
+              />
+            </div>
+          )}
         </div>
       );
     },
   });
 
-  // Vraag 16a – welke opties overwegen (meerdere antwoorden, min 1 verplicht)
+  // Vraag 16 + 17 – opties overwegen (min 1) + top 3 toepassen, samen op één pagina
   screens.push({
     id: "q16a",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     questionNumber: 16,
+    questionLabel: "16",
     title: "Welke van de volgende opties zou je eventueel overwegen op jouw bedrijf?",
     subtitle:
-      "Sommige melkveehouders verkennen aanvullende vormen van landgebruik of nieuwe activiteiten die kunnen bijdragen aan duurzaamheid en een aanvullend verdienmodel. (Meerdere antwoorden mogelijk)",
+      "Sommige melkveehouders verkennen aanvullende vormen van landgebruik of nieuwe activiteiten die kunnen bijdragen aan duurzaamheid en een aanvullend verdienmodel.",
     multiChoiceField: "q16a",
     required: true,
     render: (fd, update, toggleMulti) => {
-      const selected = Array.isArray(fd.q16a) ? fd.q16a : [];
+      const selectedA = Array.isArray(fd.q16a) ? fd.q16a : [];
+      const selectedB = Array.isArray(fd.q16b) ? fd.q16b : [];
       return (
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {Q16A_OPTIONS.map((opt) => {
-              const { label, tooltip } = splitQ16LabelAndTooltip(opt);
-              return (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => toggleMulti("q16a", opt)}
-                  className={`rounded-full border px-4 py-2 text-sm transition-all ${
-                    selected.includes(opt)
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-card hover:border-primary/50"
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    <span>{label}</span>
-                    {tooltip && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span
-                            className="inline-flex shrink-0 cursor-help text-muted-foreground hover:text-foreground"
-                            tabIndex={0}
-                            role="button"
-                            aria-label={`Voorbeeld: ${tooltip}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Info className="h-3.5 w-3.5" aria-hidden />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-[260px]">
-                          <p className="text-left text-sm">{tooltip}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          {selected.includes("Anders, namelijk:") && (
-            <div className="mt-3">
-              <Label className={`${QUESTION_LABEL_CLASS} after:content-['*'] after:text-destructive`}>
-                Anders, namelijk: (verplicht)
-              </Label>
-              <Input
-                value={fd.q16a_anders ?? ""}
-                onChange={(e) => update({ q16a_anders: e.target.value })}
-                placeholder="Vul in wat van toepassing is"
-                maxLength={200}
-              />
-            </div>
-          )}
-        </div>
-      );
-    },
-  });
-
-  // Vraag 16b – top 3 toepassen (max 3); volgorde = 1e, 2e, 3e keuze
-  screens.push({
-    id: "q16b",
-    group: "Deel 4 – Welke ondersteuning zou helpen?",
-    questionNumber: 17,
-    title: "Welke opties zou je dan het liefst toepassen op jouw bedrijf?",
-    subtitle:
-      "Stel dat deze activiteiten financieel rendabel zijn. Geef een top 3 door in volgorde van voorkeur te klikken: eerst je eerste keuze, daarna je tweede en je derde keuze.",
-    multiChoiceField: "q16b",
-    maxChoices: 3,
-    required: true,
-    render: (fd, update, toggleMulti) => {
-      const selected = Array.isArray(fd.q16b) ? fd.q16b : [];
-      return (
-        <div className="space-y-4">
-          <p className={HELPER_TEXT_CLASS}>{selected.length}/3 gekozen.</p>
-          <div className="flex flex-wrap gap-2">
-            {Q16A_OPTIONS.map((opt) => {
-              const { label, tooltip } = splitQ16LabelAndTooltip(opt);
-              const isSelected = selected.includes(opt);
-              const rank = isSelected ? selected.indexOf(opt) + 1 : 0;
-              const disabled = !isSelected && selected.length >= 3;
-              return (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => !disabled && toggleMulti("q16b", opt, 3)}
-                  disabled={disabled}
-                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-all ${
-                    isSelected
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-card hover:border-primary/50"
-                  } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  {isSelected && (
-                    <span
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
-                      aria-label={`${rank}e keuze`}
-                    >
-                      {rank}
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <p className={HELPER_TEXT_CLASS}>Meerdere antwoorden mogelijk.</p>
+            <div className="flex flex-wrap gap-2">
+              {Q16A_OPTIONS.map((opt) => {
+                const { label, tooltip } = splitQ16LabelAndTooltip(opt);
+                return (
+                  <button
+                    key={`16a-${opt}`}
+                    type="button"
+                    onClick={() => toggleMulti("q16a", opt)}
+                    className={`rounded-full border px-4 py-2 text-sm transition-all ${
+                      selectedA.includes(opt)
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card hover:border-primary/50"
+                    }`}
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      <span>{label}</span>
+                      {tooltip && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span
+                              className="inline-flex shrink-0 cursor-help text-muted-foreground hover:text-foreground"
+                              tabIndex={0}
+                              role="button"
+                              aria-label={`Voorbeeld: ${tooltip}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Info className="h-3.5 w-3.5" aria-hidden />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[260px]">
+                            <p className="text-left text-sm">{tooltip}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </span>
-                  )}
-                  <span className="inline-flex items-center gap-1.5">
-                    <span>{label}</span>
-                    {tooltip && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span
-                            className="inline-flex shrink-0 cursor-help text-muted-foreground hover:text-foreground"
-                            tabIndex={0}
-                            role="button"
-                            aria-label={`Voorbeeld: ${tooltip}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Info className="h-3.5 w-3.5" aria-hidden />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-[260px]">
-                          <p className="text-left text-sm">{tooltip}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          {selected.includes("Anders, namelijk:") && (
-            <div className="mt-3">
-              <Label className={`${QUESTION_LABEL_CLASS} after:content-['*'] after:text-destructive`}>
-                Anders, namelijk: (verplicht)
-              </Label>
-              <Input
-                value={fd.q16b_anders ?? ""}
-                onChange={(e) => update({ q16b_anders: e.target.value })}
-                placeholder="Vul in wat van toepassing is"
-                maxLength={200}
-              />
+                  </button>
+                );
+              })}
             </div>
-          )}
+            {selectedA.includes("Anders, namelijk:") && (
+              <div className="mt-3">
+                <Label className={`${QUESTION_LABEL_CLASS} after:content-['*'] after:text-destructive`}>
+                  Anders, namelijk: (verplicht)
+                </Label>
+                <Input
+                  value={fd.q16a_anders ?? ""}
+                  onChange={(e) => update({ q16a_anders: e.target.value })}
+                  placeholder="Licht je keuze kort toe"
+                  maxLength={200}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4 border-t border-border pt-6">
+            <h3 className="text-base font-semibold text-foreground">
+              Welke opties zou je dan het liefst toepassen op jouw bedrijf?
+            </h3>
+            <p className={HELPER_TEXT_CLASS}>
+              Stel dat deze activiteiten financieel rendabel zijn. Geef een top 3 door in volgorde van voorkeur. ({selectedB.length}/3 gekozen)
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {Q16A_OPTIONS.map((opt) => {
+                const { label, tooltip } = splitQ16LabelAndTooltip(opt);
+                const isSelected = selectedB.includes(opt);
+                const rank = isSelected ? selectedB.indexOf(opt) + 1 : 0;
+                const disabled = !isSelected && selectedB.length >= 3;
+                return (
+                  <button
+                    key={`16b-${opt}`}
+                    type="button"
+                    onClick={() => !disabled && toggleMulti("q16b", opt, 3)}
+                    disabled={disabled}
+                    className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-all ${
+                      isSelected
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card hover:border-primary/50"
+                    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {isSelected && (
+                      <span
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
+                        aria-label={`${rank}e keuze`}
+                      >
+                        {rank}
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1.5">
+                      <span>{label}</span>
+                      {tooltip && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span
+                              className="inline-flex shrink-0 cursor-help text-muted-foreground hover:text-foreground"
+                              tabIndex={0}
+                              role="button"
+                              aria-label={`Voorbeeld: ${tooltip}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Info className="h-3.5 w-3.5" aria-hidden />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[260px]">
+                            <p className="text-left text-sm">{tooltip}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {selectedB.includes("Anders, namelijk:") && (
+              <div className="mt-3">
+                <Label className={`${QUESTION_LABEL_CLASS} after:content-['*'] after:text-destructive`}>
+                  Anders, namelijk: (verplicht)
+                </Label>
+                <Input
+                  value={fd.q16b_anders ?? ""}
+                  onChange={(e) => update({ q16b_anders: e.target.value })}
+                  placeholder="Licht je keuze kort toe"
+                  maxLength={200}
+                />
+              </div>
+            )}
+          </div>
         </div>
       );
     },
@@ -1496,15 +1537,16 @@ export function buildUniveScreens(): UniveScreen[] {
   });
 
   // Vraag 17b – mogelijkheden per richting (sliders 1–7 + Anders namelijk)
-  const Q17B_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
+  const Q17B_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string; tooltip?: string }[] = [
     {
       key: "q17b_directe_verkoop",
-      label:
-        "Directe verkoop van producten (bijv. melk, zuivelproducten of andere producten van het bedrijf)",
+      label: "Directe verkoop van producten",
+      tooltip: "Bijv. melk, zuivelproducten of andere producten van het bedrijf",
     },
     {
       key: "q17b_nieuwe_teelten",
-      label: "Nieuwe teelten (bijv. noten, fruit of hennep)",
+      label: "Nieuwe teelten",
+      tooltip: "Bijv. noten, fruit of hennep",
     },
     { key: "q17b_co2", label: "Vergoeding voor CO₂-vastlegging" },
     {
@@ -1526,14 +1568,25 @@ export function buildUniveScreens(): UniveScreen[] {
           <span className="font-semibold text-foreground">veel mogelijkheden</span>.
         </p>
         <div className="space-y-4">
-          {Q17B_SLIDER_OPTIONS.map(({ key, label }) => (
+          {Q17B_SLIDER_OPTIONS.map(({ key, label, tooltip }) => (
             <SliderRow
               key={key}
               label={label}
+              tooltip={tooltip}
               value={(fd[key] as number) ?? 4}
               onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
             />
           ))}
+          <div className="space-y-2" role="group">
+            <Label className="text-sm font-medium text-foreground">Anders, namelijk</Label>
+            <Input
+              value={fd.q17b_anders ?? ""}
+              onChange={(e) => update({ q17b_anders: e.target.value })}
+              placeholder="Licht je keuze kort toe"
+              maxLength={200}
+              className="w-full"
+            />
+          </div>
         </div>
         <div className="rounded-lg border border-border bg-muted/30 p-3">
           <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
@@ -1541,7 +1594,7 @@ export function buildUniveScreens(): UniveScreen[] {
             value={fd.q17_toelichting ?? ""}
             onChange={(v) => update({ q17_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Deze toelichting is optioneel."
+            placeholder="Schrijf hier kort je toelichting"
             rows={3}
             maxLength={500}
           />
@@ -1553,36 +1606,37 @@ export function buildUniveScreens(): UniveScreen[] {
   // Deel 5 – Verdienmodel en kwetsbaarheden
 
 
-  const Q16_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string; tooltip: string }[] = [
+  const Q16_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string; tooltip?: string }[] = [
     {
       key: "q16_marge",
-      label: "Voldoende inkomen / marge uit het bedrijf",
-      tooltip: "Na kosten en aflossingen genoeg overhouden om te kunnen ondernemen en tegenvallers op te vangen.",
+      label: "Voldoende inkomen uit het bedrijf",
+      tooltip: "Voldoende inkomen om van te leven en het bedrijf gezond te houden.",
     },
     {
       key: "q16_stabiliteit",
-      label: "Stabiel inkomen / weinig schommelingen",
-      tooltip: "Zo min mogelijk grote schommelingen in opbrengsten, kosten of inkomsten door het jaar heen.",
+      label: "Stabiel inkomen met beperkte schommelingen",
     },
     {
       key: "q16_schuldenlast",
       label: "Lage schuldenlast",
-      tooltip: "Een schuldniveau dat past bij jouw bedrijf en waarbij je je comfortabel voelt.",
     },
     {
       key: "q16_continuïteit",
-      label: "Continuïteit voor de volgende generatie",
-      tooltip: "Het bedrijf in zo’n staat achterlaten dat een volgende generatie goed kan doorgaan.",
+      label: "Continuïteit van het bedrijf voor de volgende generatie",
+      tooltip: "Het bedrijf in zo’n staat achterslaten dat een opvolger goed kan doorgaan.",
     },
     {
       key: "q16_voortzetten",
       label: "Het bedrijf op de huidige manier kunnen voortzetten",
-      tooltip: "Je bedrijf grotendeels kunnen blijven runnen zoals nu, binnen de regels en met voldoende inkomen.",
     },
     {
       key: "q16_waardebehoud",
       label: "Waardebehoud van grond en bedrijf",
-      tooltip: "Dat je grond, gebouwen en bedrijf hun waarde behouden of op termijn niet sterk dalen.",
+      tooltip: "Dat de waarde van grond, gebouwen en bedrijf behouden blijft en op termijn niet sterk daalt.",
+    },
+    {
+      key: "q16_werkplezier",
+      label: "Werkplezier en voldoening uit het bedrijf",
     },
   ];
   screens.push({
@@ -1606,13 +1660,23 @@ export function buildUniveScreens(): UniveScreen[] {
             onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
           />
         ))}
+        <div className="space-y-2" role="group">
+          <Label className="text-sm font-medium text-foreground">Anders, namelijk</Label>
+          <Input
+            value={fd.q16_anders ?? ""}
+            onChange={(e) => update({ q16_anders: e.target.value })}
+            placeholder="Licht je keuze kort toe"
+            maxLength={200}
+            className="w-full"
+          />
+        </div>
         <div className="rounded-lg border border-border bg-muted/30 p-3">
           <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
           <PiiTextarea
             value={fd.q16_toelichting ?? ""}
             onChange={(v) => update({ q16_toelichting: v })}
             onPiiChange={setPiiBlocked}
-            placeholder="Deze toelichting is optioneel."
+            placeholder="Schrijf hier kort je toelichting"
             rows={3}
             maxLength={500}
           />
@@ -1623,52 +1687,30 @@ export function buildUniveScreens(): UniveScreen[] {
 
   // Deel 6 – Afsluiting
 
-  // Vraag 19a & 19b – optionele aanvullende opmerkingen (twee open vragen op één pagina)
+  // Vraag 21 – één open vraag: iets meegeven over praktijk, toekomst of vragenlijst
   screens.push({
     id: "q19a_19b",
     group: "Deel 6 – Afsluiting",
     questionNumber: 21,
-    title: "Wat zou Univé volgens jou beter moeten begrijpen van de praktijk op een melkveebedrijf?",
+    title: "Is er nog iets dat je ons wilt meegeven over de praktijk op een melkveebedrijf, de toekomst van de sector, of over deze vragenlijst?",
     hasPiiField: true,
-    required: false,
+    required: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => (
-      <div className="space-y-6">
-        <div className="rounded-lg border border-border bg-muted/30 p-4">
-          <Label className={QUESTION_LABEL_CLASS}>
-            Heeft u nog opmerkingen of feedback voor Univé zelf?
-          </Label>
-          <PiiTextarea
-            value={fd.q19a ?? ""}
-            onChange={(v) => update({ q19a: v })}
-            onPiiChange={setPiiBlocked}
-            placeholder="Deze toelichting is optioneel."
-            rows={4}
-            maxLength={1000}
-            className="mt-2"
-          />
-        </div>
-        <div className="space-y-2">
-          <h2 className="mb-1 text-xl font-semibold text-foreground">Heb je nog opmerkingen of ideeën die je wilt meegeven over de toekomst van de melkveehouderij?</h2>
-          <div className="rounded-lg border border-border bg-muted/30 p-4">
-            <Label className={QUESTION_LABEL_CLASS}>
-              Heeft u nog opmerkingen of feedback over deze vragenlijst?
-            </Label>
-            <PiiTextarea
-              value={fd.q19b ?? ""}
-              onChange={(v) => update({ q19b: v })}
-              onPiiChange={setPiiBlocked}
-              placeholder="Deze toelichting is optioneel."
-              rows={4}
-              maxLength={1000}
-              className="mt-2"
-            />
-          </div>
-        </div>
+      <div className="rounded-lg border border-border bg-muted/30 p-4">
+        <PiiTextarea
+          value={fd.q19a ?? ""}
+          onChange={(v) => update({ q19a: v })}
+          onPiiChange={setPiiBlocked}
+          placeholder="Schrijf hier kort je toelichting"
+          rows={5}
+          maxLength={1500}
+          className="w-full"
+        />
       </div>
     ),
   });
 
-  // Vraag 20 – openstaan voor contact (na 19a/19b)
+  // Vraag 22 + 23 – openstaan voor contact + verloting (één pagina)
   screens.push({
     id: "q19",
     group: "Deel 6 – Afsluiting",
@@ -1678,8 +1720,9 @@ export function buildUniveScreens(): UniveScreen[] {
     hasPiiField: true,
     render: (fd, update, _toggleMulti, setPiiBlocked) => {
       const toestemming = fd.q19_toestemming_contact ?? "";
+      const verlotingChecked = fd.q21_verloting === "Ja";
       return (
-        <div className="space-y-5">
+        <div className="space-y-8">
           <RadioGroup
             value={toestemming}
             onValueChange={(v) => update({ q19_toestemming_contact: v })}
@@ -1736,47 +1779,30 @@ export function buildUniveScreens(): UniveScreen[] {
               </Label>
             </div>
           </RadioGroup>
-        </div>
-      );
-    },
-  });
 
-  // Vraag 21 – verloting boerenpakket (e-mail alleen voor winactie; niet gekoppeld aan antwoorden)
-  screens.push({
-    id: "q21",
-    group: "Deel 6 – Afsluiting",
-    questionNumber: 23,
-    title: "Wil je meedoen aan de verloting van een boerenpakket onder de deelnemers aan deze vragenlijst?",
-    render: (fd, update) => {
-      const verloting = fd.q21_verloting ?? "";
-      return (
-        <div className="space-y-5">
-          <RadioGroup
-            value={verloting}
-            onValueChange={(v) => update({ q21_verloting: v, ...(v !== "Ja" ? { q21_email: "" } : {}) })}
-            className="space-y-2"
-          >
-            <div className={OPTION_ROW_CLASS}>
-              <RadioGroupItem value="Ja" id="q21-ja" />
-              <Label htmlFor="q21-ja" className="flex-1 cursor-pointer text-sm font-medium">
-                Ja, ik doe graag mee
+          <div className="border-t border-border pt-6">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="q21_verloting"
+                checked={verlotingChecked}
+                onChange={(e) =>
+                  update({
+                    q21_verloting: e.target.checked ? "Ja" : "Nee",
+                    q21_email: e.target.checked ? fd.q21_email : "",
+                  })
+                }
+                className="mt-1 h-4 w-4 shrink-0 rounded border-border accent-primary"
+                aria-label="Meedoen aan verloting"
+              />
+              <Label htmlFor="q21_verloting" className="cursor-pointer text-sm font-medium text-foreground">
+                Wil je meedoen aan de verloting van een boerenpakket onder de deelnemers aan deze vragenlijst?
               </Label>
             </div>
-            <div className={OPTION_ROW_CLASS}>
-              <RadioGroupItem value="Nee" id="q21-nee" />
-              <Label htmlFor="q21-nee" className="flex-1 cursor-pointer text-sm font-medium">
-                Nee
-              </Label>
-            </div>
-          </RadioGroup>
-          {verloting === "Ja" && (
-            <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
-              <Label className={QUESTION_LABEL_CLASS}>
-                Zo ja: Laat hier je e-mailadres achter zodat wij contact kunnen opnemen als je wint.
-              </Label>
-              <div>
-                <Label htmlFor="q21_email" className={`${QUESTION_LABEL_CLASS} mt-2`}>
-                  E-mailadres
+            {verlotingChecked && (
+              <div className="mt-4 space-y-2 rounded-lg border border-border bg-muted/30 p-4">
+                <Label htmlFor="q21_email" className={QUESTION_LABEL_CLASS}>
+                  Laat hier je e-mailadres achter zodat wij contact kunnen opnemen als je wint.
                 </Label>
                 <Input
                   id="q21_email"
@@ -1785,15 +1811,15 @@ export function buildUniveScreens(): UniveScreen[] {
                   onChange={(e) => update({ q21_email: e.target.value })}
                   placeholder="bijvoorbeeld: boer@voorbeeld.nl"
                   maxLength={200}
-                  className="mt-2 w-full"
+                  className="w-full"
                   aria-label="E-mailadres voor de verloting"
                 />
+                <p className="text-sm italic text-muted-foreground">
+                  (Je gegevens worden alleen hiervoor gebruikt en niet gekoppeld aan je antwoorden.)
+                </p>
               </div>
-              <p className="text-sm italic text-muted-foreground">
-                (Je gegevens worden alleen hiervoor gebruikt en niet gekoppeld aan je antwoorden.)
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       );
     },
@@ -1803,13 +1829,6 @@ export function buildUniveScreens(): UniveScreen[] {
 }
 
 export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBlocked: boolean): boolean {
-  const countWords = (value: unknown): number => {
-    if (typeof value !== "string") return 0;
-    const trimmed = value.trim();
-    if (!trimmed) return 0;
-    return trimmed.split(/\s+/).filter(Boolean).length;
-  };
-
   if (piiBlocked && screen.hasPiiField) return false;
   if (screen.required === false) return true;
   if (screen.id === "q0_gemeente") {
@@ -1854,8 +1873,8 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
       const val = (fd[key] as string) ?? "";
       if (val !== "Ja" && val !== "Nee") return false;
       if (val === "Ja") {
-        const toelichting = (fd[keyToelichting] as string) ?? "";
-        if (countWords(toelichting) < 2) return false;
+        const toelichting = ((fd[keyToelichting] as string) ?? "").trim();
+        if (!toelichting) return false; // minimaal 1 teken verplicht
       }
     }
     return true;
@@ -1871,6 +1890,11 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
       const anders = typeof fd.q11b_anders === "string" ? fd.q11b_anders.trim() : "";
       if (!anders) return false;
     }
+    const toelichtingZichtbaar = !q11b.includes("Nieuwe regelgeving") && !q11b.includes("Anders, namelijk:");
+    if (toelichtingZichtbaar) {
+      const toel = typeof fd.q11b_toelichting === "string" ? fd.q11b_toelichting.trim() : "";
+      if (!toel) return false;
+    }
     return true;
   }
   if (screen.id === "q19") {
@@ -1880,11 +1904,7 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
       const email = typeof fd.q19_email === "string" ? fd.q19_email : "";
       if (!email || !email.includes("@")) return false;
     }
-    return true;
-  }
-  if (screen.id === "q21") {
     const verloting = typeof fd.q21_verloting === "string" ? fd.q21_verloting.trim() : "";
-    if (!verloting) return false;
     if (verloting === "Ja") {
       const email = typeof fd.q21_email === "string" ? fd.q21_email : "";
       if (!email || !email.includes("@")) return false;
@@ -1892,12 +1912,12 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
     return true;
   }
   if (screen.id === "q6") {
-    const words = countWords(fd.q6);
-    return words >= 2;
+    const val = typeof fd.q6 === "string" ? fd.q6.trim() : "";
+    return val.length >= 1;
   }
   if (screen.id === "q10") {
-    const words = countWords(fd.q10);
-    return words >= 2;
+    const val = typeof fd.q10 === "string" ? fd.q10.trim() : "";
+    return val.length >= 1;
   }
   if (screen.id === "q4") {
     const q4 = Array.isArray(fd.q4) ? fd.q4 : [];
@@ -1930,14 +1950,22 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
       const anders = typeof fd.q11_anders === "string" ? fd.q11_anders.trim() : "";
       if (!anders) return false;
     }
+    {
+      const toel = typeof fd.q11_toelichting === "string" ? fd.q11_toelichting.trim() : "";
+      if (!toel) return false;
+    }
   }
   if (screen.id === "q15_waardevol") {
     const q15w = Array.isArray(fd.q15_waardevol) ? fd.q15_waardevol : [];
-    if (q15w.length < 1) return false;
+    if (q15w.length === 0) return true;
+    const onlyGeen = q15w.length === 1 && q15w[0] === "Geen";
+    if (onlyGeen) return true;
     if (q15w.includes("Anders, namelijk:")) {
       const anders = typeof fd.q15_waardevol_anders === "string" ? fd.q15_waardevol_anders.trim() : "";
       if (!anders) return false;
     }
+    const toel = typeof fd.q15_waardevol_toelichting === "string" ? fd.q15_waardevol_toelichting.trim() : "";
+    if (!toel) return false;
     return true;
   }
   if (screen.id === "q16a") {
@@ -1947,16 +1975,37 @@ export function isUniveStepValid(screen: UniveScreen, fd: UniveFormData, piiBloc
       const anders = typeof fd.q16a_anders === "string" ? fd.q16a_anders.trim() : "";
       if (!anders) return false;
     }
-    return true;
-  }
-  if (screen.id === "q16b") {
     const q16b = Array.isArray(fd.q16b) ? fd.q16b : [];
     if (q16b.length !== 3) return false;
     if (q16b.includes("Anders, namelijk:")) {
-      const anders = typeof fd.q16b_anders === "string" ? fd.q16b_anders.trim() : "";
-      if (!anders) return false;
+      const andersB = typeof fd.q16b_anders === "string" ? fd.q16b_anders.trim() : "";
+      if (!andersB) return false;
     }
     return true;
+  }
+  if (screen.id === "q5") {
+    const toel = typeof fd.q5_toelichting === "string" ? fd.q5_toelichting.trim() : "";
+    if (!toel) return false;
+  }
+  if (screen.id === "q10_invloed_onderdelen") {
+    const toel = typeof fd.q10_toelichting === "string" ? fd.q10_toelichting.trim() : "";
+    if (!toel) return false;
+  }
+  if (screen.id === "q14_open") {
+    const toel = typeof fd.q14_open_toelichting === "string" ? fd.q14_open_toelichting.trim() : "";
+    if (!toel) return false;
+  }
+  if (screen.id === "q17b") {
+    const toel = typeof fd.q17_toelichting === "string" ? fd.q17_toelichting.trim() : "";
+    if (!toel) return false;
+  }
+  if (screen.id === "q16") {
+    const toel = typeof fd.q16_toelichting === "string" ? fd.q16_toelichting.trim() : "";
+    if (!toel) return false;
+  }
+  if (screen.id === "q19a_19b") {
+    const v19a = typeof fd.q19a === "string" ? fd.q19a.trim() : "";
+    if (!v19a) return false;
   }
   if (screen.choiceField) {
     const val = fd[screen.choiceField];

@@ -111,7 +111,7 @@ export default function ReviewPage() {
               >
                 {isSubmitting ? "Bezig met verzenden…" : "Antwoorden versturen"}
               </Button>
-              <Link href="/vragenlijst?stap=q23">
+              <Link href="/vragenlijst?stap=q22">
                 <Button variant="outline" className="w-full rounded-xl" disabled={isSubmitting}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Antwoorden aanpassen

@@ -195,11 +195,24 @@ export default function VragenlijstPage() {
               {currentScreen && (
                 <>
                   <div className="mb-4">
-                    <h2 className="mb-1 text-xl font-semibold text-foreground">
-                      {currentScreen.title}
-                    </h2>
-                    {currentScreen.subtitle && (
-                      <p className="text-sm text-muted-foreground">{currentScreen.subtitle}</p>
+                    {currentScreen.id === "q14_open" && currentScreen.subtitle ? (
+                      <>
+                        <p className="mb-3 text-base italic text-foreground/90">
+                          {currentScreen.subtitle}
+                        </p>
+                        <h2 className="mb-1 text-xl font-semibold text-foreground">
+                          {currentScreen.title}
+                        </h2>
+                      </>
+                    ) : (
+                      <>
+                        <h2 className="mb-1 text-xl font-semibold text-foreground">
+                          {currentScreen.title}
+                        </h2>
+                        {currentScreen.subtitle && (
+                          <p className="text-sm text-muted-foreground">{currentScreen.subtitle}</p>
+                        )}
+                      </>
                     )}
                   </div>
                   <div className="mt-4 space-y-6">

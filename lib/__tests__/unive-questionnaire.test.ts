@@ -67,13 +67,13 @@ describe("normalizeFormData", () => {
   it("preserves valid string and number values", () => {
     const out = normalizeFormData({
       q1: "Biologisch",
-      q3: "Stabilisatie",
+      q3: "Ongeveer gelijk blijven",
       q6: "Mijn zorgen zijn groot",
       q8: "Ja, meerdere",
       q5a: 6,
     } as unknown);
     expect(out.q1).toBe("Biologisch");
-    expect(out.q3).toBe("Stabilisatie");
+    expect(out.q3).toBe("Ongeveer gelijk blijven");
     expect(out.q6).toBe("Mijn zorgen zijn groot");
     expect(out.q8).toBe("Ja, meerdere");
     expect(out.q5a).toBe(6);
