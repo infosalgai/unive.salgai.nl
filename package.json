@@ -5,6 +5,7 @@
   "scripts": {
     "build": "next build --webpack",
     "dev": "next dev --webpack",
+    "dev:clean": "node -e \"try{require('fs').unlinkSync('.next/dev/lock')}catch(e){}\" && next dev --webpack",
     "lint": "eslint .",
     "start": "next start",
     "test": "vitest run",
