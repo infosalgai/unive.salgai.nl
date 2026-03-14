@@ -1,53 +1,26 @@
 import OpenAI from "openai";
+import { redactPii } from "@/lib/pii-guard";
 import { buildUniveSummaryInput, normalizeFormData, type UniveFormData } from "@/lib/unive-questionnaire";
-import { detectPii } from "@/lib/pii-guard";
 
 const DEFAULT_MODEL = "gpt-4o";
 
-// Velden die wél PII mogen bevatten maar niet naar de AI gaan
-// (bijv. contactgegevens of demografie die niet in de prompt worden gebruikt).
-const PII_SCAN_EXCLUDED_KEYS: (keyof UniveFormData)[] = [
-  "q0_leeftijd",
-  "q0_gemeente",
-  "q19_naam",
-  "q19_email",
-  "q19_telefoon",
-  "q21_email",
-];
-
-export function ensureNoPiiInFormData(formData: UniveFormData): void {
-  const piiFields: string[] = [];
-
-  for (const [key, value] of Object.entries(formData)) {
-    if (PII_SCAN_EXCLUDED_KEYS.includes(key as keyof UniveFormData)) {
-      continue;
-    }
+/**
+ * Returns a copy of form data with all string values (and strings in arrays) redacted of PII.
+ * Use before sending any form data to external APIs (e.g. OpenAI).
+ */
+function redactPiiFromFormData(fd: UniveFormData): UniveFormData {
+  const out = { ...fd } as UniveFormData
+  for (const key of Object.keys(out) as (keyof UniveFormData)[]) {
+    const value = out[key]
     if (typeof value === "string") {
-      const res = detectPii(value);
-      if (res.hasPII) {
-        piiFields.push(key);
-      }
+      (out as unknown as Record<string, unknown>)[key] = redactPii(value)
     } else if (Array.isArray(value)) {
-      for (const v of value) {
-        if (typeof v !== "string") continue;
-        const res = detectPii(v);
-        if (res.hasPII) {
-          piiFields.push(key);
-          break;
-        }
-      }
+      (out as unknown as Record<string, unknown>)[key] = value.map((v) =>
+        typeof v === "string" ? redactPii(v) : v
+      )
     }
   }
-
-  if (piiFields.length > 0) {
-    const uniqueFields = Array.from(new Set(piiFields)).sort();
-    const fieldsLabel = uniqueFields.join(", ");
-    const message =
-      "Je antwoorden lijken nog herleidbare gegevens te bevatten (zoals e‑mailadres, telefoonnummer, adres of website). " +
-      "Pas deze gegevens in de vragenlijst aan voordat je een samenvatting laat maken. " +
-      `(Velden met mogelijke PII: ${fieldsLabel}).`;
-    throw new Error(message);
-  }
+  return out
 }
 
 function getClient(): OpenAI | null {
@@ -126,7 +99,7 @@ Je antwoorden zijn lokaal opgeslagen. Met een geldige API-key wordt hier een per
 
 export async function generateUniveSummaryFromFormData(rawFormData: unknown): Promise<string> {
   const formData = normalizeFormData(rawFormData);
-  ensureNoPiiInFormData(formData);
+  const safeFormData = redactPiiFromFormData(formData);
 
   const client = getClient();
   if (!client) {
@@ -134,7 +107,7 @@ export async function generateUniveSummaryFromFormData(rawFormData: unknown): Pr
   }
 
   const model = process.env.OPENAI_SUMMARIZE_MODEL ?? DEFAULT_MODEL;
-  const userPrompt = buildUniveSummaryInput(formData);
+  const userPrompt = buildUniveSummaryInput(safeFormData);
   return await createSummary(client, model, UNIVE_SYSTEM_PROMPT, userPrompt);
 }
 
@@ -144,7 +117,8 @@ export async function reviseUniveSummary(currentSummary: string, feedback: strin
     return currentSummary;
   }
   const model = process.env.OPENAI_SUMMARIZE_MODEL ?? DEFAULT_MODEL;
-  const revisePrompt = `Huidige samenvatting:\n\n${currentSummary}\n\nFeedback van de melkveehouder (wat zij willen aanpassen):\n${feedback}\n\nGeef de herziene samenvatting in dezelfde structuur (inleiding, ## Kernpunten met bullets, ## Voor het gesprek).`;
+  const safeFeedback = redactPii(feedback);
+  const revisePrompt = `Huidige samenvatting:\n\n${currentSummary}\n\nFeedback van de melkveehouder (wat zij willen aanpassen):\n${safeFeedback}\n\nGeef de herziene samenvatting in dezelfde structuur (inleiding, ## Kernpunten met bullets, ## Voor het gesprek).`;
   return await createSummary(client, model, REVISE_SYSTEM_PROMPT, revisePrompt);
 }
 
