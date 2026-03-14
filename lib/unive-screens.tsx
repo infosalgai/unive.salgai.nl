@@ -484,7 +484,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 1 – Je bedrijf",
     stepNumber: 0,
     questionNumber: 3,
-    title: "Wat typeert je bedrijf het beste?",
+    title: "Hoe zou je jouw bedrijf op dit moment het beste omschrijven?",
     choiceField: "q1",
     render: (fd, update, toggleMulti) => {
       const q1Tooltips: Record<string, string> = {
@@ -630,7 +630,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 1 – Je bedrijf",
     stepNumber: 0,
     questionNumber: 5,
-    title: "Hoe zie je de ontwikkeling van jouw bedrijf in de komende jaren?",
+    title: "Welke richting verwacht je dat jouw bedrijf de komende 5 tot 10 jaar opgaat?",
     choiceField: "q3",
     render: (fd, update) => (
       <RadioGroup value={fd.q3 ?? ""} onValueChange={(v) => update({ q3: v })} className="space-y-2">
@@ -656,7 +656,7 @@ export function buildUniveScreens(): UniveScreen[] {
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     stepNumber: 0,
     questionNumber: 6,
-    title: "Welke ontwikkelingen hebben nu het meest invloed op jouw bedrijf?",
+    title: "Wat zijn op dit moment de belangrijkste ontwikkelingen die invloed hebben op jouw bedrijf?",
     multiChoiceField: "q4",
     maxChoices: 3,
     required: true,

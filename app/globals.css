@@ -4,14 +4,14 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Univé: fresh green primary, red accent for errors */
+  /* Univé: primary knoppen/accenten paars, red accent for errors */
   --background: #FAFBF9;
   --foreground: #1A1A1A;
   --card: #FFFFFF;
   --card-foreground: #1A1A1A;
   --popover: #FFFFFF;
   --popover-foreground: #1A1A1A;
-  --primary: #00A651;
+  --primary: #6753F6;
   --primary-foreground: #FFFFFF;
   --secondary: #E8F5E9;
   --secondary-foreground: #1A1A1A;
@@ -23,9 +23,9 @@
   --destructive-foreground: #FFFFFF;
   --border: #E0E8E1;
   --input: #E0E8E1;
-  --ring: #00A651;
+  --ring: #6753F6;
   --radius: 1rem;
-  --chart-1: #00A651;
+  --chart-1: #6753F6;
   --chart-2: #E85D4C;
   --chart-3: #5F6B62;
   --chart-4: #2E7D32;
