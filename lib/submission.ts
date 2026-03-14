@@ -19,7 +19,7 @@ export interface UniveSubmissionPayload {
   submissionId: string;
   /** Alle ingevulde antwoorden van de vragenlijst (ruwe form keys). */
   answers: UniveFormData;
-  /** Antwoorden per vraag q1, q2, … met omschrijving (zelfde nummering als URL ?stap=q1, q2). Voor webhook. */
+  /** Antwoorden per vraag q1, q2, … met alleen antwoordtekst/label (zelfde nummering als URL). Geen tooltips. */
   answersSequential: Record<string, string>;
   /** Gegenereerde samenvatting (lopende tekst). */
   summary: string;
@@ -78,19 +78,39 @@ function logSubmission(payload: UniveSubmissionPayload): void {
 }
 
 /**
- * Optionele webhook: als SUBMISSION_WEBHOOK_URL is gezet, wordt het payload
- * daar naartoe gestuurd. Later kun je hier ook een CRM-client, queue, etc. toevoegen.
+ * Payload voor de webhook: alleen antwoorden als q1, q2, q3 … (labeltekst),
+ * geen ruwe form keys en geen tooltips.
+ */
+export interface UniveWebhookPayload {
+  version: string;
+  submittedAt: string;
+  submissionId: string;
+  /** Antwoorden per vraag: q1 = "Jonger dan 30", q2 = "Súdwest-Fryslân", q3 = "Gangbaar", etc. Alleen antwoordtekst, geen tooltips. */
+  answers: Record<string, string>;
+  summary: string;
+}
+
+/**
+ * Optionele webhook: als SUBMISSION_WEBHOOK_URL is gezet, wordt daar alleen
+ * het webhook-payload gestuurd (q1, q2, q3 … + metadata + summary). Geen ruwe answers, geen tooltips.
  */
 async function sendToWebhook(payload: UniveSubmissionPayload): Promise<DeliveryResult> {
   const url = process.env.SUBMISSION_WEBHOOK_URL;
   if (!url || typeof url !== "string" || !url.startsWith("https://")) {
     return { ok: true };
   }
+  const webhookBody: UniveWebhookPayload = {
+    version: payload.version,
+    submittedAt: payload.submittedAt,
+    submissionId: payload.submissionId,
+    answers: payload.answersSequential,
+    summary: payload.summary,
+  };
   try {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(webhookBody),
     });
     if (!res.ok) {
       const text = await res.text();

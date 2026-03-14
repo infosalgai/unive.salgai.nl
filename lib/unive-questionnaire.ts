@@ -360,7 +360,8 @@ export function isUniveFormData(fd: unknown): fd is UniveFormData {
 }
 
 /**
- * Payload voor webhook: opeenvolgende vragen q1, q2, … met antwoord als omschrijving (label).
+ * Payload voor webhook: opeenvolgende vragen q1, q2, … met antwoord als omschrijving (labeltekst).
+ * Alleen de zichtbare antwoordtekst (bijv. "Jonger dan 30", "Gangbaar"); tooltips worden niet meegestuurd.
  * Zelfde nummering als URL (?stap=q1, q2, …).
  */
 export function buildSequentialPayload(fd: UniveFormData): Record<string, string> {

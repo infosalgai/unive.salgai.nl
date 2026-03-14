@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata, Viewport } from "next";
 import { Open_Sans, Bree_Serif } from "next/font/google";
 import { AccessGuard } from "@/components/access-guard";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const openSans = Open_Sans({
@@ -67,11 +67,11 @@ export default function RootLayout({
   return (
     <html lang="nl" className={`${openSans.variable} ${breeSerif.variable}`}>
       <body className={`${openSans.className} antialiased`}>
-        <TooltipProvider delayDuration={400}>
+        <Providers>
           <AccessGuard>
             {children}
           </AccessGuard>
-        </TooltipProvider>
+        </Providers>
       </body>
     </html>
   );

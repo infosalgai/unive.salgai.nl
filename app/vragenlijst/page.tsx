@@ -5,17 +5,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { UniveLogo } from "@/components/unive-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight, Shield, Lock, FileCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Send } from "lucide-react";
 import { buildUniveScreens, isUniveStepValid, isStepConditionallyHidden } from "@/lib/unive-screens";
 import { useUniveFormState } from "@/lib/use-unive-form-state";
+
+const FORM_STORAGE_KEY = "univeFormV2";
 
 export default function VragenlijstPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { formData, update, toggleMulti } = useUniveFormState();
   const [stepError, setStepError] = useState<string | null>(null);
-  const [currentStepPiiBlocked, setCurrentStepPiiBlocked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const stepErrorRef = useRef<HTMLParagraphElement>(null);
 
   const allScreens = useMemo(() => buildUniveScreens(), []);
@@ -61,10 +63,6 @@ export default function VragenlijstPage() {
   const totalScreens = allScreens.length;
   const overallPercent = Math.round(((currentScreenIndex + 1) / totalScreens) * 100);
 
-  useEffect(() => {
-    setCurrentStepPiiBlocked(false);
-  }, [currentScreenIndex]);
-
   // Zorg dat eerste stap in URL staat als /vragenlijst?stap=q1
   useEffect(() => {
     if (!searchParams.get("stap") && currentScreen && currentScreen.stepNumber === 1) {
@@ -73,17 +71,17 @@ export default function VragenlijstPage() {
   }, [currentScreen, searchParams, router]);
 
   useEffect(() => {
-    if (currentScreen && isUniveStepValid(currentScreen, formData, currentStepPiiBlocked)) setStepError(null);
-  }, [currentScreen?.id, formData, currentStepPiiBlocked]);
+    if (currentScreen && isUniveStepValid(currentScreen, formData)) setStepError(null);
+  }, [currentScreen?.id, formData]);
 
-  // Bij directe URL naar een voorwaardelijk scherm (q4a, q9): redirect naar een geldige stap
+  // Bij directe URL naar een voorwaardelijk scherm (q4a, q11b): redirect naar een geldige stap
   useEffect(() => {
     if (!currentScreen) return;
     if (!isStepConditionallyHidden(currentScreen.id, formData)) return;
     if (currentScreen.id === "q4a") {
-      const q4Screen = allScreens.find((s) => s.id === "q4");
-      if (q4Screen) {
-        router.replace(`/vragenlijst?stap=${getStepSlug(q4Screen)}`);
+      const q6Screen = allScreens.find((s) => s.id === "q6");
+      if (q6Screen) {
+        router.replace(`/vragenlijst?stap=${getStepSlug(q6Screen)}`);
       }
       return;
     }
@@ -91,7 +89,6 @@ export default function VragenlijstPage() {
     for (let i = currentScreenIndex + 1; i < allScreens.length; i++) {
       const c = allScreens[i];
       if (c.id === "q4a") continue;
-      if (c.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") continue;
       if (c.id === "q11b" && isStepConditionallyHidden("q11b", formData)) continue;
       targetScreen = c;
       break;
@@ -115,17 +112,12 @@ export default function VragenlijstPage() {
     let idx = currentScreenIndex + 1;
     while (idx < allScreens.length) {
       const candidate = allScreens[idx];
-      // q4a overgeslagen: regelgeving-doorvraag staat inlined op q4
+      // q4a overgeslagen: regelgeving-doorvraag staat inlined op q6
       if (candidate.id === "q4a") {
         idx++;
         continue;
       }
-      // q9 (aanleidingen) alleen tonen als bij q8 "Ja" is gekozen
-      if (candidate.id === "q9" && formData.q8 !== "Ja, meerdere" && formData.q8 !== "Ja, beperkt") {
-        idx++;
-        continue;
-      }
-      // q11b alleen tonen bij minimaal 1 Ja bij vraag 11 (matrix)
+      // q11b alleen tonen bij minimaal 1 Ja bij vraag 10 (matrix)
       if (candidate.id === "q11b" && isStepConditionallyHidden("q11b", formData)) {
         idx++;
         continue;
@@ -156,22 +148,48 @@ export default function VragenlijstPage() {
     return null;
   };
 
+  const handleSubmit = async () => {
+    if (currentScreen?.id !== "q21" || !isUniveStepValid(currentScreen, formData)) return;
+    setSubmitError(null);
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formData }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSubmitError(data?.error ?? "Versturen mislukt. Probeer het later opnieuw.");
+        return;
+      }
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem(FORM_STORAGE_KEY);
+      }
+      router.push("/vragenlijst/bedankt");
+      scrollToTop();
+    } catch {
+      setSubmitError("Versturen mislukt. Controleer je verbinding en probeer het opnieuw.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleNext = () => {
-    if (currentScreen && !isUniveStepValid(currentScreen, formData, currentStepPiiBlocked)) {
-      setStepError("Vul een geldig antwoord in om door te gaan. Vermijd namen of herleidbare gegevens in open velden.");
+    if (currentScreen && !isUniveStepValid(currentScreen, formData)) {
+      setStepError("Vul een geldig antwoord in om door te gaan.");
       setTimeout(() => stepErrorRef.current?.focus(), 100);
       return;
     }
     setStepError(null);
+    setSubmitError(null);
 
     const nextScreen = findNextScreen();
     if (nextScreen) {
       router.push(`/vragenlijst?stap=${getStepSlug(nextScreen)}`);
       scrollToTop();
-    } else {
-      router.push("/vragenlijst/review");
-      scrollToTop();
     }
+    // Geen overzicht meer: op q21 wordt direct verstuurd via "Antwoorden versturen"
   };
 
   const handleBack = () => {
@@ -212,7 +230,7 @@ export default function VragenlijstPage() {
               {currentScreen && (
                 <>
                   <div className="mb-4">
-                    {(currentScreen.id === "q14_open" || currentScreen.id === "q16a") && currentScreen.subtitle ? (
+                    {(currentScreen.id === "q14" || currentScreen.id === "q16") && currentScreen.subtitle ? (
                       <>
                         <p className="mb-3 text-base italic text-foreground/90">
                           {currentScreen.subtitle}
@@ -233,7 +251,18 @@ export default function VragenlijstPage() {
                     )}
                   </div>
                   <div className="mt-4 space-y-6">
-                    {currentScreen.render(formData, update, toggleMulti, setCurrentStepPiiBlocked)}
+                    {currentScreen.render(formData, update, toggleMulti)}
+                    {currentScreen.id === "q21" &&
+                      isUniveStepValid(currentScreen, formData) && (
+                      <div className="border-t border-border pt-6">
+                        <h3 className="mb-2 text-lg font-semibold text-foreground">
+                          Antwoorden versturen
+                        </h3>
+                        <p className="mb-4 text-sm text-muted-foreground">
+                          Met de knop hieronder worden je antwoorden definitief naar Univé verzonden. Controleer of alles klopt voordat je verstuurt.
+                        </p>
+                      </div>
+                    )}
                     {stepError && (
                       <p
                         ref={stepErrorRef}
@@ -242,6 +271,14 @@ export default function VragenlijstPage() {
                         tabIndex={-1}
                       >
                         {stepError}
+                      </p>
+                    )}
+                    {currentScreen.id === "q21" && submitError && (
+                      <p
+                        role="alert"
+                        className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                      >
+                        {submitError}
                       </p>
                     )}
                   </div>
@@ -254,20 +291,31 @@ export default function VragenlijstPage() {
             <Button
               variant="outline"
               onClick={handleBack}
-              disabled={currentScreenIndex === 0}
+              disabled={currentScreenIndex === 0 || isSubmitting}
               className="rounded-xl"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Vorige
             </Button>
-            <Button
-              onClick={handleNext}
-              disabled={currentScreen ? !isUniveStepValid(currentScreen, formData, currentStepPiiBlocked) : false}
-              className="rounded-xl"
-            >
-              {currentScreenIndex === allScreens.length - 1 ? "Naar overzicht" : "Volgende"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            {currentScreen?.id === "q21" && isUniveStepValid(currentScreen, formData) ? (
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="rounded-xl"
+              >
+                {isSubmitting ? "Bezig met verzenden…" : "Antwoorden versturen"}
+                <Send className="ml-2 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleNext}
+                disabled={currentScreen ? !isUniveStepValid(currentScreen, formData) : false}
+                className="rounded-xl"
+              >
+                Volgende
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
       </main>

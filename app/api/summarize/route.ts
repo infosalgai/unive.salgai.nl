@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import type { UniveFormData } from "@/lib/unive-questionnaire";
 import {
-  DEMO_SUMMARY,
-  ensureNoPiiInFormData,
   generateUniveSummaryFromFormData,
   reviseUniveSummary,
 } from "@/lib/summary-service";
