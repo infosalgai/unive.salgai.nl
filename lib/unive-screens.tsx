@@ -432,13 +432,13 @@ export interface UniveScreen {
 export function buildUniveScreens(): UniveScreen[] {
   const screens: UniveScreen[] = [];
 
-  // Vraag 1 – leeftijd (URL q1)
+  // Vraag 1 – leeftijdscategorie (URL q1)
   screens.push({
     id: "q1",
     group: "Algemeen",
     stepNumber: 0,
     questionNumber: 1,
-    title: "Wat is je leeftijd?",
+    title: "In welke leeftijdscategorie val je?",
     choiceField: "q0_leeftijd",
     required: true,
     render: (fd, update) => (
@@ -781,12 +781,330 @@ export function buildUniveScreens(): UniveScreen[] {
     render: () => null,
   });
 
-  // Vraag 7 – stellingen (URL q7)
+  // Vraag 7 – zorgen (na herordening)
+  screens.push({
+    id: "q8",
+    group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    stepNumber: 0,
+    questionNumber: 7,
+    title: "Als je kijkt naar de komende 5 tot 10 jaar: waar maak je je voor jouw bedrijf het meest zorgen over?",
+    render: (fd, update, _) => (
+      <Textarea
+        value={fd.q6 ?? ""}
+        onChange={(e) => update({ q6: e.target.value })}
+        placeholder="Beschrijf in je eigen woorden waar jij je de meeste zorgen over maakt."
+        rows={4}
+        maxLength={1000}
+      />
+    ),
+  });
+
+  // Vraag 8 – invloed onderdelen
+  screens.push({
+    id: "q9",
+    group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    stepNumber: 0,
+    questionNumber: 8,
+    title: "In hoeverre heb je zelf invloed op de volgende onderdelen van jouw bedrijf in de komende jaren?",
+    render: (fd, update, _toggleMulti) => (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <p className={SCALE_INTRO_CLASS}>
+            Schaal 1–7: links <span className="font-semibold text-foreground">nauwelijks invloed</span>, rechts{" "}
+            <span className="font-semibold text-foreground">veel invloed</span>.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <SliderRow
+            label="Kostenstructuur"
+            tooltip="Denk aan kosten voor bijvoorbeeld voer, energie en mestafzet."
+            value={fd.q10_kostenstructuur ?? 4}
+            onValueChange={(v) => update({ q10_kostenstructuur: v })}
+          />
+          <SliderRow
+            label="Omvang van het bedrijf"
+            tooltip="Bijvoorbeeld het aantal melkkoeien op je bedrijf en het aantal hectares grond."
+            value={fd.q10_omvang ?? 4}
+            onValueChange={(v) => update({ q10_omvang: v })}
+          />
+          <SliderRow
+            label="Grondgebruik"
+            tooltip="Zoals beweiding, de teelt van gewassen en eventuele natuur- of klimaatmaatregelen op je land."
+            value={fd.q10_grondgebruik ?? 4}
+            onValueChange={(v) => update({ q10_grondgebruik: v })}
+          />
+          <SliderRow
+            label="Samenwerking met andere partijen"
+            tooltip="Denk aan samenwerking met afnemers in de keten, collega-boeren in de buurt of coöperaties."
+            value={fd.q10_samenwerking ?? 4}
+            onValueChange={(v) => update({ q10_samenwerking: v })}
+          />
+          <SliderRow
+            label="Afzet van producten"
+            tooltip="Bijvoorbeeld levering aan de zuivelverwerker of (aanvullende) directe verkoop vanaf het erf."
+            value={fd.q10_afzet ?? 4}
+            onValueChange={(v) => update({ q10_afzet: v })}
+          />
+          <SliderRow
+            label="Verbreding"
+            tooltip="Zoals energieopwekking, recreatie op het bedrijf of nieuwe producten en diensten."
+            value={fd.q10_verbreding ?? 4}
+            onValueChange={(v) => update({ q10_verbreding: v })}
+          />
+        </div>
+
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
+          <Textarea
+            value={fd.q10_toelichting ?? ""}
+            onChange={(e) => update({ q10_toelichting: e.target.value })}
+            placeholder="Schrijf hier kort je toelichting"
+            rows={3}
+            maxLength={800}
+          />
+        </div>
+      </div>
+    ),
+  });
+
+  // Deel 3 – Veranderingen in bedrijfsvoering
+  // Vraag 9 – matrix aanpassingen per thema
+  screens.push({
+    id: "q10",
+    group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    stepNumber: 0,
+    questionNumber: 9,
+    title: "Heb je in de afgelopen 5 jaar aanpassingen gedaan op één of meer van de volgende gebieden?",
+    render: (fd, update, _toggleMulti) => (
+      <div className="space-y-6">
+        {Q11_THEMES.map(({ key, keyToelichting, label }) => {
+          const value = (fd[key] as string) ?? "";
+          const toelichting = (fd[keyToelichting] as string) ?? "";
+          const { label: displayLabel, tooltip } = splitQ16LabelAndTooltip(label);
+          return (
+            <div key={key} className="space-y-3 rounded-lg border border-border p-4">
+              <Label className="text-sm font-medium text-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <span>{displayLabel}</span>
+                  {tooltip && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span
+                          className="inline-flex shrink-0 cursor-help text-muted-foreground hover:text-foreground"
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`Uitleg: ${displayLabel}`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Info className="h-3.5 w-3.5" aria-hidden />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[260px]">
+                        <p className="text-left text-sm">{tooltip}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </span>
+              </Label>
+              <div className="flex flex-wrap items-center gap-4">
+                <RadioGroup
+                  value={value}
+                  onValueChange={(v) => update({ [key]: v, [keyToelichting]: v === "Nee" ? "" : (fd[keyToelichting] as string) ?? "" })}
+                  className="flex flex-row gap-6"
+                >
+                  <div className={OPTION_ROW_CLASS}>
+                    <RadioGroupItem value="Ja" id={`${key}-ja`} />
+                    <Label htmlFor={`${key}-ja`} className="cursor-pointer text-sm font-medium">Ja</Label>
+                  </div>
+                  <div className={OPTION_ROW_CLASS}>
+                    <RadioGroupItem value="Nee" id={`${key}-nee`} />
+                    <Label htmlFor={`${key}-nee`} className="cursor-pointer text-sm font-medium">Nee</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              {value === "Ja" && (
+                <div className="mt-2">
+                  <Label className="mb-1 block text-xs font-medium text-muted-foreground">Korte toelichting</Label>
+                  <Textarea
+                    value={toelichting}
+                    onChange={(e) => update({ [keyToelichting]: e.target.value } as Partial<UniveFormData>)}
+                    placeholder="Licht kort toe wat je hebt aangepast."
+                    rows={2}
+                    maxLength={400}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    ),
+  });
+
+  // Vraag 10 – aanleidingen aanpassingen (alleen tonen bij minimaal 1 Ja bij vraag 9)
+  screens.push({
+    id: "q11b",
+    group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    stepNumber: 0,
+    questionNumber: 10,
+    title: "Wat waren de belangrijkste aanleidingen voor deze aanpassingen?",
+    subtitle: "Kies maximaal 2.",
+    multiChoiceField: "q11b_aanleidingen",
+    maxChoices: 2,
+    render: (fd, update, toggleMulti) => {
+      const selected = Array.isArray(fd.q11b_aanleidingen) ? fd.q11b_aanleidingen : [];
+      return (
+        <div className="space-y-4">
+          <div>
+            <p className={HELPER_TEXT_CLASS}>{selected.length}/2 gekozen</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {Q11B_OPTIONS.map((opt) => {
+                const isSelected = selected.includes(opt);
+                const disabled = !isSelected && selected.length >= 2;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => !disabled && toggleMulti("q11b_aanleidingen", opt, 2)}
+                    disabled={disabled}
+                    className={`rounded-full border px-4 py-2 text-sm transition-all ${
+                      isSelected ? "border-primary bg-primary/10 text-primary" : "border-border bg-card hover:border-primary/50"
+                    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {selected.includes("Nieuwe regelgeving") && (
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <Label className="mb-2 block text-sm font-semibold text-foreground">Welke regelgeving speelde een rol?</Label>
+              <Textarea
+                value={fd.q11b_regelgeving ?? ""}
+                onChange={(e) => update({ q11b_regelgeving: e.target.value })}
+                placeholder="Beschrijf kort welke regelgeving"
+                rows={3}
+                maxLength={500}
+                className="mt-2"
+              />
+            </div>
+          )}
+          {selected.includes("Anders, namelijk:") && (
+            <div>
+              <Label className={QUESTION_LABEL_CLASS}>Anders, namelijk:</Label>
+              <Input
+                value={fd.q11b_anders ?? ""}
+                onChange={(e) => update({ q11b_anders: e.target.value })}
+                placeholder="Licht je keuze kort toe"
+                maxLength={200}
+              />
+            </div>
+          )}
+          {!selected.includes("Nieuwe regelgeving") && !selected.includes("Anders, namelijk:") && (
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
+              <Textarea
+                value={fd.q11b_toelichting ?? ""}
+                onChange={(e) => update({ q11b_toelichting: e.target.value })}
+                placeholder="Schrijf hier kort je toelichting"
+                rows={3}
+                maxLength={500}
+              />
+            </div>
+          )}
+        </div>
+      );
+    },
+  });
+
+  // Vraag 11 – onder welke omstandigheden
+  screens.push({
+    id: "q12",
+    group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    stepNumber: 0,
+    questionNumber: 11,
+    title: "Onder welke omstandigheden zou je in de toekomst opnieuw aanpassingen in jouw bedrijfsvoering overwegen?",
+    render: (fd, update, _) => (
+      <Textarea
+        value={fd.q10 ?? ""}
+        onChange={(e) => update({ q10: e.target.value })}
+        placeholder="Beschrijf onder welke omstandigheden je aanpassingen zou overwegen..."
+        rows={4}
+        maxLength={1000}
+      />
+    ),
+  });
+
+  // Vraag 12 – wat houdt tegen
+  screens.push({
+    id: "q13",
+    group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    stepNumber: 0,
+    questionNumber: 12,
+    title: "Wat houdt je op dit moment het meest tegen om aanpassingen te doen?",
+    multiChoiceField: "q11",
+    maxChoices: 2,
+    required: true,
+    render: (fd, update, toggleMulti) => {
+      const selected = Array.isArray(fd.q11) ? fd.q11 : [];
+      return (
+        <div className="space-y-4">
+          <div>
+            <p className={HELPER_TEXT_CLASS}>{selected.length}/2 gekozen</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {Q11_OPTIONS.map((opt) => {
+                const isSelected = selected.includes(opt);
+                const disabled = !isSelected && selected.length >= 2;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => !disabled && toggleMulti("q11", opt, 2)}
+                    disabled={disabled}
+                    className={`rounded-full border px-4 py-2 text-sm transition-all ${
+                      isSelected ? "border-primary bg-primary/10 text-primary" : "border-border bg-card hover:border-primary/50"
+                    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {selected.includes("Anders, namelijk:") && (
+            <div>
+              <Label className={QUESTION_LABEL_CLASS}>Anders, namelijk:</Label>
+              <Input
+                value={fd.q11_anders ?? ""}
+                onChange={(e) => update({ q11_anders: e.target.value })}
+                placeholder="Licht je keuze kort toe"
+                maxLength={200}
+              />
+            </div>
+          )}
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
+            <Textarea
+              value={fd.q11_toelichting ?? ""}
+              onChange={(e) => update({ q11_toelichting: e.target.value })}
+              placeholder="Schrijf hier kort je toelichting"
+              rows={3}
+              maxLength={500}
+            />
+          </div>
+        </div>
+      );
+    },
+  });
+
+  // Vraag 13 – stellingen (na herordening)
   screens.push({
     id: "q7",
     group: "Deel 2 – Huidige situatie en toekomstbeeld",
     stepNumber: 0,
-    questionNumber: 7,
+    questionNumber: 13,
     title: "In hoeverre ben je het eens met de volgende stellingen?",
     render: (fd, update, _toggleMulti) => (
       <div className="space-y-6">
@@ -883,328 +1201,97 @@ export function buildUniveScreens(): UniveScreen[] {
     ),
   });
 
-  // Vraag 8 – zorgen (URL q8)
+  // Deel 4 – Welke ondersteuning zou helpen?
+  // Vraag 14 – behoefte aanvullende inkomsten (stap 14)
   screens.push({
-    id: "q8",
-    group: "Deel 2 – Huidige situatie en toekomstbeeld",
+    id: "q17",
+    group: "Deel 4 – Welke ondersteuning zou helpen?",
     stepNumber: 0,
-    questionNumber: 8,
-    title: "De komende 5–10 jaar maak ik me voor mijn bedrijf het meest zorgen over:",
-    render: (fd, update, _) => (
-      <Textarea
-        value={fd.q6 ?? ""}
-        onChange={(e) => update({ q6: e.target.value })}
-        placeholder="Beschrijf in je eigen woorden waar jij je de meeste zorgen over maakt."
-        rows={4}
-        maxLength={1000}
-      />
-    ),
-  });
-
-  // Vraag 9 – invloed onderdelen (URL q9)
-  screens.push({
-    id: "q9",
-    group: "Deel 2 – Huidige situatie en toekomstbeeld",
-    stepNumber: 0,
-    questionNumber: 9,
-    title: "In hoeverre heb je zelf invloed op de volgende onderdelen van jouw bedrijf in de komende jaren?",
-    render: (fd, update, _toggleMulti) => (
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <p className={SCALE_INTRO_CLASS}>
-            Schaal 1–7: links <span className="font-semibold text-foreground">nauwelijks invloed</span>, rechts{" "}
-            <span className="font-semibold text-foreground">veel invloed</span>.
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          <SliderRow
-            label="Kostenstructuur"
-            tooltip="Denk aan kosten voor bijvoorbeeld voer, energie en mestafzet."
-            value={fd.q10_kostenstructuur ?? 4}
-            onValueChange={(v) => update({ q10_kostenstructuur: v })}
-          />
-          <SliderRow
-            label="Omvang van het bedrijf"
-            tooltip="Bijvoorbeeld het aantal melkkoeien op je bedrijf en het aantal hectares grond."
-            value={fd.q10_omvang ?? 4}
-            onValueChange={(v) => update({ q10_omvang: v })}
-          />
-          <SliderRow
-            label="Grondgebruik"
-            tooltip="Zoals beweiding, de teelt van gewassen en eventuele natuur- of klimaatmaatregelen op je land."
-            value={fd.q10_grondgebruik ?? 4}
-            onValueChange={(v) => update({ q10_grondgebruik: v })}
-          />
-          <SliderRow
-            label="Samenwerking met andere partijen"
-            tooltip="Denk aan samenwerking met afnemers in de keten, collega-boeren in de buurt of coöperaties."
-            value={fd.q10_samenwerking ?? 4}
-            onValueChange={(v) => update({ q10_samenwerking: v })}
-          />
-          <SliderRow
-            label="Afzet van producten"
-            tooltip="Bijvoorbeeld levering aan de zuivelverwerker of (aanvullende) directe verkoop vanaf het erf."
-            value={fd.q10_afzet ?? 4}
-            onValueChange={(v) => update({ q10_afzet: v })}
-          />
-          <SliderRow
-            label="Verbreding"
-            tooltip="Zoals energieopwekking, recreatie op het bedrijf of nieuwe producten en diensten."
-            value={fd.q10_verbreding ?? 4}
-            onValueChange={(v) => update({ q10_verbreding: v })}
-          />
-        </div>
-
-        <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
-          <Textarea
-            value={fd.q10_toelichting ?? ""}
-            onChange={(e) => update({ q10_toelichting: e.target.value })}
-            placeholder="Schrijf hier kort je toelichting"
-            rows={3}
-            maxLength={800}
-          />
-        </div>
+    questionNumber: 14,
+    title: "In hoeverre heb je behoefte aan aanvullende inkomsten of meer risicospreiding?",
+    render: (fd, update) => (
+      <div className="space-y-4">
+        <p className={SCALE_INTRO_CLASS}>
+          Schaal 1–7: links <span className="font-semibold text-foreground">geen behoefte</span>, rechts{" "}
+          <span className="font-semibold text-foreground">sterke behoefte</span>.
+        </p>
+        <ScaleSlider
+          value={fd.q17a ?? 4}
+          onValueChange={(v) => update({ q17a: v })}
+          labelLeft="Geen behoefte"
+          labelRight="Sterke behoefte"
+        />
       </div>
     ),
   });
 
-  // Deel 3 – Veranderingen in bedrijfsvoering
-  // Vraag 10 – matrix aanpassingen per thema (URL q10)
-  screens.push({
-    id: "q10",
-    group: "Deel 3 – Veranderingen in bedrijfsvoering",
-    stepNumber: 0,
-    questionNumber: 10,
-    title: "Heb je de afgelopen 5 jaar aanpassingen gedaan op de volgende gebieden?",
-    render: (fd, update, _toggleMulti) => (
-      <div className="space-y-6">
-        {Q11_THEMES.map(({ key, keyToelichting, label }) => {
-          const value = (fd[key] as string) ?? "";
-          const toelichting = (fd[keyToelichting] as string) ?? "";
-          const { label: displayLabel, tooltip } = splitQ16LabelAndTooltip(label);
-          return (
-            <div key={key} className="space-y-3 rounded-lg border border-border p-4">
-              <Label className="text-sm font-medium text-foreground">
-                <span className="inline-flex items-center gap-1.5">
-                  <span>{displayLabel}</span>
-                  {tooltip && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span
-                          className="inline-flex shrink-0 cursor-help text-muted-foreground hover:text-foreground"
-                          tabIndex={0}
-                          role="button"
-                          aria-label={`Uitleg: ${displayLabel}`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Info className="h-3.5 w-3.5" aria-hidden />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[260px]">
-                        <p className="text-left text-sm">{tooltip}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </span>
-              </Label>
-              <div className="flex flex-wrap items-center gap-4">
-                <RadioGroup
-                  value={value}
-                  onValueChange={(v) => update({ [key]: v, [keyToelichting]: v === "Nee" ? "" : (fd[keyToelichting] as string) ?? "" })}
-                  className="flex flex-row gap-6"
-                >
-                  <div className={OPTION_ROW_CLASS}>
-                    <RadioGroupItem value="Ja" id={`${key}-ja`} />
-                    <Label htmlFor={`${key}-ja`} className="cursor-pointer text-sm font-medium">Ja</Label>
-                  </div>
-                  <div className={OPTION_ROW_CLASS}>
-                    <RadioGroupItem value="Nee" id={`${key}-nee`} />
-                    <Label htmlFor={`${key}-nee`} className="cursor-pointer text-sm font-medium">Nee</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              {value === "Ja" && (
-                <div className="mt-2">
-                  <Label className="mb-1 block text-xs font-medium text-muted-foreground">Korte toelichting</Label>
-                  <Textarea
-                    value={toelichting}
-                    onChange={(e) => update({ [keyToelichting]: e.target.value } as Partial<UniveFormData>)}
-                    placeholder="Licht kort toe wat je hebt aangepast."
-                    rows={2}
-                    maxLength={400}
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    ),
-  });
-
-  // Vraag 11b – alleen tonen bij minimaal 1 Ja bij vraag 11
-  screens.push({
-    id: "q11b",
-    group: "Deel 3 – Veranderingen in bedrijfsvoering",
-    stepNumber: 0,
-    questionNumber: 13,
-    questionLabel: "11b",
-    title: "Wat waren de belangrijkste aanleidingen voor deze aanpassingen?",
-    subtitle: "Kies maximaal 2.",
-    multiChoiceField: "q11b_aanleidingen",
-    maxChoices: 2,
-    render: (fd, update, toggleMulti) => {
-      const selected = Array.isArray(fd.q11b_aanleidingen) ? fd.q11b_aanleidingen : [];
-      return (
-        <div className="space-y-4">
-          <div>
-            <p className={HELPER_TEXT_CLASS}>{selected.length}/2 gekozen</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {Q11B_OPTIONS.map((opt) => {
-                const isSelected = selected.includes(opt);
-                const disabled = !isSelected && selected.length >= 2;
-                return (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => !disabled && toggleMulti("q11b_aanleidingen", opt, 2)}
-                    disabled={disabled}
-                    className={`rounded-full border px-4 py-2 text-sm transition-all ${
-                      isSelected ? "border-primary bg-primary/10 text-primary" : "border-border bg-card hover:border-primary/50"
-                    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    {opt}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          {selected.includes("Nieuwe regelgeving") && (
-            <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <Label className="mb-2 block text-sm font-semibold text-foreground">Welke regelgeving speelde een rol?</Label>
-              <Textarea
-                value={fd.q11b_regelgeving ?? ""}
-                onChange={(e) => update({ q11b_regelgeving: e.target.value })}
-                placeholder="Beschrijf kort welke regelgeving"
-                rows={3}
-                maxLength={500}
-                className="mt-2"
-              />
-            </div>
-          )}
-          {selected.includes("Anders, namelijk:") && (
-            <div>
-              <Label className={QUESTION_LABEL_CLASS}>Anders, namelijk:</Label>
-              <Input
-                value={fd.q11b_anders ?? ""}
-                onChange={(e) => update({ q11b_anders: e.target.value })}
-                placeholder="Licht je keuze kort toe"
-                maxLength={200}
-              />
-            </div>
-          )}
-          {!selected.includes("Nieuwe regelgeving") && !selected.includes("Anders, namelijk:") && (
-            <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
-              <Textarea
-                value={fd.q11b_toelichting ?? ""}
-                onChange={(e) => update({ q11b_toelichting: e.target.value })}
-                placeholder="Schrijf hier kort je toelichting"
-                rows={3}
-                maxLength={500}
-              />
-            </div>
-          )}
-        </div>
-      );
+  // Vraag 15 – mogelijkheden richtingen aanvullend inkomen (stap 15)
+  const Q17B_SLIDER_OPTIONS_FOR_ORDER: { key: keyof UniveFormData; label: string; tooltip?: string }[] = [
+    {
+      key: "q17b_directe_verkoop",
+      label: "Directe verkoop van producten",
+      tooltip: "Bijv. melk, zuivelproducten of andere producten van het bedrijf",
     },
-  });
-
-  // Vraag 12 – onder welke omstandigheden (URL q12)
+    {
+      key: "q17b_nieuwe_teelten",
+      label: "Nieuwe teelten",
+      tooltip: "Bijv. noten, fruit of hennep",
+    },
+    { key: "q17b_co2", label: "Vergoeding voor CO₂-vastlegging" },
+    {
+      key: "q17b_natuur_biodiversiteit",
+      label: "Vergoedingen voor natuur- en biodiversiteitsbeheer",
+    },
+  ];
   screens.push({
-    id: "q12",
-    group: "Deel 3 – Veranderingen in bedrijfsvoering",
+    id: "q18",
+    group: "Deel 4 – Welke ondersteuning zou helpen?",
     stepNumber: 0,
-    questionNumber: 12,
-    title: "Onder welke omstandigheden zou je in de toekomst (opnieuw) aanpassingen in jouw bedrijfsvoering overwegen?",
-    render: (fd, update, _) => (
-      <Textarea
-        value={fd.q10 ?? ""}
-        onChange={(e) => update({ q10: e.target.value })}
-        placeholder="Beschrijf onder welke omstandigheden je aanpassingen zou overwegen..."
-        rows={4}
-        maxLength={1000}
-      />
-    ),
-  });
-
-  // Vraag 13 – wat houdt tegen (URL q13)
-  screens.push({
-    id: "q13",
-    group: "Deel 3 – Veranderingen in bedrijfsvoering",
-    stepNumber: 0,
-    questionNumber: 13,
-    title: "Wat houd je het meest tegen om aanpassingen te doen?",
-    subtitle: "Denk aan wat je tegenhoudt om te verduurzamen of te investeren.",
-    multiChoiceField: "q11",
-    maxChoices: 2,
-    required: true,
-    render: (fd, update, toggleMulti) => {
-      const selected = Array.isArray(fd.q11) ? fd.q11 : [];
-      return (
+    questionNumber: 15,
+    title:
+      "In welke van de volgende richtingen zie je voor jouw bedrijf mogelijkheden voor aanvullend inkomen of risicospreiding?",
+    render: (fd, update, _toggleMulti) => (
+      <div className="space-y-6">
+        <p className={SCALE_INTRO_CLASS}>
+          Schaal 1–7: links <span className="font-semibold text-foreground">geen mogelijkheden</span>, rechts{" "}
+          <span className="font-semibold text-foreground">veel mogelijkheden</span>.
+        </p>
         <div className="space-y-4">
-          <div>
-            <p className={HELPER_TEXT_CLASS}>{selected.length}/2 gekozen</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {Q11_OPTIONS.map((opt) => {
-                const isSelected = selected.includes(opt);
-                const disabled = !isSelected && selected.length >= 2;
-                return (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => !disabled && toggleMulti("q11", opt, 2)}
-                    disabled={disabled}
-                    className={`rounded-full border px-4 py-2 text-sm transition-all ${
-                      isSelected ? "border-primary bg-primary/10 text-primary" : "border-border bg-card hover:border-primary/50"
-                    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    {opt}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          {selected.includes("Anders, namelijk:") && (
-            <div>
-              <Label className={QUESTION_LABEL_CLASS}>Anders, namelijk:</Label>
-              <Input
-                value={fd.q11_anders ?? ""}
-                onChange={(e) => update({ q11_anders: e.target.value })}
-                placeholder="Licht je keuze kort toe"
-                maxLength={200}
-              />
-            </div>
-          )}
-          <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
-            <Textarea
-              value={fd.q11_toelichting ?? ""}
-              onChange={(e) => update({ q11_toelichting: e.target.value })}
-              placeholder="Schrijf hier kort je toelichting"
-              rows={3}
-              maxLength={500}
+          {Q17B_SLIDER_OPTIONS_FOR_ORDER.map(({ key, label, tooltip }) => (
+            <SliderRow
+              key={key}
+              label={label}
+              tooltip={tooltip}
+              value={(fd[key] as number) ?? 4}
+              onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
+            />
+          ))}
+          <div className="space-y-2" role="group">
+            <Label className="text-sm font-medium text-foreground">Anders, namelijk</Label>
+            <Input
+              value={fd.q17b_anders ?? ""}
+              onChange={(e) => update({ q17b_anders: e.target.value })}
+              placeholder="Licht je keuze kort toe"
+              maxLength={200}
+              className="w-full"
             />
           </div>
         </div>
-      );
-    },
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
+          <Textarea
+            value={fd.q17_toelichting ?? ""}
+            onChange={(e) => update({ q17_toelichting: e.target.value })}
+            placeholder="Schrijf hier kort je toelichting"
+            rows={3}
+            maxLength={500}
+          />
+        </div>
+      </div>
+    ),
   });
 
-  // Deel 4 – Welke ondersteuning zou helpen?
-  // Vraag 14 – open voor vormen ondersteuning (URL q14)
+  // Vraag 18 – open voor ondersteuning Univé
   const Q14_OPEN_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string }[] = [
     { key: "q14_open_eenmalig", label: "Eenmalige financiële bijdrage" },
     { key: "q14_open_structureel", label: "Structurele financiële vergoeding" },
@@ -1221,11 +1308,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q14",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     stepNumber: 0,
-    questionNumber: 14,
-    title:
-      "In hoeverre sta je open voor de volgende vormen van ondersteuning vanuit Univé bij het ontwikkelen van een rendabel en duurzaam bedrijfsmodel?",
-    subtitle:
-      "Vanuit wet- en regelgeving wordt van verzekeraars gevraagd om de transitie naar duurzaamheid te ondersteunen.",
+    questionNumber: 18,
+    title: "In hoeverre sta je open voor de volgende vormen van ondersteuning vanuit Univé?",
     render: (fd, update, _toggleMulti) => (
       <div className="space-y-6">
         <p className={SCALE_INTRO_CLASS}>
@@ -1280,9 +1364,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q15",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     stepNumber: 0,
-    questionNumber: 15,
-    title:
-      "Naast financiële ondersteuning, welke vormen van ondersteuning zouden voor jou het meest waardevol zijn bij aanpassingen in jouw bedrijfsvoering?",
+    questionNumber: 17,
+    title: "Aan welke vormen van ondersteuning zou je eventueel behoefte hebben?",
     multiChoiceField: "q15_waardevol",
     maxChoices: 2,
     required: false,
@@ -1369,13 +1452,12 @@ export function buildUniveScreens(): UniveScreen[] {
     },
   });
 
-  // Vraag 16 + 17 – opties overwegen (min 1) + top 3 toepassen, samen op één pagina
+  // Vraag 16 – opties overwegen (min 1) + top 3 toepassen, samen op één pagina
   screens.push({
     id: "q16a",
     group: "Deel 4 – Welke ondersteuning zou helpen?",
     stepNumber: 0,
     questionNumber: 16,
-    questionLabel: "16",
     title: "Welke van de volgende opties zou je eventueel overwegen op jouw bedrijf?",
     subtitle:
       "Sommige melkveehouders verkennen aanvullende vormen van landgebruik of nieuwe activiteiten die kunnen bijdragen aan duurzaamheid en een aanvullend verdienmodel.",
@@ -1557,95 +1639,6 @@ export function buildUniveScreens(): UniveScreen[] {
     },
   });
 
-  // Vraag 17a – behoefte aanvullende inkomsten of risicospreiding (1 slider)
-  screens.push({
-    id: "q17",
-    group: "Deel 4 – Welke ondersteuning zou helpen?",
-    stepNumber: 0,
-    questionNumber: 17,
-    title: "In hoeverre heb je behoefte aan aanvullende inkomsten of meer risicospreiding?",
-    render: (fd, update) => (
-      <div className="space-y-4">
-        <p className={SCALE_INTRO_CLASS}>
-          Schaal 1–7: links <span className="font-semibold text-foreground">geen behoefte</span>, rechts{" "}
-          <span className="font-semibold text-foreground">sterke behoefte</span>.
-        </p>
-        <ScaleSlider
-          value={fd.q17a ?? 4}
-          onValueChange={(v) => update({ q17a: v })}
-          labelLeft="Geen behoefte"
-          labelRight="Sterke behoefte"
-        />
-      </div>
-    ),
-  });
-
-  // Vraag 17b – mogelijkheden per richting (sliders 1–7 + Anders namelijk)
-  const Q17B_SLIDER_OPTIONS: { key: keyof UniveFormData; label: string; tooltip?: string }[] = [
-    {
-      key: "q17b_directe_verkoop",
-      label: "Directe verkoop van producten",
-      tooltip: "Bijv. melk, zuivelproducten of andere producten van het bedrijf",
-    },
-    {
-      key: "q17b_nieuwe_teelten",
-      label: "Nieuwe teelten",
-      tooltip: "Bijv. noten, fruit of hennep",
-    },
-    { key: "q17b_co2", label: "Vergoeding voor CO₂-vastlegging" },
-    {
-      key: "q17b_natuur_biodiversiteit",
-      label: "Vergoedingen voor natuur- en biodiversiteitsbeheer",
-    },
-  ];
-  screens.push({
-    id: "q18",
-    group: "Deel 4 – Welke ondersteuning zou helpen?",
-    stepNumber: 0,
-    questionNumber: 18,
-    title:
-      "In hoeverre zie je op jouw bedrijf mogelijkheden in de volgende richtingen om jouw inkomsten te verbreden of risico's te spreiden?",
-    render: (fd, update, _toggleMulti) => (
-      <div className="space-y-6">
-        <p className={SCALE_INTRO_CLASS}>
-          Schaal 1–7: links <span className="font-semibold text-foreground">geen mogelijkheden</span>, rechts{" "}
-          <span className="font-semibold text-foreground">veel mogelijkheden</span>.
-        </p>
-        <div className="space-y-4">
-          {Q17B_SLIDER_OPTIONS.map(({ key, label, tooltip }) => (
-            <SliderRow
-              key={key}
-              label={label}
-              tooltip={tooltip}
-              value={(fd[key] as number) ?? 4}
-              onValueChange={(v) => update({ [key]: v } as Partial<UniveFormData>)}
-            />
-          ))}
-          <div className="space-y-2" role="group">
-            <Label className="text-sm font-medium text-foreground">Anders, namelijk</Label>
-            <Input
-              value={fd.q17b_anders ?? ""}
-              onChange={(e) => update({ q17b_anders: e.target.value })}
-              placeholder="Licht je keuze kort toe"
-              maxLength={200}
-              className="w-full"
-            />
-          </div>
-        </div>
-        <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <Label className="mb-2 block text-sm font-medium text-foreground">Licht je antwoorden kort toe</Label>
-          <Textarea
-            value={fd.q17_toelichting ?? ""}
-            onChange={(e) => update({ q17_toelichting: e.target.value })}
-            placeholder="Schrijf hier kort je toelichting"
-            rows={3}
-            maxLength={500}
-          />
-        </div>
-      </div>
-    ),
-  });
-
   // Deel 5 – Verdienmodel en kwetsbaarheden
 
 
@@ -1686,8 +1679,8 @@ export function buildUniveScreens(): UniveScreen[] {
     id: "q16",
     group: "Deel 5 – Verdienmodel en kwetsbaarheden",
     stepNumber: 0,
-    questionNumber: 20,
-    title: "Wat betekent rendabel ondernemen voor jou?",
+    questionNumber: 19,
+    title: "Hoe belangrijk zijn de volgende aspecten voor jou als het gaat om een rendabele toekomst van jouw bedrijf?",
     render: (fd, update, _toggleMulti) => (
       <div className="space-y-5">
         <p className={SCALE_INTRO_CLASS}>
@@ -1729,7 +1722,7 @@ export function buildUniveScreens(): UniveScreen[] {
 
   // Deel 6 – Afsluiting
 
-  // Vraag 21 – één open vraag: iets meegeven over praktijk, toekomst of vragenlijst
+  // Vraag 20 – één open vraag: iets meegeven over praktijk, toekomst of vragenlijst
   screens.push({
     id: "q20",
     group: "Deel 6 – Afsluiting",
@@ -1751,14 +1744,13 @@ export function buildUniveScreens(): UniveScreen[] {
     ),
   });
 
-  // Vraag 22 + 23 – openstaan voor contact + verloting (één pagina)
+  // Vraag 21 – openstaan voor contact (+ optioneel verloting)
   screens.push({
     id: "q21",
     group: "Deel 6 – Afsluiting",
     stepNumber: 0,
     questionNumber: 21,
-    title:
-      "Sta je ervoor open dat er mogelijk contact met je wordt opgenomen naar aanleiding van de vragenlijst in het vervolg van Univé's onderzoek?",
+    title: "Sta je ervoor open dat er mogelijk contact met je wordt opgenomen naar aanleiding van deze vragenlijst?",
     render: (fd, update, _toggleMulti) => {
       const toestemming = fd.q19_toestemming_contact ?? "";
       const verlotingChecked = fd.q21_verloting === "Ja";
@@ -1879,6 +1871,13 @@ export function buildUniveScreens(): UniveScreen[] {
       );
     },
   });
+
+  // Volgorde van 21 hoofdvragen (q4a is doorvraag, geen eigen stap)
+  const SCREEN_ORDER = [
+    "q1", "q2", "q3", "q4", "q5", "q6", "q4a", "q8", "q9", "q10", "q11b", "q12", "q13", "q7",
+    "q17", "q18", "q16a", "q15", "q14", "q16", "q20", "q21",
+  ];
+  screens.sort((a, b) => SCREEN_ORDER.indexOf(a.id) - SCREEN_ORDER.indexOf(b.id));
 
   // Opeenvolgende stepNumber voor URL (?stap=q1, q2, …) en webhook-payload (q1, q2, …)
   let step = 1;

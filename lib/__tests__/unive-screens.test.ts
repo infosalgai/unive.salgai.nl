@@ -7,6 +7,13 @@ import {
 import { normalizeFormData, UNIVE_INITIAL_FORM_DATA } from "../unive-questionnaire";
 import type { UniveFormData } from "../unive-questionnaire";
 
+/** Verwacht: URL ?stap=qN toont het scherm met deze screen id (21 hoofdvragen in vaste volgorde). */
+const EXPECTED_STEP_TO_SCREEN_ID: Record<number, string> = {
+  1: "q1", 2: "q2", 3: "q3", 4: "q4", 5: "q5", 6: "q6",
+  7: "q8", 8: "q9", 9: "q10", 10: "q11b", 11: "q12", 12: "q13", 13: "q7",
+  14: "q17", 15: "q18", 16: "q16a", 17: "q15", 18: "q14", 19: "q16", 20: "q20", 21: "q21",
+};
+
 describe("buildUniveScreens", () => {
   it("returns screens with expected ids and opeenvolgende stepNumber (q1, q2, …)", () => {
     const screens = buildUniveScreens();
@@ -20,6 +27,15 @@ describe("buildUniveScreens", () => {
     expect(steps[0]).toBe(1);
     expect(steps).toContain(2);
     expect(Math.max(...steps)).toBe(21);
+  });
+
+  it("URL structuur: ?stap=q1..q21 komt overeen met vaste volgorde (stepNumber → screen id)", () => {
+    const screens = buildUniveScreens();
+    for (let stepNum = 1; stepNum <= 21; stepNum++) {
+      const screen = screens.find((s) => s.stepNumber === stepNum && s.id !== "q4a");
+      expect(screen, `step ${stepNum}`).toBeDefined();
+      expect(screen!.id).toBe(EXPECTED_STEP_TO_SCREEN_ID[stepNum]);
+    }
   });
 
   it("q1 (leeftijd) is invalid when empty", () => {
