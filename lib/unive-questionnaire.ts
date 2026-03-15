@@ -407,30 +407,22 @@ export function buildSequentialPayload(fd: UniveFormData): Record<string, string
     set(6, q6);
   }
 
-  // q7 – Stellingen verduurzaming (5a, 5b, 5c) + toelichting
-  const q7parts: string[] = [];
-  if (fd.q5a != null) q7parts.push(`Verduurzaming: ${fd.q5a}`);
-  if (fd.q5b != null) q7parts.push(`CO₂-reductie: ${fd.q5b}`);
-  if (fd.q5c != null) q7parts.push(`Biodiversiteit: ${fd.q5c}`);
-  if (fd.q5_toelichting?.trim()) q7parts.push(fd.q5_toelichting.trim());
-  if (q7parts.length) set(7, q7parts.join(". "));
+  // q7 – Grootste zorgen (stap 7)
+  set(7, fd.q6 ?? "");
 
-  // q8 – Grootste zorgen
-  set(8, fd.q6 ?? "");
+  // q8 – Invloed onderdelen (sliders + toelichting)
+  const q8parts: string[] = [];
+  if (fd.q10_kostenstructuur != null) q8parts.push(`Kostenstructuur: ${fd.q10_kostenstructuur}`);
+  if (fd.q10_omvang != null) q8parts.push(`Omvang: ${fd.q10_omvang}`);
+  if (fd.q10_grondgebruik != null) q8parts.push(`Grondgebruik: ${fd.q10_grondgebruik}`);
+  if (fd.q10_samenwerking != null) q8parts.push(`Samenwerking: ${fd.q10_samenwerking}`);
+  if (fd.q10_afzet != null) q8parts.push(`Afzet: ${fd.q10_afzet}`);
+  if (fd.q10_verbreding != null) q8parts.push(`Verbreding: ${fd.q10_verbreding}`);
+  if (fd.q10_toelichting?.trim()) q8parts.push(fd.q10_toelichting.trim());
+  if (q8parts.length) set(8, q8parts.join(". "));
 
-  // q9 – Invloed onderdelen (sliders + toelichting)
-  const q9parts: string[] = [];
-  if (fd.q10_kostenstructuur != null) q9parts.push(`Kostenstructuur: ${fd.q10_kostenstructuur}`);
-  if (fd.q10_omvang != null) q9parts.push(`Omvang: ${fd.q10_omvang}`);
-  if (fd.q10_grondgebruik != null) q9parts.push(`Grondgebruik: ${fd.q10_grondgebruik}`);
-  if (fd.q10_samenwerking != null) q9parts.push(`Samenwerking: ${fd.q10_samenwerking}`);
-  if (fd.q10_afzet != null) q9parts.push(`Afzet: ${fd.q10_afzet}`);
-  if (fd.q10_verbreding != null) q9parts.push(`Verbreding: ${fd.q10_verbreding}`);
-  if (fd.q10_toelichting?.trim()) q9parts.push(fd.q10_toelichting.trim());
-  if (q9parts.length) set(9, q9parts.join(". "));
-
-  // q10 – Matrix aanpassingen (Ja/Nee per thema + toelichtingen)
-  const q10rows: string[] = [];
+  // q9 – Matrix aanpassingen (Ja/Nee per thema + toelichtingen)
+  const q9rows: string[] = [];
   const themes: { key: keyof UniveFormData; keyToel: keyof UniveFormData; label: string }[] = [
     { key: "q11_duurzaamheid", keyToel: "q11_duurzaamheid_toelichting", label: "Duurzaamheid" },
     { key: "q11_bedrijfsschaal", keyToel: "q11_bedrijfsschaal_toelichting", label: "Bedrijfsschaal" },
@@ -440,76 +432,84 @@ export function buildSequentialPayload(fd: UniveFormData): Record<string, string
   ];
   for (const { key, keyToel, label } of themes) {
     const v = (fd[key] as string) ?? "";
-    if (v) q10rows.push(`${label}: ${v}${v === "Ja" && fd[keyToel] ? " – " + fd[keyToel] : ""}`);
+    if (v) q9rows.push(`${label}: ${v}${v === "Ja" && fd[keyToel] ? " – " + fd[keyToel] : ""}`);
   }
-  if (q10rows.length) set(10, q10rows.join(" | "));
+  if (q9rows.length) set(9, q9rows.join(" | "));
 
-  // q11 – Aanleidingen aanpassingen (11b)
-  const q11b = Array.isArray(fd.q11b_aanleidingen) ? fd.q11b_aanleidingen : [];
-  if (q11b.length) {
-    let t = q11b.join(", ");
-    if (q11b.includes("Nieuwe regelgeving") && fd.q11b_regelgeving) t += " – " + fd.q11b_regelgeving;
-    if (q11b.includes("Anders, namelijk:") && fd.q11b_anders) t += " – " + fd.q11b_anders;
+  // q10 – Aanleidingen aanpassingen (11b)
+  const q10b = Array.isArray(fd.q11b_aanleidingen) ? fd.q11b_aanleidingen : [];
+  if (q10b.length) {
+    let t = q10b.join(", ");
+    if (q10b.includes("Nieuwe regelgeving") && fd.q11b_regelgeving) t += " – " + fd.q11b_regelgeving;
+    if (q10b.includes("Anders, namelijk:") && fd.q11b_anders) t += " – " + fd.q11b_anders;
     if (fd.q11b_toelichting?.trim()) t += " – " + fd.q11b_toelichting.trim();
-    set(11, t);
+    set(10, t);
   }
 
-  // q12 – Onder welke omstandigheden
-  set(12, fd.q10 ?? "");
+  // q11 – Onder welke omstandigheden
+  set(11, fd.q10 ?? "");
 
-  // q13 – Wat houdt tegen
-  const q11arr = Array.isArray(fd.q11) ? fd.q11 : [];
-  if (q11arr.length) {
-    let t = q11arr.join(", ");
-    if (q11arr.includes("Anders, namelijk:") && fd.q11_anders) t += " – " + fd.q11_anders;
+  // q12 – Wat houdt tegen
+  const q12arr = Array.isArray(fd.q11) ? fd.q11 : [];
+  if (q12arr.length) {
+    let t = q12arr.join(", ");
+    if (q12arr.includes("Anders, namelijk:") && fd.q11_anders) t += " – " + fd.q11_anders;
     if (fd.q11_toelichting?.trim()) t += " – " + fd.q11_toelichting.trim();
-    set(13, t);
+    set(12, t);
   }
 
-  // q14 – Open voor ondersteuning (sliders + andere + toelichting)
-  const q14parts: string[] = [];
-  if (fd.q14_open_eenmalig != null) q14parts.push(`Eenmalig: ${fd.q14_open_eenmalig}`);
-  if (fd.q14_open_structureel != null) q14parts.push(`Structureel: ${fd.q14_open_structureel}`);
-  if (fd.q14_open_pacht != null) q14parts.push(`Pacht: ${fd.q14_open_pacht}`);
-  if (fd.q14_open_co2 != null) q14parts.push(`CO₂: ${fd.q14_open_co2}`);
-  if (fd.q14_open_premiekorting != null) q14parts.push(`Premiekorting: ${fd.q14_open_premiekorting}`);
-  if (fd.q14_open_teeltverzekering != null) q14parts.push(`Teeltverzekering: ${fd.q14_open_teeltverzekering}`);
-  if (fd.q14_open_andere_naamelijk?.trim()) q14parts.push("Andere: " + fd.q14_open_andere_naamelijk.trim());
-  if (fd.q14_open_toelichting?.trim()) q14parts.push(fd.q14_open_toelichting.trim());
-  if (q14parts.length) set(14, q14parts.join(". "));
+  // q13 – Stellingen verduurzaming (5a, 5b, 5c) + toelichting
+  const q13parts: string[] = [];
+  if (fd.q5a != null) q13parts.push(`Verduurzaming: ${fd.q5a}`);
+  if (fd.q5b != null) q13parts.push(`CO₂-reductie: ${fd.q5b}`);
+  if (fd.q5c != null) q13parts.push(`Biodiversiteit: ${fd.q5c}`);
+  if (fd.q5_toelichting?.trim()) q13parts.push(fd.q5_toelichting.trim());
+  if (q13parts.length) set(13, q13parts.join(". "));
 
-  // q15 – Waardevolle ondersteuning
-  const q15w = Array.isArray(fd.q15_waardevol) ? fd.q15_waardevol : [];
-  if (q15w.length) {
-    let t = q15w.join(", ");
-    if (q15w.includes("Anders, namelijk:") && fd.q15_waardevol_anders) t += " – " + fd.q15_waardevol_anders;
-    if (fd.q15_waardevol_toelichting?.trim()) t += " – " + fd.q15_waardevol_toelichting.trim();
-    set(15, t);
-  }
+  // q14 – Behoefte aanvullende inkomsten (17a)
+  if (fd.q17a != null) set(14, String(fd.q17a));
+
+  // q15 – Mogelijkheden verbreding (17b sliders + anders + toelichting)
+  const q15parts: string[] = [];
+  if (fd.q17b_directe_verkoop != null) q15parts.push(`Directe verkoop: ${fd.q17b_directe_verkoop}`);
+  if (fd.q17b_nieuwe_teelten != null) q15parts.push(`Nieuwe teelten: ${fd.q17b_nieuwe_teelten}`);
+  if (fd.q17b_co2 != null) q15parts.push(`CO₂: ${fd.q17b_co2}`);
+  if (fd.q17b_natuur_biodiversiteit != null) q15parts.push(`Natuur/biodiversiteit: ${fd.q17b_natuur_biodiversiteit}`);
+  if (fd.q17b_anders?.trim()) q15parts.push("Anders: " + fd.q17b_anders.trim());
+  if (fd.q17_toelichting?.trim()) q15parts.push(fd.q17_toelichting.trim());
+  if (q15parts.length) set(15, q15parts.join(". "));
 
   // q16 – Opties overwegen + top 3 toepassen (16a, 16b)
-  const q16a = Array.isArray(fd.q16a) ? fd.q16a : [];
-  const q16b = Array.isArray(fd.q16b) ? fd.q16b : [];
-  if (q16a.length || q16b.length) {
+  const q16aArr = Array.isArray(fd.q16a) ? fd.q16a : [];
+  const q16bArr = Array.isArray(fd.q16b) ? fd.q16b : [];
+  if (q16aArr.length || q16bArr.length) {
     let t = "";
-    if (q16a.length) t += "Overwegen: " + q16a.join(", ");
-    if (q16a.includes("Anders, namelijk:") && fd.q16a_anders) t += " " + fd.q16a_anders;
-    if (q16b.length) t += (t ? " | " : "") + "Top 3: " + q16b.join(", ");
-    if (q16b.includes("Anders, namelijk:") && fd.q16b_anders) t += " " + fd.q16b_anders;
+    if (q16aArr.length) t += "Overwegen: " + q16aArr.join(", ");
+    if (q16aArr.includes("Anders, namelijk:") && fd.q16a_anders) t += " " + fd.q16a_anders;
+    if (q16bArr.length) t += (t ? " | " : "") + "Top 3: " + q16bArr.join(", ");
+    if (q16bArr.includes("Anders, namelijk:") && fd.q16b_anders) t += " " + fd.q16b_anders;
     set(16, t.trim());
   }
 
-  // q17 – Behoefte aanvullende inkomsten (17a)
-  if (fd.q17a != null) set(17, String(fd.q17a));
+  // q17 – Behoefte aan vormen ondersteuning (waardevol)
+  const q17w = Array.isArray(fd.q15_waardevol) ? fd.q15_waardevol : [];
+  if (q17w.length) {
+    let t = q17w.join(", ");
+    if (q17w.includes("Anders, namelijk:") && fd.q15_waardevol_anders) t += " – " + fd.q15_waardevol_anders;
+    if (fd.q15_waardevol_toelichting?.trim()) t += " – " + fd.q15_waardevol_toelichting.trim();
+    set(17, t);
+  }
 
-  // q18 – Mogelijkheden verbreding (17b sliders + anders + toelichting)
+  // q18 – Open voor ondersteuning Univé (sliders + andere + toelichting)
   const q18parts: string[] = [];
-  if (fd.q17b_directe_verkoop != null) q18parts.push(`Directe verkoop: ${fd.q17b_directe_verkoop}`);
-  if (fd.q17b_nieuwe_teelten != null) q18parts.push(`Nieuwe teelten: ${fd.q17b_nieuwe_teelten}`);
-  if (fd.q17b_co2 != null) q18parts.push(`CO₂: ${fd.q17b_co2}`);
-  if (fd.q17b_natuur_biodiversiteit != null) q18parts.push(`Natuur/biodiversiteit: ${fd.q17b_natuur_biodiversiteit}`);
-  if (fd.q17b_anders?.trim()) q18parts.push("Anders: " + fd.q17b_anders.trim());
-  if (fd.q17_toelichting?.trim()) q18parts.push(fd.q17_toelichting.trim());
+  if (fd.q14_open_eenmalig != null) q18parts.push(`Eenmalig: ${fd.q14_open_eenmalig}`);
+  if (fd.q14_open_structureel != null) q18parts.push(`Structureel: ${fd.q14_open_structureel}`);
+  if (fd.q14_open_pacht != null) q18parts.push(`Pacht: ${fd.q14_open_pacht}`);
+  if (fd.q14_open_co2 != null) q18parts.push(`CO₂: ${fd.q14_open_co2}`);
+  if (fd.q14_open_premiekorting != null) q18parts.push(`Premiekorting: ${fd.q14_open_premiekorting}`);
+  if (fd.q14_open_teeltverzekering != null) q18parts.push(`Teeltverzekering: ${fd.q14_open_teeltverzekering}`);
+  if (fd.q14_open_andere_naamelijk?.trim()) q18parts.push("Andere: " + fd.q14_open_andere_naamelijk.trim());
+  if (fd.q14_open_toelichting?.trim()) q18parts.push(fd.q14_open_toelichting.trim());
   if (q18parts.length) set(18, q18parts.join(". "));
 
   // q19 – Rendabel ondernemen (q16 sliders + anders + toelichting)

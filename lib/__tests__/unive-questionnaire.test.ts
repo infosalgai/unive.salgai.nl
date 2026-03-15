@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   normalizeFormData,
   UNIVE_INITIAL_FORM_DATA,
+  buildSequentialPayload,
 } from "../unive-questionnaire";
 
 describe("normalizeFormData", () => {
@@ -77,5 +78,41 @@ describe("normalizeFormData", () => {
     expect(out.q6).toBe("Mijn zorgen zijn groot");
     expect(out.q8).toBe("Ja, meerdere");
     expect(out.q5a).toBe(6);
+  });
+});
+
+describe("buildSequentialPayload", () => {
+  it("payload bevat alleen keys q1..q21 (zelfde nummering als URL ?stap=qN)", () => {
+    const fd = normalizeFormData({
+      q0_leeftijd: "30-39",
+      q0_gemeente: "Test",
+      q1: "Gangbaar",
+      q2_cows: 80,
+      q2_hectares: 50,
+      q3: "Ongeveer gelijk blijven",
+      q4: ["Melkprijs"],
+      q6: "Zorgen",
+      q10_kostenstructuur: 5,
+      q11_duurzaamheid: "Ja",
+      q11: ["Financiële middelen"],
+      q5a: 5,
+      q17a: 4,
+      q17b_directe_verkoop: 3,
+      q16a: ["Energieopwekking"],
+      q15_waardevol: ["Kennis en advies"],
+      q14_open_eenmalig: 4,
+      q16_marge: 6,
+      q19a: "Bedankt",
+      q19_toestemming_contact: "Nee",
+      q21_verloting: "Nee",
+    } as unknown);
+    const payload = buildSequentialPayload(fd);
+    const keys = Object.keys(payload);
+    expect(keys.every((k) => /^q(?:[1-9]|1\d|2[01])$/.test(k))).toBe(true);
+    expect(keys).toContain("q1");
+    expect(keys).toContain("q2");
+    expect(payload.q1).toBe("30-39");
+    expect(payload.q2).toBe("Test");
+    expect(payload.q7).toBe("Zorgen");
   });
 });
